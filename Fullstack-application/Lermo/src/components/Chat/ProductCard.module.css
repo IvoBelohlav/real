@@ -1,0 +1,186 @@
+/* ProductCard.module.css */
+
+.card {
+  padding: 16px; /* Reduced padding to prevent overflow */
+  border-radius: 12px;
+  position: relative;
+  width: 100%; /* Keep 100% to fill parent container */
+  min-width: 250px; /* Increased from 220px */
+  max-width: 320px; /* Increased from 280px */
+  margin: 0; /* Left align instead of center */
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  border: 1px solid; /* Border color will be set dynamically */
+  transition: all 0.3s ease;
+  margin-bottom: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: white; /* Default background */
+  box-sizing: border-box; /* Include padding in width calculation */
+  text-align: left; /* Left align all content */
+  align-self: flex-start;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Theme classes primarily for background/text/border defaults */
+.cardLight {
+  background-color: #ffffff;
+  color: #333333;
+  /* border-color is set inline via style prop based on primaryColor */
+}
+
+.cardDark {
+  background-color: #2a2a2a;
+  color: #f5f5f5;
+  /* border-color is set inline via style prop based on primaryColor */
+}
+
+/* Header styles are removed as image is now separate */
+.header {
+  /* No longer using flexbox for image/info side-by-side */
+  margin-bottom: 12px; /* Space below image */
+}
+
+.productImage {
+  width: 100%; /* Image takes full width */
+  height: 160px; /* Reduced height to save space */
+  border-radius: 8px;
+  object-fit: contain; /* Use contain to show full image */
+  display: block; /* Ensure it's a block element */
+  margin-bottom: 15px; /* Space below the image */
+}
+
+.placeholderImage {
+  width: 100%; /* Match productImage size */
+  height: 160px; /* Match reduced height */
+  border-radius: 8px;
+  border: 2px dashed; /* Border color set inline */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc; /* Keep a light placeholder background */
+  overflow: hidden;
+  margin-bottom: 15px; /* Space below the placeholder */
+}
+
+.placeholderImgContent {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productInfo {
+  /* No longer needs flex: 1 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Increased gap between elements */
+  min-width: 0;
+  align-items: flex-start; /* Left align content */
+  width: 100%;
+  /* margin-top: 16px; /* Add space above if needed, but image has margin-bottom */
+}
+
+.productName {
+  font-size: 17px; /* Increased from 16px */
+  font-weight: 600;
+  margin: 0 0 4px 0; /* Added margin bottom */
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Text should be left-aligned */
+  text-align: left;
+  /* Re-adding line clamping to prevent overflow */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.description {
+  font-size: 14px; /* Increased from 13px */
+  margin: 10px 0; /* Increased margin */
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Further reduced to prevent overflow */
+  -webkit-box-orient: vertical;
+  color: #555; /* Slightly lighter description text */
+  text-align: left; /* Left align text */
+}
+.cardDark .description {
+  color: #bbb;
+}
+
+.price {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 10px 0;
+  text-align: center; /* Center the text */
+  display: block;
+  width: 100%;
+}
+
+/* Price container */
+.priceContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center !important; /* Force center alignment */
+  justify-content: center;
+  width: 100% !important;
+  margin: 10px auto !important; /* Use auto horizontal margins */
+  text-align: center !important; /* Force center text */
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 6px; /* Reduced gap */
+  margin: 10px 0; /* Reduced margin */
+  flex-grow: 1; /* Use flex-grow instead of flex: 1 to take up space */
+  align-items: flex-start; /* Left align */
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Reduced gap */
+  font-size: 13px; /* Smaller font size */
+}
+
+.featureIcon {
+  flex-shrink: 0;
+  /* Color set inline */
+}
+
+.footer {
+  display: flex;
+  justify-content: center; /* Changed to center align */
+  margin-top: auto;
+  padding-top: 15px; /* Reduced padding */
+  border-top: 1px solid #eee; /* Optional separator line */
+  width: 100%;
+}
+.cardDark .footer {
+  border-top: 1px solid #444;
+}
+
+/* Link styles removed from here - will be handled inline via style prop */
+.linkIcon {
+  margin-right: 4px; /* Keep icon margin */
+}
+
+.carouselItem {
+  width: 100%;
+  max-width: 320px; /* Increased from 280px to be wider */
+  margin: 0; /* Remove auto margins */
+  display: flex;
+  justify-content: flex-start; /* Align to left */
+  align-items: flex-start; /* Align to top-left */
+  box-sizing: border-box;
+  align-self: flex-start; /* Ensure left alignment */
+}

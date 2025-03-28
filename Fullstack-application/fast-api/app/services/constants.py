@@ -1,0 +1,9 @@
+# app/services/constants.py
+COMPARISON_CONFIGS_COLLECTION_NAME = "comparison_configs"
+PRODUCT_COLLECTION_NAME = "products"
+QA_COLLECTION_NAME = "qa_items"
+GUIDED_CHAT_FLOWS_COLLECTION_NAME = "guided_chat_flows"
+BUSINESS_CONFIGS_COLLECTION_NAME = "business_configs"
+USER_COLLECTION_NAME = "users"
+CONVERSATIONS_COLLECTION_NAME = "conversations"
+LOGS_COLLECTION_NAME = "logs"

@@ -1,0 +1,50 @@
+/* General smoothness and transitions */
+body {
+    transition: background-color 0.3s ease; /* Smooth background transitions for theme changes */
+  }
+  
+  .shadow-chat-widget {
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2); /* More pronounced shadow */
+  }
+  
+  .shadow-option-button {
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.15); /* More pronounced shadow */
+  }
+  
+  /* width */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 0.5rem;
+    border-radius: 100vw;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #889;
+    border-radius: 100vw;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #556;
+  }
+  
+  .scrollbar-thumb-purple-300 {
+      --scrollbar-thumb-color: #C0B1EB;
+  }
+  .scrollbar-track-gray-100 {
+      --scrollbar-track-color: #F7FAFC;
+  }
+  
+  .scrollbar-thumb-gray-600 {
+      --scrollbar-thumb-color: #4A5568;
+  }
+  
+  .scrollbar-track-gray-800 {
+      --scrollbar-track-color: #2D3748;
+  }

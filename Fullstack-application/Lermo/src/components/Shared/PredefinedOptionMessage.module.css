@@ -1,0 +1,94 @@
+/* PredefinedOptionMessage.module.css */
+
+.container {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .button {
+    position: relative;
+    overflow: hidden;
+    transition-property: all;
+    transition-duration: 300ms;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
+  
+  .button:hover {
+    transform: translateY(-2px);
+  }
+  
+  .button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .button:focus {
+    outline: none;
+  }
+  
+  .buttonGradient {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1));
+  }
+  
+  .content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .iconContainer {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    border-radius: 0.5rem;
+    padding: 2px !important;
+  }
+  
+  .spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .textContainer {
+    flex-grow: 1;
+    text-align: left;
+  }
+  
+  .primaryText {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .secondaryText {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    opacity: 0.8;
+  }
+  
+  .arrow {
+    width: 1rem;
+    height: 1rem;
+    transform: rotate(180deg);
+  }

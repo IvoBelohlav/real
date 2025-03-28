@@ -1,0 +1,384 @@
+/* ChatMessage.module.css */
+
+/* Root font size variables */
+:root {
+  --base-font-size: 16px;
+  --large-font-size: 17px; /* Slightly larger base */
+  --header-font-size: 19px; /* Adjusted header size */
+  --button-font-size: 14px; /* Keep buttons standard */
+  --small-font-size: 13px; /* Adjusted small size */
+  --price-font-size: 18px; /* Specific variable for price */
+}
+
+.messageContainer {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem; /* Reduced bottom margin */
+    gap: 0.5rem; /* Reduced gap */
+    justify-content: flex-start; /* Align to the left */
+    width: 100%; /* Take full width */
+    padding: 0 5px; /* Reduced horizontal padding */
+    box-sizing: border-box;
+    overflow: visible; /* Allow content to be visible */
+  }
+
+  .messageContainerReverse {
+    flex-direction: row-reverse;
+  }
+
+  .botAvatar {
+    position: relative;
+    width: 2.25rem; /* Slightly smaller */
+    height: 2.25rem; /* Slightly smaller */
+    border-radius: 9999px;
+    flex-shrink: 0;
+    overflow: hidden;
+    margin-top: 6px; /* Adjust vertical alignment */
+    margin-right: 6px; /* Reduced right margin */
+  }
+
+  .botAvatarImage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .botAvatarFallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e5e7eb; /* Light grey fallback */
+    font-weight: bold;
+    font-size: var(--base-font-size);
+  }
+
+  .messageContent {
+    max-width: 100%; /* 100% of parent width */
+    margin: 0; /* Remove auto margins for better positioning */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align children to the left */
+    box-sizing: border-box;
+    width: auto; /* Changed from 100% to auto */
+    min-width: 0; /* Allow shrinking */
+    overflow: visible; /* Allow content to be visible */
+  }
+
+  .messageContentReverse {
+    margin-left: auto;
+    align-items: flex-end; /* Right align for user messages */
+  }
+
+  .messageBubble {
+    position: relative;
+    padding: 0.75rem; /* Further reduced padding */
+    font-size: var(--large-font-size); /* Use variable */
+    line-height: 1.5;
+    border-radius: 1rem; /* Default bubble radius */
+    width: auto; /* Auto width */
+    max-width: 95%; /* Limit width but allow more space */
+    box-sizing: border-box; /* Include padding in width calculation */
+    text-align: left; /* Left align all content */
+    margin: 0; /* No auto margins */
+    display: inline-block; /* Change to inline-block to prevent horizontal stretching */
+    overflow: hidden; /* Prevent overflow */
+    /* Specific background/color/border set inline via getMessageStyle() */
+  }
+
+  .messageBubbleWithRecommendations {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Reduced gap further */
+    align-items: flex-start; /* Align to left */
+    width: 100%; /* Take full width */
+  }
+
+  .messageText {
+    font-size: var(--large-font-size); /* Use variable */
+    line-height: 1.55; /* Slightly more line spacing */
+    white-space: pre-wrap; /* Preserve line breaks */
+    text-align: left; /* Left align the text */
+    width: 100%; /* Take full width */
+    max-width: 100%; /* Take full width */
+    margin: 0; /* No margins */
+  }
+  /* Add basic styling for lists generated in renderMessageText */
+  .messageText .list-item-bullet,
+  .messageText .list-item-number {
+      display: block;
+      margin-left: 1em; /* Indent list items */
+      margin-bottom: 0.25em;
+  }
+
+  .recommendationsContainer {
+    margin-top: 0.5rem; /* Space before recommendations */
+  }
+
+  .showMoreButton {
+    /* Styles unchanged */
+    margin-top: 0.5rem;
+    padding: 0.375rem 1rem;
+    font-size: var(--small-font-size);
+    font-weight: 500;
+    border-radius: 9999px;
+    transition: all 200ms;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .showMoreIcon {
+    /* Styles unchanged */
+    width: 0.75rem;
+    height: 0.75rem;
+    margin-left: 0.5rem;
+  }
+
+  .followupQuestionsContainer {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    animation: fadeIn 0.4s ease-out;
+  }
+
+  .followupQuestionLabel {
+    font-size: var(--base-font-size);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    animation: fadeIn 0.4s ease-out;
+    opacity: 0.9;
+  }
+
+  .followupButtonsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .followupSuggestion {
+    font-size: var(--button-font-size);
+    position: relative;
+    text-align: left;
+    font-weight: 400;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
+    animation: fadeIn 0.5s ease-out;
+    margin-right: 0;
+    position: relative;
+    /* Red text color set inline with primaryColor */
+    padding-left: 5px;
+    transition: all 0.2s ease;
+    transform-origin: left center;
+  }
+
+  .followupSuggestion:hover {
+    transform: translateX(3px);
+    text-decoration: underline;
+  }
+
+  /* Remove the dots between suggestions */
+  .followupSuggestion:after {
+    content: "";
+  }
+
+  /* Button interaction animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideDown {
+    from { transform: translateY(-10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .messageTimestamp {
+    font-size: var(--small-font-size); /* Use variable */
+    margin-top: 0.35rem; /* Adjusted margin */
+    opacity: 0.7; /* Make slightly more visible */
+    /* Color set inline */
+    /* text-align set via timestampLeft/Right */
+  }
+
+  .timestampLeft {
+    text-align: left;
+  }
+
+  .timestampRight {
+    text-align: right;
+  }
+
+  /* --- Product Carousel Styles --- */
+  .productCarousel {
+    position: relative;
+    margin: 0.75rem auto; /* Reduced margin */
+    /* Horizontal padding creates space for arrows */
+    padding: 0.5rem 40px; /* Reduced padding for arrows */
+    border-radius: 8px;
+    overflow: visible; /* Allow content to be visible outside of container */
+    width: 100%; /* Full width */
+    max-width: 320px; /* Reduced max-width */
+    box-sizing: border-box; /* Include padding in width calculation */
+  }
+
+  .carouselItems {
+    /* This container is now mostly for the animation */
+    position: relative;
+    width: 100%;
+    height: auto; /* Adjust height based on content */
+  }
+
+  .carouselItem {
+    width: 100%;
+    max-width: 320px; /* Increased from 280px to be wider */
+    margin: 0; /* Remove auto margins */
+    display: flex;
+    justify-content: flex-start; /* Align to left */
+    align-items: center;
+    box-sizing: border-box;
+  }
+
+  /* Carousel dots navigation */
+  .carouselDots {
+    position: absolute;
+    bottom: 5px; /* Position at the bottom outside the card */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px; /* Reduced gap between dots */
+    padding: 6px 12px; /* Reduced padding */
+    background-color: rgba(255, 255, 255, 0.8); /* More opaque background */
+    border-radius: 16px; /* Rounded capsule */
+    z-index: 25; /* Above card, below arrows if they overlap */
+    backdrop-filter: blur(2px); /* Optional: blur effect */
+  }
+  .messageBubble.cardDark .carouselDots { /* Adjust for dark theme */
+      background-color: rgba(40, 40, 40, 0.8);
+  }
+
+
+  .carouselDot {
+    width: 10px; /* Larger dots */
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /* background-color set inline */
+  }
+
+  .carouselDotActive {
+    transform: scale(1.3); /* Make active dot more prominent */
+    /* background-color set inline */
+  }
+
+  /* Carousel arrows */
+  .carouselArrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px; /* Slightly smaller arrows */
+    height: 32px; 
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    z-index: 30; /* Ensure arrows are on top */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+    opacity: 0.9; /* Less transparent */
+    transition: all 0.2s ease;
+    /* background-color set inline */
+  }
+
+  .carouselArrow:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1); /* Larger scale on hover */
+  }
+
+  /* Position arrows within the padding of .productCarousel */
+  .carouselArrowPrev {
+    left: -25px; /* Position further outside the left edge */
+  }
+
+  .carouselArrowNext {
+    right: -25px; /* Position further outside the right edge */
+  }
+
+  .productCounter {
+    /* Unchanged - Keep if needed */
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 12px;
+    padding: 5px 10px;
+    font-size: var(--small-font-size);
+    z-index: 20;
+    font-weight: bold;
+  }
+
+  .scoreContainer, .why {
+      font-size: var(--small-font-size);
+      padding: 5px 10px;
+      margin-top: 8px;
+      opacity: 0.85;
+      text-align: center;
+  }
+
+  .recommendationSection {
+    margin-bottom: 1rem; /* Reduced margin */
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align to left */
+  }
+
+  .recommendationSectionTitle {
+    font-size: var(--header-font-size); /* Use variable */
+    font-weight: 600;
+    margin-bottom: 1rem; /* Less space below title */
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid; /* Border set dynamically */
+    text-align: center;
+    width: 100%;
+    max-width: 320px; /* Increased from 280px to match wider card */
+    /* Color set inline */
+  }
+
+
+  /* Ensure card within carousel doesn't get too wide */
+  .carouselItem > div { /* Targets the direct child, likely ProductCard wrapper */
+    max-width: 100%; /* Allow it to fill the carousel item space */
+    margin: 0 auto;
+  }
+
+/* Classes to replace Tailwind utility classes */
+.accessoryWrapper {
+  margin-bottom: 0.75rem; /* Replaces mb-3 */
+}
+
+.accessoryExplanation {
+  margin-top: 0.25rem; /* Replaces mt-1 */
+  font-size: var(--small-font-size); /* Replaces text-sm */
+  font-style: italic; /* Replaces italic */
+  opacity: 0.75; /* Replaces opacity-75 */
+}

@@ -1,0 +1,29 @@
+/* This targets elements outside of our widget container */
+body > *:not(.dvojkavit-widget-container) h1,
+body > *:not(.dvojkavit-widget-container) h2,
+body > *:not(.dvojkavit-widget-container) h3,
+body > *:not(.dvojkavit-widget-container) h4,
+body > *:not(.dvojkavit-widget-container) h5,
+body > *:not(.dvojkavit-widget-container) h6 {
+  /* Reset heading styles to browser defaults */
+  font-size: revert;
+  font-weight: revert;
+  margin: revert;
+  padding: revert;
+  line-height: revert;
+}
+
+/* Add specific styles for external headings if needed */
+body > *:not(.dvojkavit-widget-container) h1 {
+  font-size: 2em;
+  font-weight: bold;
+  margin: 0.67em 0;
+}
+
+body > *:not(.dvojkavit-widget-container) h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin: 0.83em 0;
+}
+
+/* And so on for h3-h6 */

@@ -1,0 +1,33 @@
+/* WidgetPreview.module.css */
+
+.container {
+  border: 1px solid #e5e7eb;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+.title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #1f2937;
+}
+
+.widgetContainer {
+  max-width: 350px;
+  border: 1px solid #ccc;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background-color: #1f2937;
+  }
+  
+  .title {
+    color: #f3f4f6;
+  }
+} 

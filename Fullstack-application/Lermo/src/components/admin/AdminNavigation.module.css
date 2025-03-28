@@ -1,0 +1,155 @@
+/* AdminNavigation.module.css */
+
+.navContainer {
+  position: fixed;
+  width: 16rem; /* w-64 */
+  height: 100vh; /* h-screen */
+  background-color: white;
+  border-right: 1px solid #e5e7eb; /* border-r border-gray-200 */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 1px 0 5px rgba(0, 0, 0, 0.03);
+  z-index: 10;
+}
+
+.header {
+  height: 4rem; /* h-16 */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  padding-left: 1.25rem;
+  padding-right: 1.25rem; /* px-5 */
+  border-bottom: 1px solid #f0f0f0; /* border-b */
+  background: linear-gradient(to right, #E01E26, #B61319);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  width: 100%;
+}
+
+.logo {
+  height: 2.25rem;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.logoText {
+  font-size: 1.25rem; /* Slightly larger */
+  font-weight: 600; /* font-semibold */
+  color: white;
+  letter-spacing: 0.01em;
+  text-align: center;
+}
+
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 4rem);
+  overflow: hidden;
+}
+
+.navItems {
+  flex: 1;
+  padding-top: 1rem;
+  padding-bottom: 1rem; /* py-4 */
+  overflow-y: auto;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem; /* px-5 py-3 */
+  margin: 0.25rem 0.75rem; /* mx-3 my-1 */
+  border-radius: 0.5rem; /* rounded-lg */
+  transition: all 0.2s ease;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.navItemActive {
+  background-color: rgba(224, 30, 38, 0.08); /* Light red background */
+  color: #E01E26; /* LERMO red */
+  font-weight: 500;
+}
+
+.navItemActive::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background-color: #E01E26;
+  border-radius: 0 2px 2px 0;
+}
+
+.navItemInactive {
+  color: #4b5563; /* text-gray-600 */
+}
+
+.navItemInactive:hover {
+  background-color: #f9fafb; /* hover:bg-gray-50 */
+  color: #333333; /* hover:text-gray-900 */
+  transform: translateX(2px);
+}
+
+.icon {
+  width: 1.25rem; /* w-5 */
+  height: 1.25rem; /* h-5 */
+  opacity: 0.9;
+}
+
+.navItemActive .icon {
+  color: #E01E26;
+}
+
+.navItemText {
+  margin-left: 0.75rem; /* ml-3 */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  white-space: nowrap;
+}
+
+.bottomActions {
+  padding: 1rem 1.25rem; /* p-5 */
+  border-top: 1px solid #f0f0f0; /* border-t */
+  background-color: #fafafa;
+}
+
+.actionsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem; /* space-x-3 */
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem; /* px-4 py-2 */
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+  color: #E01E26; /* LERMO red */
+  border-radius: 0.5rem; /* rounded-lg */
+  transition: all 0.2s ease;
+  background-color: white;
+  border: 1px solid rgba(224, 30, 38, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  padding: 0.5rem 1rem;
+}
+
+.logoutButton:hover {
+  background-color: #fef2f2; /* Light red background */
+  border-color: rgba(224, 30, 38, 0.3);
+}
+
+.logoutIcon {
+  width: 1rem; /* w-4 */
+  height: 1rem; /* h-4 */
+  margin-right: 0.5rem; /* mr-2 */
+  color: #E01E26;
+} 

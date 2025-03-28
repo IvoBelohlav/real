@@ -1,0 +1,1601 @@
+/* Widget.module.css - WITH BULLETPROOF TYPOGRAPHY */
+/* Add this to the end of your src/index.css file */
+/* Create a file called heading-fix.css in your public folder */
+
+/* ===== TYPOGRAPHY PROTECTION LAYER ===== */
+.dvojkavit-widget-container * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  line-height: 1.5 !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  word-spacing: normal !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Define base font sizes */
+.dvojkavit-widget-container h1,
+.dvojkavit-widget-container h2,
+.dvojkavit-widget-container h3,
+.dvojkavit-widget-container h4,
+.dvojkavit-widget-container h5,
+.dvojkavit-widget-container h6 {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  line-height: 1.3 !important;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+}
+.dvojkavit-widget-container h4{
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  margin-top: 0 !important;
+  margin-bottom: 8px !important;
+  line-height: 1.3 !important;
+}
+
+.dvojkavit-widget-container p{
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+}
+.dvojkavit-widget-container span,
+.dvojkavit-widget-container div {
+  font-size: 12px !important;
+  line-height: 1.5 !important;
+}
+
+/* Common Classes */
+.dvojkavit-widget-container {
+  position: fixed;
+  bottom: 2px;
+  right: 2px;
+  z-index: 50;
+}
+
+/* Collapsed Widget Styles */
+.dvojkavit-widget-collapsed-container {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 50;
+}
+
+@media (min-width: 768px) {
+  .dvojkavit-widget-collapsed-container {
+    bottom: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dvojkavit-widget-collapsed-container {
+    bottom: 48px;
+    right: 32px;
+  }
+}
+
+.dvojkavit-proactive-prompt {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  padding: 12px 16px;
+  min-width: 140px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  background-color: #FFFFFF !important;
+  border: 2px solid #E01E26 !important;
+  box-shadow: 0 4px 10px rgba(229, 30, 38, 0.25) !important;
+  z-index: 51;
+  text-align: center;
+  transform-origin: bottom right;
+  opacity: 1 !important;
+  display: block !important;
+  visibility: visible !important;
+  will-change: transform, opacity, box-shadow;
+}
+
+/* Remove all previous triangle styles */
+.dvojkavit-proactive-prompt::before,
+.dvojkavit-proactive-prompt::after {
+  display: none !important;
+}
+
+/* Add a border-only triangle using a different approach */
+.dvojkavit-proactive-prompt-triangle {
+  position: absolute;
+  bottom: -10px;
+  right: 25px;
+  width: 16px;
+  height: 16px;
+  background-color: #FFFFFF;
+  border-right: 2px solid #E01E26;
+  border-bottom: 2px solid #E01E26;
+  transform: rotate(45deg);
+  z-index: 1;
+}
+
+.dvojkavit-button-wrapper {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dvojkavit-button-glow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  opacity: 0.7;
+}
+
+.dvojkavit-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  z-index: 0;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes pulse-shadow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(229, 30, 38, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(229, 30, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 30, 38, 0.5);
+  }
+}
+
+.dvojkavit-collapsed-button {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(229, 30, 38, 0.6);
+  transition: transform 300ms ease-in-out, box-shadow 300ms ease-in-out;
+  outline: none;
+  cursor: pointer;
+  z-index: 1;
+  animation: pulse-shadow 4s infinite;
+}
+
+.dvojkavit-floating-image-1 {
+  position: absolute;
+  top: -48px;
+  left: -32px;
+}
+
+.dvojkavit-floating-image-2 {
+  position: absolute;
+  top: -32px;
+  right: -32px;
+}
+
+.dvojkavit-floating-image-3 {
+  position: absolute;
+  bottom: -32px;
+  left: -24px;
+}
+
+.dvojkavit-floating-icon {
+  width: 32px;
+  height: 32px;
+  
+}
+
+.dvojkavit-button-background {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+
+.dvojkavit-button-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+
+.dvojkavit-button-border {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px; /* Added to match button shape */
+}
+
+.dvojkavit-button-content {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  z-index: 10;
+}
+
+.dvojkavit-button-icon-container {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.dvojkavit-button-icon {
+  position: relative;
+  z-index: 10;
+}
+
+.dvojkavit-button-icon-border {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+}
+
+.dvojkavit-button-text-container {
+  text-align: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  line-height: 1.2;
+  padding: 4px 0;
+  position: relative;
+  will-change: opacity, color;
+}
+
+.dvojkavit-button-text-primary {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+  color: #E01E26 !important;
+  transition: color 0.3s ease;
+}
+
+.dvojkavit-button-text-secondary {
+  font-size: 12px !important;
+  opacity: 0.95;
+}
+
+/* Error Message */
+.dvojkavit-error-message {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 12px;
+  background-color: rgb(220, 38, 38);
+  color: white;
+  border-radius: 6px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 51; /* Adjusted to be above widget */
+  backdrop-filter: blur(4px);
+}
+
+.dvojkavit-error-icon {
+  height: 20px;
+  width: 20px;
+}
+
+.dvojkavit-error-text {
+  font-size: 14px !important;
+  flex: 1;
+}
+
+.dvojkavit-retry-button {
+  background-color: rgb(185, 28, 28);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px !important;
+  outline: none;
+}
+
+.dvojkavit-retry-button:hover {
+  background-color: rgb(153, 27, 27); /* Fixed syntax error */
+}
+
+.dvojkavit-retry-icon {
+  height: 16px;
+  width: 16px;
+}
+
+/* Desktop Widget Styles */
+.dvojkavit-desktop-widget {
+  display: none;
+  width: 400px;
+  max-height: 80vh;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .dvojkavit-desktop-widget {
+    display: flex;
+  }
+}
+
+.dvojkavit-widget-header {
+  padding: 8px;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 86px;
+}
+
+.dvojkavit-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Fix for header title container */
+.dvojkavit-header-left > div {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.dvojkavit-logo-container {
+  width: 48px;
+  height: auto;
+}
+
+.dvojkavit-logo-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.dvojkavit-header-title {
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.1 !important;
+}
+
+.dvojkavit-header-status {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  display: flex;
+  align-items: center;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+.dvojkavit-status-indicator {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: rgb(74, 222, 128);
+  margin-right: 4px;
+  animation: pulse 2s infinite; /* Added for consistency with mobile */
+}
+
+.dvojkavit-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 8px;
+}
+
+.dvojkavit-theme-toggle {
+  padding: 6px;
+  border-radius: 9999px;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dvojkavit-toggle-icon {
+  height: 20px;
+  width: 20px;
+  color: inherit;
+}
+
+.dvojkavit-close-button {
+  outline: none;
+  padding: 6px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dvojkavit-close-icon {
+  height: 20px;
+  width: 20px;
+  color: inherit;
+}
+
+.dvojkavit-widget-content {
+  overflow-y: auto;
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dvojkavit-welcome-banner {
+  background-color: #E01E26;    padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+  color: white;
+}
+
+.dvojkavit-welcome-title {
+  color: white !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px;
+}
+
+.dvojkavit-welcome-text {
+  font-size: 14px !important;
+  opacity: 0.9;
+}
+
+.dvojkavit-guided-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dvojkavit-options-heading {
+  font-size: 14px !important;
+  text-align: center;
+  font-weight: 500 !important;
+  margin-bottom: 8px;
+}
+
+.dvojkavit-typing-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.dvojkavit-avatar-container {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background-color: rgb(209, 213, 219);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.dvojkavit-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dvojkavit-typing-bubble-container {
+  max-width: 75%;
+}
+
+.dvojkavit-typing-bubble {
+  position: relative;
+  border-radius: 12px;
+  padding: 8px;
+  background-color: rgb(243, 244, 246);
+}
+
+/* Contact Form - Desktop */
+.dvojkavit-contact-form {
+  
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dvojkavit-form-header {
+  background-image: linear-gradient(to right, rgba(224, 30, 38, 0.1), rgba(182, 19, 25, 0.1));  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(4px);
+}
+
+.dvojkavit-form-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, rgba(224, 30, 38, 0.1), rgba(182, 19, 25, 0.1));
+    color: rgb(147, 51, 234); /* Fallback for unsupported browsers */
+}
+
+.dvojkavit-form-subtitle {
+  font-size: 14px !important;
+}
+
+.dvojkavit-form-label {
+  display: block;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  margin-bottom: 4px;
+}
+
+.dvojkavit-form-label-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: text-top;
+}
+
+.dvojkavit-form-input {
+  display: block;
+  width: 100%;
+  border-radius: 6px; /* Removed duplicate declaration */
+  transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
+  padding: 0.625rem;
+  font-size: 14px !important;
+}
+
+.dvojkavit-form-textarea {
+  display: block;
+  width: 100%;
+  border-radius: 6px; /* Removed duplicate declaration */
+  transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
+  resize: none;
+  padding: 0.625rem;
+  font-size: 14px !important;
+}
+
+.dvojkavit-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.dvojkavit-form-cancel-button {
+  padding: 8px 16px;
+  border-radius: 6px; /* Removed duplicate declaration */
+  outline: none;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.dvojkavit-form-submit-button {
+  padding: 8px 20px;
+  border-radius: 6px; /* Removed duplicate declaration */
+  outline: none;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* Thank You Message */
+.dvojkavit-thank-you-container {
+  text-align: center;
+  padding: 24px;
+  border-radius: 8px;
+}
+
+.dvojkavit-thank-you-icon-container {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dvojkavit-thank-you-title {
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  margin-bottom: 8px;
+}
+
+.dvojkavit-thank-you-text {
+  font-size: 16px !important;
+  margin-bottom: 16px;
+}
+
+.dvojkavit-thank-you-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* Footer - Desktop */
+.dvojkavit-widget-footer {
+  padding: 16px 16px 24px;
+}
+
+.dvojkavit-guided-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dvojkavit-time-display {
+  text-align: center;
+  font-size: 12px !important;
+  margin-bottom: 16px;
+}
+
+.dvojkavit-back-button {
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 300ms, color 300ms; /* Specified properties */
+  gap: 12px;
+}
+
+.dvojkavit-back-icon {
+  height: 16px;
+  width: 16px;
+}
+
+/* FAQ Section */
+.dvojkavit-faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dvojkavit-faq-title {
+  text-align: left;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+}
+
+.dvojkavit-faq-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dvojkavit-faq-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.dvojkavit-goto-chat-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.dvojkavit-user-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.dvojkavit-arrow-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+}
+
+/* Chat Mode */
+.dvojkavit-chat-footer {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dvojkavit-contact-admin-button {
+  
+  width: 100%;
+  background-color: transparent;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 300ms, color 300ms; /* Specified properties */
+  margin-bottom: 8px;
+}
+
+.dvojkavit-message-icon {
+  height: 20px;
+  width: 20px;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.7;
+  }
+}
+
+.dvojkavit-mode-toggle-container {
+  margin-top: 12px;
+}
+
+.dvojkavit-widget-footer-copyright {
+  margin-top: 12px;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 13px !important;
+  color: rgb(107, 114, 128);
+  border-top: 1px solid rgba(229, 231, 235, 0.3);
+}
+
+.dvojkavit-copyright-link {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em;
+}
+
+.dvojkavit-copyright-link:hover {
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 200ms ease;
+}
+
+/* Mobile Widget Styles */
+.dvojkavit-mobile-widget {
+  position: fixed;
+  bottom: 8px;
+  right: 8px;
+  width: 85vw;
+  max-height: 80vh;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .dvojkavit-mobile-widget {
+    display: none;
+  }
+}
+
+.dvojkavit-mobile-header {
+  padding: 8px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dvojkavit-mobile-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dvojkavit-mobile-logo-container {
+  width: 40px;
+  height: auto;
+}
+
+.dvojkavit-mobile-logo {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.dvojkavit-mobile-title {
+  font-weight: 700 !important;
+  font-size: 16px !important;
+}
+
+.dvojkavit-mobile-status {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  display: flex;
+  align-items: center;
+}
+
+.dvojkavit-mobile-status-indicator {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background-color: rgb(74, 222, 128);
+  margin-right: 4px;
+  animation: pulse 2s infinite;
+}
+
+.dvojkavit-mobile-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-right: 8px;
+}
+
+.dvojkavit-mobile-theme-toggle {
+  padding: 6px;
+  border-radius: 9999px;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dvojkavit-mobile-toggle-icon {
+  height: 20px;
+  width: 20px;
+  color: inherit;
+}
+
+.dvojkavit-mobile-close-button {
+  outline: none;
+  padding: 6px;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.dvojkavit-mobile-close-icon {
+  height: 20px;
+  width: 20px;
+  color: inherit;
+}
+
+.dvojkavit-mobile-content {
+  overflow-y: auto;
+  flex: 1;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dvojkavit-mobile-welcome-banner {
+  background-color: #E01E26;    padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 12px;
+  color: white;
+}
+
+.dvojkavit-mobile-welcome-title {
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  margin-bottom: 2px;
+}
+
+.dvojkavit-mobile-welcome-text {
+  font-size: 14px !important;
+  opacity: 0.9;
+}
+
+.dvojkavit-mobile-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dvojkavit-mobile-options-heading {
+  font-size: 14px !important;
+  text-align: center;
+  font-weight: 500 !important;
+  margin-bottom: 4px;
+}
+
+.dvojkavit-mobile-typing-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.dvojkavit-mobile-avatar-container {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background-color: rgb(209, 213, 219);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.dvojkavit-mobile-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dvojkavit-mobile-typing-bubble-container {
+  max-width: 75%;
+}
+
+.dvojkavit-mobile-typing-bubble {
+  position: relative;
+  border-radius: 8px;
+  padding: 6px;
+  background-color: rgb(243, 244, 246);
+  color: rgb(31, 41, 55); /* Fixed property name from text-color */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Contact Form - Mobile */
+.dvojkavit-mobile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dvojkavit-mobile-form-header {
+  background-image: linear-gradient(to right, rgba(224, 30, 38, 0.1), rgba(182, 19, 25, 0.1));  
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.dvojkavit-mobile-form-title {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-bottom: 4px;
+}
+
+.dvojkavit-mobile-form-subtitle {
+  font-size: 14px !important;
+}
+
+.dvojkavit-mobile-form-label {
+  display: block;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  margin-bottom: 4px;
+}
+
+.dvojkavit-mobile-form-label-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: text-top;
+}
+
+.dvojkavit-mobile-form-input {
+  display: block;
+  width: 100%;
+  border-radius: 6px; /* Removed duplicate declaration */
+  outline: none;
+  border: 0;
+  transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
+  padding: 0.625rem;
+  font-size: 14px !important;
+}
+
+.dvojkavit-mobile-form-textarea {
+  display: block;
+  width: 100%;
+  border-radius: 6px; /* Removed duplicate declaration */
+  outline: none;
+  border: 0;
+  resize: none;
+  transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
+  padding: 0.625rem;
+  font-size: 14px !important;
+}
+
+.dvojkavit-mobile-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.dvojkavit-mobile-form-cancel-button {
+  padding: 8px 16px; /* Increased for better touch target */
+  border-radius: 6px; /* Removed duplicate declaration */
+  outline: none;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.dvojkavit-mobile-form-submit-button {
+  padding: 8px 20px; /* Increased for better touch target */
+  border-radius: 6px;
+  outline: none;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* Thank You Message - Mobile */
+.dvojkavit-mobile-thank-you-container {
+  text-align: center;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.dvojkavit-mobile-thank-you-icon-container {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 8px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dvojkavit-mobile-thank-you-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px;
+}
+
+.dvojkavit-mobile-thank-you-text {
+  font-size: 14px !important;
+  margin-bottom: 12px;
+}
+
+.dvojkavit-mobile-thank-you-button {
+  padding: 8px 16px; /* Increased for better touch target */
+  border-radius: 8px;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  font-size: 14px !important;
+}
+
+/* Footer - Mobile */
+.dvojkavit-mobile-footer {
+  padding: 12px 12px 16px;
+}
+
+.dvojkavit-mobile-guided-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dvojkavit-mobile-time-display {
+  text-align: center;
+  font-size: 12px !important;
+}
+
+.dvojkavit-mobile-back-button {
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid;
+  padding: 8px 16px; /* Increased for better touch target */
+  border-radius: 8px;
+  font-size: 14px !important; /* Increased for readability */
+  font-weight: 500 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 300ms, color 300ms; /* Fixed property name */
+}
+
+.dvojkavit-mobile-back-icon {
+  height: 16px;
+  width: 16px;
+  margin-right: 4px;
+}
+
+/* FAQ Section - Mobile */
+.dvojkavit-mobile-faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dvojkavit-mobile-faq-title {
+  text-align: left;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin-bottom: 8px;
+}
+
+.dvojkavit-mobile-faq-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.dvojkavit-mobile-goto-chat-button {
+  padding: 16px 24px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 200ms, color 200ms; /* Specified properties */
+  margin: 16px;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.dvojkavit-mobile-user-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+.dvojkavit-mobile-arrow-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+}
+
+/* Chat Mode - Mobile */
+.dvojkavit-mobile-chat-footer {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dvojkavit-mobile-contact-admin-button {
+  width: 100%;
+  background-color: transparent;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 300ms, color 300ms; /* Specified properties */
+  margin-bottom: 8px;
+}
+
+.dvojkavit-mobile-message-icon {
+  height: 20px;
+  width: 20px;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+.dvojkavit-mobile-mode-toggle {
+  margin-top: 6px;
+}
+
+.dvojkavit-mobile-footer-copyright {
+  margin-top: 12px;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 13px !important;
+  color: rgb(107, 114, 128);
+  border-top: 1px solid rgba(229, 231, 235, 0.3);
+}
+
+.dvojkavit-mobile-copyright-link {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em;
+}
+
+/* ===== DARK MODE THEME TYPOGRAPHY SUPPORT ===== */
+[data-theme="dark"] .dvojkavit-widget-container * {
+  color: #F3F4F6 !important;
+}
+
+[data-theme="dark"] .dvojkavit-form-input,
+[data-theme="dark"] .dvojkavit-form-textarea,
+[data-theme="dark"] .dvojkavit-mobile-form-input,
+[data-theme="dark"] .dvojkavit-mobile-form-textarea {
+  color: #F3F4F6 !important;
+  background-color: #2D3748 !important;
+}
+
+/* Extra high specificity to prevent Shoptet override */
+html body .dvojkavit-widget-container .dvojkavit-header-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1.1 !important;
+}
+
+html body .dvojkavit-widget-container .dvojkavit-header-status {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: 1 !important;
+}
+
+html body .dvojkavit-widget-container .dvojkavit-welcome-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+html body .dvojkavit-widget-container .dvojkavit-welcome-text {
+  font-size: 14px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* Mobile versions with extra specificity */
+html body .dvojkavit-widget-container .dvojkavit-mobile-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+html body .dvojkavit-widget-container .dvojkavit-mobile-status {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+html body .dvojkavit-widget-container .dvojkavit-mobile-welcome-title {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+html body .dvojkavit-widget-container .dvojkavit-mobile-welcome-text {
+  font-size: 14px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+.dvojkavit-text-char {
+  display: inline-block;
+  transform-origin: bottom center;
+  position: relative;
+  margin: 0 0.25px;
+}
+
+/* Additional utility classes for the widget that were previously provided by Tailwind */
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+.rounded-md {
+  border-radius: 0.375rem;
+}
+
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
+.rounded-xl {
+  border-radius: 0.75rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.p-1 {
+  padding: 0.25rem;
+}
+
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
+}
+
+.p-4 {
+  padding: 1rem;
+}
+
+.px-2 {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
+.pt-2 {
+  padding-top: 0.5rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-base {
+  font-size: 1rem;
+}
+
+.text-lg {
+  font-size: 1.125rem;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-white {
+  color: #ffffff;
+}
+
+.text-gray-500 {
+  color: #6b7280;
+}
+
+.text-gray-700 {
+  color: #374151;
+}
+
+.bg-white {
+  background-color: #ffffff;
+}
+
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.relative {
+  position: relative;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
+
+.transition {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.hover\:bg-gray-100:hover {
+  background-color: #f3f4f6;
+}
+
+.hover\:shadow-md:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.focus\:outline-none:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.focus\:ring-2:focus {
+  --ring-offset-shadow: var(--ring-inset) 0 0 0 var(--ring-offset-width) var(--ring-offset-color);
+  --ring-shadow: var(--ring-inset) 0 0 0 calc(2px + var(--ring-offset-width)) var(--ring-color);
+  box-shadow: var(--ring-offset-shadow), var(--ring-shadow), var(--shadow, 0 0 #0000);
+}
+
+/* Add the new button styles after existing styles */
+
+.widget {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  font-family: 'Inter', sans-serif;
+}
+
+.collapsed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.chatButton {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  outline: none;
+}
+
+.chatButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+.buttonContent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chatIconContainer {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+}
+
+.chatIcon {
+  transition: transform 0.3s ease;
+}
+
+.chatButton:hover .chatIcon {
+  transform: scale(1.1);
+}
+
+.proactivePromptContainer {
+  position: absolute;
+  bottom: 80px;
+  right: 0;
+  padding: 15px;
+  border-radius: 10px;
+  border-width: 1px;
+  border-style: solid;
+  width: 220px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.proactivePromptContainer p {
+  margin: 0 0 10px 0;
+  font-size: 0.9rem;
+}
+
+.proactivePromptButton {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.proactivePromptButton:hover {
+  opacity: 0.9;
+}

@@ -1,0 +1,105 @@
+/* BusinessTypeManagementManual.module.css */
+.container {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+}
+
+.header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.toggleButton {
+  background: none;
+  border: none;
+}
+
+.toggleButton:focus {
+  outline: none;
+}
+
+.toggleIcon {
+  height: 1.25rem;
+  width: 1.25rem;
+  color: #6b7280;
+}
+
+.content {
+  padding: 1.5rem;
+}
+
+.paragraph {
+  margin-bottom: 1rem;
+  color: #4b5563;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #E01E26;
+}
+
+.list {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+  color: #4b5563;
+}
+
+.listItem {
+  margin-bottom: 0.25rem;
+}
+
+.strongText {
+  font-weight: 600;
+  color: #E01E26;
+}
+
+.table {
+  min-width: 100%;
+  table-layout: auto;
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.tableHeader {
+  background-color: #e5e7eb;
+}
+
+.tableHeaderCell {
+  padding: 0.5rem 1rem;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.tableRow {
+  border-bottom: 1px solid #d1d5db;
+}
+
+.tableCell {
+  padding: 0.5rem 1rem;
+  color: #4b5563;
+}
+
+.tableCellHighlight {
+  composes: tableCell;
+  font-weight: 500;
+  color: #E01E26;
+} 

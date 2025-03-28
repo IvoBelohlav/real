@@ -1,0 +1,39 @@
+/* src/components/Chat/MessageInput.module.css */
+.inputContainer {
+    display: flex;
+    gap: 0.5rem; /* space-x-2 -> gap: 0.5rem */
+    align-items: center;
+}
+
+.inputField {
+    flex: 1; /* flex-1 */
+    border-radius: 0.75rem; /* rounded-xl */
+    border-width: 1px; /* border */
+    padding: 0.5rem; /* p-2 */
+    font-size: 0.875rem; /* text-sm */
+    outline: none; /* focus:outline-none */
+}
+
+.inputField:focus {
+  outline: none;
+}
+
+.sendButton {
+    border-radius: 0.75rem; /* rounded-xl */
+    padding: 0.625rem 1rem; /* py-2.5 px-4 -> adjusted for better visual balance */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    outline: none; /* focus:outline-none */
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile Safari */
+}
+
+.sendButton:focus {
+  outline: none;
+}
+
+.sendButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

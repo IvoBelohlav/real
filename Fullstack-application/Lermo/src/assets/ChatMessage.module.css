@@ -1,0 +1,55 @@
+ /* src/components/Chat/ChatMessage.module.css */
+ .messageContainer {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem; /* space-x-2 -> gap: 0.5rem */
+}
+
+.botMessageContainer {
+    align-items: flex-start;
+}
+
+.userMessageContainer {
+    align-items: flex-end;
+    flex-direction: row-reverse; /* Flip for user messages */
+}
+
+
+.avatarContainer {
+    width: 1.5rem; /* w-6 */
+    height: 1.5rem; /* h-6 */
+    border-radius: 50%; /* rounded-full */
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.avatarImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.messageBubble {
+    position: relative;
+    border-radius: 0.75rem; /* rounded-xl */
+    padding: 0.5rem; /* p-2 */
+    max-width: 75%; /* max-w-[75%] */
+    word-wrap: break-word;
+}
+
+.messageText {
+    font-size: 0.875rem; /* text-sm */
+    margin: 0;
+    line-height: 1.25rem; /* approximate line-height for text-sm */
+}
+
+.messageTimestamp {
+    position: absolute;
+    bottom: -0.25rem; /* -bottom-1 */
+    right: 0.5rem; /* right-2 */
+    font-size: 0.625rem; /* text-xs */
+    color: #6b7280; /* text-gray-500 */
+}
+
+
+

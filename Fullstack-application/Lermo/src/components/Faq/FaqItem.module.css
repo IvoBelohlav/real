@@ -1,0 +1,40 @@
+/* FaqItem.module.css */
+
+.faqItem {
+    margin-bottom: 1rem; /* mb-4 */
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 0.75rem; /* rounded-xl */
+    border-width: 1px; /* border */
+    transition-property: box-shadow; /* transition-shadow */
+    transition-duration: 300ms; /* duration-300 */
+  }
+  
+  .faqItem:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-lg */
+  }
+  
+  .questionContainer {
+    display: flex; /* flex */
+    align-items: center; /* items-center */
+    justify-content: space-between; /* justify-between */
+    padding: 1.25rem; /* p-5 */
+  }
+  
+  .question {
+    font-size: 1rem!important;
+    font-weight: 600!important;
+    padding-right: 0.5rem!important;
+  }
+  
+  .answerContainer {
+    padding-left: 1.25rem; /* px-5 */
+    padding-right: 1.25rem; /* px-5 */
+    padding-bottom: 1.25rem; /* pb-5 */
+    padding-top: 0; /* pt-0 */
+    font-size: 0.875rem; /* text-sm */
+  }
+  
+  .highlightedMark {
+    padding: 0;
+  }

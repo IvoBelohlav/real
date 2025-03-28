@@ -1,0 +1,18 @@
+/* EmojiPicker.module.css */
+
+.container {
+  position: relative;
+}
+
+.pickerContainer {
+  position: absolute;
+  z-index: 10;
+  display: block;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.picker {
+  width: 100%;
+} 

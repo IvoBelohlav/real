@@ -1,0 +1,19 @@
+/* LoadingIndicator.module.css */
+
+.container {
+    display: flex;
+    justify-content: flex-start;
+    padding: 0.5rem; /* p-2 */
+  }
+  
+  .dotsContainer {
+    display: flex;
+    align-items: center;
+    column-gap: 0.25rem; /* space-x-1 */
+  }
+  
+  .dot {
+    width: 0.5rem; /* w-2 */
+    height: 0.5rem; /* h-2 */
+    border-radius: 9999px; /* rounded-full */
+  }

@@ -1,0 +1,106 @@
+.admin-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin: 20px auto;
+  width: 80%;
+  max-width: 800px;
+}
+
+.admin-container h2 {
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.admin-container h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+.logs-box {
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 20px;
+  background-color: white;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.log-item {
+    padding: 5px;
+    display: flex;
+    align-items: baseline;
+    border-bottom: 1px solid #eee;
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-level {
+   margin-right: 5px;
+   font-weight: bold;
+}
+.log-level.info {
+  color: green;
+}
+.log-level.error {
+  color: red;
+}
+.log-level.warn {
+  color: orange;
+}
+.log-timestamp {
+    font-size: 0.8em;
+    color: #999;
+    margin-right: 5px;
+}
+.log-message {
+  flex: 1;
+}
+
+.train-box {
+    margin-bottom: 20px;
+    background-color: white;
+     padding: 10px;
+    border: 1px solid #ddd;
+}
+.training-textarea {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.train-button {
+    background-color: #5cb85c;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+     font-weight: bold;
+}
+
+.train-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+.message-box {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+.conversation-stats {
+    margin-bottom: 20px;
+    background-color: white;
+     padding: 10px;
+    border: 1px solid #ddd;
+  }

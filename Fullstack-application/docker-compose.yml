@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      - REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL}
+      - PORT=3000
+      - NODE_ENV=production
+    depends_on:
+      - server # Changed dependency to 'server'
+
+  server:  # <--- RENAMED SERVICE FROM 'fastapi' to 'server'
+    build:
+      context: .
+      dockerfile: fast-api/Dockerfile  # <--- UPDATED dockerfile PATH
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=${MONGODB_URI}
+      - MONGO_DB_NAME=${MONGO_DB_NAME}
+      - CORS_ORIGINS=${CLIENT_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PORT=8000
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+
+volumes:
+  mongodb_data:

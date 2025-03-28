@@ -1,0 +1,25 @@
+/* CSS Module for global index styles */
+.headingReset h1,
+.headingReset h2,
+.headingReset h3,
+.headingReset h4,
+.headingReset h5,
+.headingReset h6 {
+  font-size: revert !important;
+  font-weight: revert !important;
+}
+
+/* Root container */
+.container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Ensure the widget container is properly contained */
+.widgetContainer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+} 

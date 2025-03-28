@@ -1,0 +1,13 @@
+/* AnimatedTypingDots.module.css */
+
+.container {
+    display: flex; /* flex */
+    align-items: center; /* items-center */
+    gap: 0.25rem; /* space-x-1 */
+  }
+  
+  .dot {
+    height: 0.5rem; /* h-2 */
+    width: 0.5rem; /* w-2 */
+    border-radius: 9999px; /* rounded-full */
+  }

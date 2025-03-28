@@ -1,0 +1,10 @@
+[[services]]
+name = "client"
+source = "."
+startCommand = "nginx -g 'daemon off;'"
+
+[services.variables]
+  PORT = "80"
+
+[deploy]
+restartPolicyType = "ON_FAILURE"

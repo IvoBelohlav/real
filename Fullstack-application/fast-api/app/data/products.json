@@ -1,0 +1,100 @@
+[
+    {
+        "id": "prod001",
+        "product_name": "Chatbot",
+        "description": "AI chatbot pro automatizaci zákaznické podpory.",
+        "category": "software",
+        "features": ["live chat", "automatické odpovědi", "analytika", "integrace s kalendářem"],
+        "technical_specifications": {
+            "jazyky": ["čeština", "angličtina"],
+            "platformy": ["web", "iOS", "Android"]
+        },
+        "pricing": {
+            "monthly": 1000.00,
+            "annual": 10000.00,
+            "CZK": 1000.00
+        },
+        "target_audience": ["malé a střední firmy", "e-shopy"],
+        "keywords": ["chatbot", "AI", "zákaznická podpora", "automatizace"],
+        "url": null,
+        "compatible_accessories": ["calendar_integration", "crm_integration"],
+        "image_url": null,
+        "stock_information": null,
+        "store_availability": null,
+        "use_cases": ["zákaznická podpora", "lead generation"],
+        "benefits": ["snížení nákladů", "zvýšení efektivity", "zlepšení zákaznické zkušenosti"],
+        "pros": ["snadné použití", "rychlá implementace", "dobrá podpora"],
+        "cons": ["omezené možnosti customizace", "vyšší cena pro velké firmy"],
+        "value_propositions": ["ušetřete čas a peníze", "zlepšete spokojenost zákazníků"],
+        "comparison_points": {
+            "performance_score": 85.5,
+            "value_score": 78.3,
+            "quality_score": 90.0
+        },
+        "ratings": {
+            "average": 4.5,
+            "count": 120
+        },
+        "aliases": ["AI Chatbot", "Chatbot Software"],
+        "comparison_metrics": {
+            "funkce": 9,
+            "cena": 7,
+            "podpora": 8
+        },
+        "category_specific_attributes": {
+            "software": {
+                "verze": "2.5",
+                "licence": "SaaS"
+            }
+        }
+    },
+    {
+        "id": "prod002",
+        "product_name": "Helpdesk",
+        "description": "Komplexní platforma pro správu požadavků zákazníků.",
+        "category": "software",
+        "features": ["ticketing", "emailová integrace", "znalostní báze", "reporty"],
+        "technical_specifications": {
+            "jazyky": ["čeština", "angličtina", "němčina"],
+            "platformy": ["web", "iOS", "Android", "Windows", "macOS"]
+        },
+        "pricing": {
+            "monthly": 500.00,
+            "annual": 5000.00,
+            "CZK": 500.00
+        },
+        "target_audience": ["střední a velké firmy", "zákaznická centra"],
+        "keywords": ["helpdesk", "ticketing", "zákaznická podpora", "znalostní báze"],
+        "url": null,
+        "compatible_accessories": ["live_chat_integration", "reporting_tools"],
+        "image_url": null,
+        "stock_information": null,
+        "store_availability": null,
+        "use_cases": ["zákaznická podpora", "IT support"],
+        "benefits": ["zlepšení organizace", "rychlejší řešení požadavků", "přehled o výkonu"],
+        "pros": ["robustní funkce", "vhodné pro velké týmy", "dobrá škálovatelnost"],
+        "cons": ["může být složité pro malé firmy", "vyšší cena"],
+        "value_propositions": ["zefektivněte zákaznickou podporu", "zvyšte spokojenost klientů"],
+        "comparison_points": {
+          "performance_score": 78,
+          "value_score": 90,
+          "quality_score": 85
+        },
+        "ratings": {
+            "average": 4.8,
+            "count": 350
+        },
+        "aliases": ["Help Desk Software", "Ticketing System"],
+        "comparison_metrics": {
+            "funkce": 10,
+            "cena": 6,
+            "podpora": 9
+        },
+        "category_specific_attributes": {
+            "software": {
+                "verze": "5.2",
+                "licence": "SaaS"
+            }
+        }
+    }
+]

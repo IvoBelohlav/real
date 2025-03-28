@@ -1,0 +1,19 @@
+{
+    "name": "fullstack-app",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "echo 'start npm run start from client and server directory'"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "lucide-react": "^0.468.0",
+        "react-router-dom": "^7.1.1"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.14"
+    }
+}

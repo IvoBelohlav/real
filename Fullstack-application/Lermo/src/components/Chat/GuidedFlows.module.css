@@ -1,0 +1,85 @@
+/* src/components/GuidedFlowsComponent.module.css */
+.guidedFlowsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* space-y-3 -> gap: 0.75rem */
+  }
+  
+  .optionButtonContainer {
+    margin-top: 0.5rem; /* mt-2 -> 0.5rem */
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .optionButton {
+    position: relative;
+    overflow: hidden;
+    border-width: 1px; /* border */
+    border-radius: 1rem; /* rounded-full */
+    padding-left: 1rem; /* px-4 */
+    padding-right: 1rem; /* px-4 */
+    padding-top: 0.75rem; /* py-3 */
+    padding-bottom: 0.75rem; /* py-3 */
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, box-shadow, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 0.3s; /* duration-300 */
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 -> 0.5rem */
+    background-color: rgba(255, 255, 255, 0.95); /* bg-opacity-95 - approximation */
+    cursor: pointer;
+    outline: none; /* focus:outline-none */
+    user-select: none;
+    -webkit-tap-highlight-color: transparent; /* Removes tap highlight on mobile Safari */
+    box-shadow: none; /* hover:shadow-lg - reset default shadow */
+  }
+  
+  .optionButton:focus {
+    outline: none;
+  }
+  
+  .optionButton:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1); /* shadow-lg - approximation */
+    transform: scale(1.02); /* whileHover:scale-102 - approximation */
+  }
+  
+  .optionButton:active {
+    transform: scale(0.98); /* whileTap:scale-98 - approximation */
+  }
+  
+  
+  .buttonContent {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 -> 0.5rem */
+  }
+  
+  .buttonIconContainer {
+    flex-shrink: 0;
+    width: 1.5rem; /* w-6 */
+    height: 1.5rem; /* h-6 */
+    border-radius: 50%; /* rounded-full */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: 0 0 0 0.125rem black; /* shadow-inner - approximation, adjust as needed */
+  }
+  
+  .buttonTextContainer {
+    flex-grow: 1;
+    text-align: left; /* Ensure text is left-aligned */
+  }
+  
+  .buttonMainText {
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    margin: 0;
+    line-height: 1.25rem; /* approximate line-height for text-sm */
+  }
+  
+  .buttonArrowIcon {
+    width: 0.75rem; /* h-3 */
+    height: 0.75rem; /* w-3 */
+    transform: rotate(180deg); /* rotate-180 */
+  }

@@ -1,0 +1,75 @@
+    [
+        {
+            "name": "lermo_o_nas",
+            "url": "https://www.lermoplus.cz/o-nas",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_produkty",
+            "url": "https://www.lermoplus.cz/produkty",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_akcni_nabidka",
+            "url": "https://www.lermoplus.cz/produkty/akcni-nabidka",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_postele",
+            "url": "https://www.lermoplus.cz/produkty/postele",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_nabytek_na_miru",
+            "url": "https://www.lermoplus.cz/nabytek-na-miru",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_showroom",
+            "url": "https://www.lermoplus.cz/showroom",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_kde_nakoupit",
+            "url": "https://www.lermoplus.cz/kde-nakoupit",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_kontakt",
+            "url": "https://www.lermoplus.cz/kontakt",
+            "base_url": "https://www.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5
+        },
+        {
+            "name": "lermo_blog",
+            "url": "https://blog.lermoplus.cz",
+            "base_url": "https://blog.lermoplus.cz",
+            "content_selector": "div#main",
+            "ignore_selectors": ["nav", "footer", "aside", ".breadcrumb", ".cookie-consent"],
+            "delay": 0.5,
+            "subdomains": ["blog"]
+        }
+    ]

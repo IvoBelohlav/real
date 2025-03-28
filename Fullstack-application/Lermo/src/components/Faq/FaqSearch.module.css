@@ -1,0 +1,29 @@
+/* FaqSearch.module.css */
+
+.container {
+  position: relative;
+  margin-bottom: 1rem; /* mb-4 */
+}
+
+.searchInput {
+  width: 100%; /* w-full */
+  padding-left: 2.5rem; /* pl-10 */
+  padding-right: 1rem; /* pr-4 */
+  padding-top: 0.5rem; /* py-2 */
+  padding-bottom: 0.5rem; /* py-2 */
+  border-radius: 0.75rem; /* rounded-xl */
+  border: 0; /* border-0 */
+  font-size: 0.875rem;
+}
+
+.searchInput:focus {
+  outline: none!important; /* focus:outline-none */
+  box-shadow: none!important;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem !important; /* left-2 */
+  top: 50% !important;/* top-1/2 */
+  transform: translateY(-50%)!important; /* transform -translate-y-1/2 */
+}

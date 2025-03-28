@@ -1,0 +1,32 @@
+/* CSS Module for App-specific styles */
+.headingReset h1,
+.headingReset h2,
+.headingReset h3,
+.headingReset h4,
+.headingReset h5,
+.headingReset h6 {
+  font-size: revert !important;
+  font-weight: revert !important;
+  margin: revert !important;
+}
+
+/* Widget container styles */
+.widgetContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Layout styles */
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  padding: 1rem;
+} 

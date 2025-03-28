@@ -1,0 +1,10 @@
+/* Add this to the end of your src/index.css file */
+:not(.dvojkavit-widget-container) h1,
+:not(.dvojkavit-widget-container) h2,
+:not(.dvojkavit-widget-container) h3,
+:not(.dvojkavit-widget-container) h4,
+:not(.dvojkavit-widget-container) h5,
+:not(.dvojkavit-widget-container) h6 {
+  font-size: revert !important;
+  font-weight: revert !important;
+}

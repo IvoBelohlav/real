@@ -1,0 +1,32 @@
+[
+    {
+      "store_id": "alza_holesovice",
+      "location": "U Pergamenky 1522/2, Praha 7 Holešovice",
+      "opening_hours": {
+        "monday": "8:00 - 20:00",
+        "tuesday": "8:00 - 20:00",
+        "wednesday": "8:00 - 20:00",
+        "thursday": "8:00 - 20:00",
+        "friday": "8:00 - 20:00",
+        "saturday": "9:00 - 18:00",
+        "sunday": "9:00 - 18:00"
+      },
+      "contact": {
+        "phone": "+420225340111",
+        "email": "info@alza.cz"
+      },
+      "coordinates": {
+        "latitude": 50.1066,
+        "longitude": 14.4414
+      },
+      "services": [
+        "výdej zboží",
+        "reklamace",
+        "alzapoint"
+      ],
+      "accessibility": {
+        "wheelchair": true,
+        "parking": true
+      }
+    }
+  ]
