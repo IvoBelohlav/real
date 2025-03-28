@@ -4,6 +4,7 @@ import './index.css';  // Regular CSS import instead of CSS Module
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { setApiKey, setApiBaseUrl } from './utils/api';
+import { QueryClient, QueryClientProvider } from 'react-query'; // Import QueryClient and Provider
 
 // Create a global namespace for the widget API
 window.LermoWidget = {
@@ -40,11 +41,24 @@ window.LermoWidget = {
     // Add widgetContainer class directly instead of using CSS Module
     container.className = `${container.className} widgetContainer`;
     
+    // Create a new QueryClient for React Query
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          refetchOnWindowFocus: false,
+          retry: 1,
+          staleTime: 30000,
+        },
+      },
+    });
+    
     // Render the app in the container
     const root = ReactDOM.createRoot(container);
     root.render(
       <React.StrictMode>
-        <App />
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
       </React.StrictMode>
     );
     
