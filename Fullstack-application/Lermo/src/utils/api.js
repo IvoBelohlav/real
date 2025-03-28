@@ -9,15 +9,23 @@ const PROD_API_URL = 'https://lermobackend.up.railway.app/';
 // Choose the API URL based on environment
 const API_URL = process.env.NODE_ENV === 'production' ? PROD_API_URL : LOCAL_API_URL;
 
-// Get API key from initialization or configuration
+// API configuration
 let apiKey = null;
+let apiBaseUrl = 'http://localhost:8000'; // Default to localhost
+
+// Update to check for production environment
+if (process.env.NODE_ENV === 'production') {
+  // Use CloudFront URL in production
+  apiBaseUrl = 'https://d129jv2av2liy7.cloudfront.net/api';
+}
 
 export const setApiKey = (key) => {
-    apiKey = key;
-    console.log('API key set for Lermo widget');
+  apiKey = key;
 };
 
-export const getApiKey = () => apiKey;
+export const setApiBaseUrl = (url) => {
+  apiBaseUrl = url;
+};
 
 const api = axios.create({
     baseURL: API_URL,

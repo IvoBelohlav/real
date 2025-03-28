@@ -3,13 +3,16 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   entry: './src/index.js',
   output: {
-    path: path.resolve(__dirname, 'build/static/js'),
-    filename: 'bundle.js',
-    publicPath: '/',
+    path: path.resolve(__dirname, 'build'),
+    filename: 'widget.js',
+    publicPath: process.env.NODE_ENV === 'production' 
+      ? 'https://d129jv2av2liy7.cloudfront.net/' 
+      : 'http://localhost:5173/'
   },
   module: {
     rules: [

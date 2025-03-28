@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';  // Regular CSS import instead of CSS Module
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { setApiKey } from './utils/api';
+import { setApiKey, setApiBaseUrl } from './utils/api';
 
 // Create a global namespace for the widget API
 window.LermoWidget = {
@@ -23,6 +23,11 @@ window.LermoWidget = {
     } else {
       console.error('API key is required for Lermo Widget initialization');
       return;
+    }
+    
+    // Set custom API URL if provided
+    if (apiUrl) {
+      setApiBaseUrl(apiUrl);
     }
     
     // Find the container element

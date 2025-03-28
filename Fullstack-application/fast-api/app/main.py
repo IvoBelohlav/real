@@ -47,41 +47,19 @@ app = FastAPI()
 # Apply the JSON patch to handle infinity values
 patch_json_response(app)
 
-# CORS Configuration
-CORS_ORIGINS = [
-    "http://localhost:3000",  # Next.js dashboard
-    "http://localhost:8000",
-    "http://127.0.0.1:5500",
-    "https://127.0.0.1:5500",
-    "http://127.0.0.1:5501",
-    "https://127.0.0.1:5501",
-    "http://localhost:8080",
-    "https://689516.myshoptet.com",
-    "https://client-production-b2b9.up.railway.app",
-    "https://702265.myshoptet.com",
-    "http://dvojkavit2.s3-website.eu-north-1.amazonaws.com",
-    "https://mynewbucket3310.s3.eu-north-1.amazonaws.com",
-    "https://pslib-cz.github.io/2023-p2a-web-vlastniprojekt-IvoDBelohlav",
-    "https://pslib-cz.github.io/2023-p2a-web-vlastniprojekt-IvoDBelohlav/",
-    "https://www.dvojkavit.cz",
-    "https://www.dvojkavit.cz/",
-    "https://www.dvojkavit.cz/kontakt",
-    "https://www.dvojkavit.cz/web-na-miru",
-    "https://www.dvojkavit.cz/wordpress",
-    "https://www.dvojkavit.cz/shoptet",
-    "https://www.dvojkavit.cz/o-nas",
-    "http://2vit.s3-website.eu-north-1.amazonaws.com",
-    "http://lermoplus.s3-website.eu-north-1.amazonaws.com",
-    "http://lermoplus.s3-website.eu-north-1.amazonaws.com/"
-]
-
-# Updated CORS policy with wildcard origin for widgets while allowing credentials for dashboard
+# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow requests from any origin
-    allow_credentials=True,  # Allow cookies
-    allow_methods=["*"],  # Allow all methods
-    allow_headers=["*", "X-Api-Key"],  # Explicitly allow API key header
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8080",
+        "https://d129jv2av2liy7.cloudfront.net",
+        "http://lermoplus.s3-website.eu-north-1.amazonaws.com"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Apply rate limiting middleware
