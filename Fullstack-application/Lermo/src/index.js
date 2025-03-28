@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import styles from './index.module.css';  // CSS Module import
+import './index.css';  // Regular CSS import instead of CSS Module
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { setApiKey } from './utils/api';
@@ -32,8 +32,8 @@ window.LermoWidget = {
       return;
     }
     
-    // Add CSS Module class to container
-    container.className = `${container.className} ${styles.widgetContainer}`;
+    // Add widgetContainer class directly instead of using CSS Module
+    container.className = `${container.className} widgetContainer`;
     
     // Render the app in the container
     const root = ReactDOM.createRoot(container);
