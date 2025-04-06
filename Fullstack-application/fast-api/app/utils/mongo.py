@@ -29,8 +29,13 @@ def get_mongo_client() -> AsyncIOMotorClient:
     return client
 
 async def get_db():
+    """
+    Returns the MongoDB database connection.
+    """
     client = get_mongo_client()
-    return client[MONGO_DB_NAME]
+    db = client[MONGO_DB_NAME]
+    
+    return db
 
 USER_COLLECTION_NAME = "users"
 CONVERSATIONS_COLLECTION_NAME = "conversations"
@@ -218,8 +223,37 @@ async def get_shop_info_collection():
     db = await get_db()
     return db.get_collection(SHOP_INFO_COLLECTION_NAME)
 
+async def get_comparison_config(category: str, user_id: str = None) -> Dict:
+    """
+    Retrieves a comparison configuration by category.
+    
+    Args:
+        category: The category to search for
+        user_id: The ID of the user who owns the config (for multi-tenancy)
+        
+    Returns:
+        The comparison config object
+    """
+    collection = await get_comparison_configs_collection()
+    
+    # Build filter query with user_id if provided
+    filter_query = {"category": category}
+    if user_id:
+        filter_query["user_id"] = user_id
+        
+    config = await collection.find_one(filter_query)
+    return serialize_mongo_doc(config) if config else None
+
 async def create_comparison_config(config_data: Dict) -> Dict:
-    """Creates a new comparison configuration."""
+    """
+    Creates a new comparison configuration.
+    
+    Args:
+        config_data: The configuration data to insert
+        
+    Returns:
+        The created comparison config object
+    """
     collection = await get_comparison_configs_collection()
     try:
         result = await collection.insert_one(config_data)
@@ -229,84 +263,78 @@ async def create_comparison_config(config_data: Dict) -> Dict:
         logger.error(f"Failed to create comparison config: {e}")
         raise HTTPException(status_code=500, detail="Failed to create comparison config")
 
-async def delete_contact_submission(submission_id: str) -> bool:
+async def update_comparison_config(category: str, config_data: Dict, user_id: str = None) -> Dict:
     """
-    Deletes a contact submission by ID.
+    Updates an existing comparison configuration.
     
     Args:
-        submission_id: The ID of the submission to delete
+        category: The category to update
+        config_data: The updated configuration data
+        user_id: The ID of the user who owns the config (for multi-tenancy)
         
     Returns:
-        True if successful, False if submission not found
+        The updated comparison config object
     """
-    collection = await get_contact_submissions_collection()
+    collection = await get_comparison_configs_collection()
     try:
-        result = await collection.delete_one({"_id": ObjectId(submission_id)})
-        return result.deleted_count > 0
-    except Exception as e:
-        logger.error(f"Failed to delete contact submission: {e}")
-        return False
-
-async def update_contact_submission_status(submission_id: str, completed: bool) -> bool:
-    """
-    Updates the completed status of a contact submission.
-    
-    Args:
-        submission_id: The ID of the submission to update
-        completed: The new completion status
+        # Build filter query with user_id if provided
+        filter_query = {"category": category}
+        if user_id:
+            filter_query["user_id"] = user_id
         
-    Returns:
-        True if successful, False if submission not found
-    """
-    collection = await get_contact_submissions_collection()
-    try:
         result = await collection.update_one(
-            {"_id": ObjectId(submission_id)},
-            {"$set": {"completed": completed}}
-        )
-        return result.matched_count > 0
-    except Exception as e:
-        logger.error(f"Failed to update contact submission status: {e}")
-        return False
-
-async def get_comparison_config(category: str) -> Dict:
-    """Retrieves a comparison configuration by category."""
-    collection = await get_comparison_configs_collection()
-    config = await collection.find_one({"category": category})
-    return serialize_mongo_doc(config) if config else None
-
-async def update_comparison_config(category: str, config_data: Dict) -> Dict:
-    """Updates an existing comparison configuration."""
-    collection = await get_comparison_configs_collection()
-    try:
-        result = await collection.update_one(
-            {"category": category},
+            filter_query,
             {"$set": config_data}
         )
         if result.matched_count == 0:
             raise HTTPException(status_code=404, detail=f"Comparison config for category '{category}' not found")
 
-        updated_config = await collection.find_one({"category": category})
+        updated_config = await collection.find_one(filter_query)
         return serialize_mongo_doc(updated_config) if updated_config else None
     except Exception as e:
         logger.error(f"Failed to update comparison config: {e}")
         raise HTTPException(status_code=500, detail="Failed to update comparison config")
 
-async def delete_comparison_config(category: str):
-    """Deletes a comparison configuration."""
+async def delete_comparison_config(category: str, user_id: str = None):
+    """
+    Deletes a comparison configuration.
+    
+    Args:
+        category: The category to delete
+        user_id: The ID of the user who owns the config (for multi-tenancy)
+    """
     collection = await get_comparison_configs_collection()
     try:
-        result = await collection.delete_one({"category": category})
+        # Build filter query with user_id if provided
+        filter_query = {"category": category}
+        if user_id:
+            filter_query["user_id"] = user_id
+        
+        result = await collection.delete_one(filter_query)
         if result.deleted_count == 0:
             raise HTTPException(status_code=404, detail=f"Comparison config for category '{category}' not found")
     except Exception as e:
         logger.error(f"Failed to delete comparison config: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete comparison config")
 
-async def get_all_comparison_configs():
-    """Retrieves all comparison configurations."""
+async def get_all_comparison_configs(user_id: str = None):
+    """
+    Retrieves all comparison configurations.
+    
+    Args:
+        user_id: The ID of the user to filter by (for multi-tenancy)
+        
+    Returns:
+        List of comparison config objects
+    """
     collection = await get_comparison_configs_collection()
-    configs = await collection.find().to_list(length=None)
+    
+    # Apply user_id filter if provided
+    filter_query = {}
+    if user_id:
+        filter_query["user_id"] = user_id
+        
+    configs = await collection.find(filter_query).to_list(length=None)
     return [serialize_mongo_doc(config) for config in configs]
 
 async def get_synonyms_from_db(db: AsyncIOMotorClient) -> Dict[str, List[str]]:
@@ -387,9 +415,21 @@ async def get_all_synonyms():
     return [serialize_mongo_doc(entry) for entry in synonym_entries]
 
 async def create_widget_config(config_data: Dict) -> Dict:
-    """Creates a new widget configuration."""
+    """
+    Creates a new widget configuration.
+    
+    Args:
+        config_data: The configuration data to insert (must include user_id for multi-tenancy)
+        
+    Returns:
+        The created widget configuration
+    """
     collection = await get_widget_config_collection()
     try:
+        # Ensure user_id is present for multi-tenancy
+        if "user_id" not in config_data:
+            raise HTTPException(status_code=400, detail="user_id is required for widget configuration")
+            
         result = await collection.insert_one(config_data)
         config = await collection.find_one({"_id": result.inserted_id})
         return serialize_mongo_doc(config) if config else None
@@ -397,44 +437,88 @@ async def create_widget_config(config_data: Dict) -> Dict:
         logger.error(f"Failed to create widget config: {e}")
         raise HTTPException(status_code=500, detail="Failed to create widget config")
 
-async def get_widget_config(business_id: str) -> Dict:
-    """Retrieves a widget configuration by business_id."""
+async def get_widget_config(user_id: str) -> Dict:
+    """
+    Retrieves a widget configuration by user_id.
+    
+    Args:
+        user_id: The ID of the user who owns the config
+        
+    Returns:
+        The widget configuration
+    """
     collection = await get_widget_config_collection()
-    config = await collection.find_one({"business_id": business_id})
+    config = await collection.find_one({"user_id": user_id})
     return serialize_mongo_doc(config) if config else None
 
-async def update_widget_config(business_id: str, config_data: Dict) -> Dict:
-    """Updates an existing widget configuration."""
+async def update_widget_config(user_id: str, config_data: Dict) -> Dict:
+    """
+    Updates an existing widget configuration.
+    
+    Args:
+        user_id: The ID of the user who owns the config
+        config_data: The updated configuration data
+        
+    Returns:
+        The updated widget configuration
+    """
     collection = await get_widget_config_collection()
     try:
+        # Ensure user_id is in filter but not in the update data to prevent changing ownership
+        update_data = {k: v for k, v in config_data.items() if k != "user_id"}
+        
         result = await collection.update_one(
-            {"business_id": business_id},
-            {"$set": config_data}
+            {"user_id": user_id},
+            {"$set": update_data}
         )
+        
         if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail=f"Widget config for business_id '{business_id}' not found")
+            # If no config exists, create one with the provided data
+            config_data["user_id"] = user_id
+            return await create_widget_config(config_data)
 
-        updated_config = await collection.find_one({"business_id": business_id})
+        updated_config = await collection.find_one({"user_id": user_id})
         return serialize_mongo_doc(updated_config) if updated_config else None
     except Exception as e:
         logger.error(f"Failed to update widget config: {e}")
         raise HTTPException(status_code=500, detail="Failed to update widget config")
 
-async def delete_widget_config(business_id: str):
-    """Deletes a widget configuration."""
+async def delete_widget_config(user_id: str) -> bool:
+    """
+    Deletes a widget configuration.
+    
+    Args:
+        user_id: The ID of the user who owns the config
+        
+    Returns:
+        True if deleted successfully, False otherwise
+    """
     collection = await get_widget_config_collection()
     try:
-        result = await collection.delete_one({"business_id": business_id})
-        if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail=f"Widget config for business_id '{business_id}' not found")
+        result = await collection.delete_one({"user_id": user_id})
+        return result.deleted_count > 0
     except Exception as e:
         logger.error(f"Failed to delete widget config: {e}")
-        raise HTTPException(status_code=500, detail="Failed to delete widget config")
+        return False
 
-async def get_all_widget_configs():
-    """Retrieves all widget configurations."""
+async def get_all_widget_configs(user_id: str = None) -> List[Dict]:
+    """
+    Retrieves all widget configurations.
+    
+    Args:
+        user_id: The ID of the user to filter by (for multi-tenancy)
+        
+    Returns:
+        List of widget configurations
+    """
     collection = await get_widget_config_collection()
-    configs = await collection.find().to_list(length=None)
+    
+    # Apply user_id filter if provided
+    filter_query = {}
+    if user_id:
+        filter_query["user_id"] = user_id
+        
+    configs = await collection.find(filter_query).to_list(length=None)
     return [serialize_mongo_doc(config) for config in configs]
 
 
@@ -449,35 +533,96 @@ async def create_contact_submission(submission_data: Dict) -> ContactSubmissionM
         logger.error(f"Failed to create contact submission: {e}")
         raise HTTPException(status_code=500, detail="Failed to create contact submission")
 
-async def get_all_contact_submissions() -> List[Dict[str, Any]]:
+async def get_contact_submissions_by_user(user_id: str) -> List[Dict[str, Any]]:
     """
-    Retrieves all contact submissions.
+    Retrieves all contact submissions for a specific user.
     
+    Args:
+        user_id: The ID of the user
+        
     Returns:
         List of contact submissions as dictionaries
     """
     collection = await get_contact_submissions_collection()
-    submissions_cursor = collection.find().sort([("submittedAt", -1)])
+    submissions_cursor = collection.find({"user_id": user_id}).sort([("submittedAt", -1)])
     submissions = await submissions_cursor.to_list(length=None)
     
     # Convert to dict instead of returning model objects directly
     return [serialize_mongo_doc(submission) for submission in submissions]
 
+async def delete_contact_submission(submission_id: str, user_id: str = None) -> bool:
+    """
+    Deletes a contact submission by ID.
+    
+    Args:
+        submission_id: The ID of the submission to delete
+        user_id: The ID of the user who owns the submission (for multi-tenancy)
+        
+    Returns:
+        True if successful, False if submission not found
+    """
+    collection = await get_contact_submissions_collection()
+    try:
+        # Build filter query with user_id if provided
+        filter_query = {"_id": ObjectId(submission_id)}
+        if user_id:
+            filter_query["user_id"] = user_id
+        
+        result = await collection.delete_one(filter_query)
+        return result.deleted_count > 0
+    except Exception as e:
+        logger.error(f"Failed to delete contact submission: {e}")
+        return False
+
+async def update_contact_submission_status(submission_id: str, completed: bool, user_id: str = None) -> bool:
+    """
+    Updates the completed status of a contact submission.
+    
+    Args:
+        submission_id: The ID of the submission to update
+        completed: The new completion status
+        user_id: The ID of the user who owns the submission (for multi-tenancy)
+        
+    Returns:
+        True if successful, False if submission not found
+    """
+    collection = await get_contact_submissions_collection()
+    try:
+        # Build filter query with user_id if provided
+        filter_query = {"_id": ObjectId(submission_id)}
+        if user_id:
+            filter_query["user_id"] = user_id
+        
+        result = await collection.update_one(
+            filter_query,
+            {"$set": {"completed": completed}}
+        )
+        return result.matched_count > 0
+    except Exception as e:
+        logger.error(f"Failed to update contact submission status: {e}")
+        return False
 
 # Shop Info CRUD functions
-async def get_shop_info(language: str = "cs") -> Dict:
+async def get_shop_info(language: str = "cs", user_id: str = None) -> Dict:
     """
-    Retrieves shop information for the specified language.
+    Retrieves shop information for the specified language and user.
     Creates default shop info if none exists.
     
     Args:
         language: Language code (default: "cs" for Czech)
+        user_id: User ID for multi-tenancy filtering
         
     Returns:
         Dictionary with shop information
     """
     collection = await get_shop_info_collection()
-    shop_info = await collection.find_one({"language": language})
+    
+    # Build filter query including user_id if provided
+    filter_query = {"language": language}
+    if user_id:
+        filter_query["user_id"] = user_id
+    
+    shop_info = await collection.find_one(filter_query)
     
     if not shop_info:
         # Create default shop info if none exists
@@ -500,21 +645,34 @@ async def get_shop_info(language: str = "cs") -> Dict:
                 "Specializujeme se na webové stránky a e-shopy na míru",
                 "Sídlíme v České republice",
                 "Nabízíme kompletní digitální řešení pro firmy"
-            ]
+            ],
+            user_id=user_id  # Add user_id to default info
         )
         
-        await collection.insert_one(default_info.model_dump())
-        shop_info = await collection.find_one({"language": language})
+        try:
+            # Try to use upsert instead of insert_one to handle duplicate key errors
+            await collection.update_one(
+                filter_query,
+                {"$setOnInsert": default_info.model_dump()},
+                upsert=True
+            )
+            # Get the document after insertion/update
+            shop_info = await collection.find_one(filter_query)
+        except Exception as e:
+            logger.error(f"Error creating default shop info: {e}")
+            # If there was an error, try to get existing record
+            shop_info = await collection.find_one(filter_query)
     
     return serialize_mongo_doc(shop_info) if shop_info else None
 
-async def update_shop_info(shop_info_update: Dict, language: str = "cs") -> Dict:
+async def update_shop_info(shop_info_update: Dict, language: str = "cs", user_id: str = None) -> Dict:
     """
-    Updates shop information for the specified language.
+    Updates shop information for the specified language and user.
     
     Args:
         shop_info_update: Dictionary with fields to update
         language: Language code (default: "cs" for Czech)
+        user_id: User ID for multi-tenancy filtering
         
     Returns:
         Updated shop information dictionary
@@ -524,15 +682,20 @@ async def update_shop_info(shop_info_update: Dict, language: str = "cs") -> Dict
     # Add updated timestamp
     shop_info_update["updated_at"] = datetime.now(timezone.utc)
     
+    # Build filter query including user_id if provided
+    filter_query = {"language": language}
+    if user_id:
+        filter_query["user_id"] = user_id
+    
     # Update the document
     await collection.update_one(
-        {"language": language},
+        filter_query,
         {"$set": shop_info_update},
         upsert=True
     )
     
     # Retrieve and return the updated document
-    updated_info = await collection.find_one({"language": language})
+    updated_info = await collection.find_one(filter_query)
     return serialize_mongo_doc(updated_info) if updated_info else None
 
 async def index_exists(collection, index_name):
@@ -551,6 +714,7 @@ async def create_indexes():
         await user_collection.create_index("stripe_customer_id", sparse=True)  # Stripe customer ID index
         await user_collection.create_index("verification_token", sparse=True)  # Email verification token
         await user_collection.create_index("reset_password_token", sparse=True)  # Password reset token
+        await user_collection.create_index("authorized_domains", sparse=True)  # Authorized domains for API key
         
         # Conversation Collection Indexes
         conv_collection = await get_conversations_collection()
@@ -604,9 +768,35 @@ async def create_indexes():
             logger.warning(f"Human chat session_id index error (continuing): {e}")
         
         await human_chat_collection.create_index("user_id")  # For multi-tenancy filtering
+
+        # Shop Info Collection Indexes
+        shop_info_collection = await get_shop_info_collection()
+        # Attempt to drop the old conflicting index first (if it exists)
+        try:
+            await shop_info_collection.drop_index("language_1")
+            logger.info("Successfully dropped old 'language_1' index from shop_info collection.")
+        except Exception as e:
+            # Ignore error if index doesn't exist
+            if "index not found" in str(e).lower():
+                logger.info("Old 'language_1' index not found, skipping drop.")
+            else:
+                logger.warning(f"Could not drop old 'language_1' index (maybe permissions?): {e}")
         
+        # Ensure uniqueness per user per language with the correct compound index
+        try:
+            await shop_info_collection.create_index([("user_id", ASCENDING), ("language", ASCENDING)], name="user_id_1_language_1", unique=True)
+            logger.info("Successfully created compound index 'user_id_1_language_1' on shop_info collection.")
+        except Exception as e:
+             # Log if index creation fails, but might be okay if it already exists correctly
+             if "index already exists" in str(e).lower() or "IndexOptionsConflict" in str(e).lower():
+                 logger.warning(f"Compound index 'user_id_1_language_1' likely already exists: {e}")
+             else:
+                 logger.error(f"Failed to create compound index 'user_id_1_language_1': {e}")
+                 # Consider raising the error depending on desired strictness
+                 # raise
+
         # ... (rest of the indexes remain the same)
-        
+
         logger.info("MongoDB indexes created successfully")
     except Exception as e:
         # Log error but don't fail startup for index errors
@@ -665,3 +855,81 @@ async def verify_db():
         if hasattr(e, '__dict__'):
             logger.error(f"Error attributes: {e.__dict__}")
         return False
+
+async def get_user_domains(user_id: str) -> List[str]:
+    """
+    Get the list of authorized domains for a user.
+    
+    Args:
+        user_id: The ID of the user
+        
+    Returns:
+        List of authorized domains
+    """
+    collection = await get_user_collection()
+    user = await collection.find_one({"id": user_id})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    return user.get("authorized_domains", [])
+
+async def add_user_domain(user_id: str, domain: str) -> List[str]:
+    """
+    Add a domain to a user's list of authorized domains.
+    
+    Args:
+        user_id: The ID of the user
+        domain: The domain to add
+        
+    Returns:
+        Updated list of authorized domains
+    """
+    collection = await get_user_collection()
+    user = await collection.find_one({"id": user_id})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    # Get current domains and add new one if not already present
+    domains = user.get("authorized_domains", [])
+    if domain not in domains:
+        domains.append(domain)
+        
+        # Update user with new domains list
+        await collection.update_one(
+            {"id": user_id},
+            {"$set": {"authorized_domains": domains}}
+        )
+        
+    return domains
+
+async def remove_user_domain(user_id: str, domain: str) -> List[str]:
+    """
+    Remove a domain from a user's list of authorized domains.
+    
+    Args:
+        user_id: The ID of the user
+        domain: The domain to remove
+        
+    Returns:
+        Updated list of authorized domains
+    """
+    collection = await get_user_collection()
+    user = await collection.find_one({"id": user_id})
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    # Get current domains and remove the specified one
+    domains = user.get("authorized_domains", [])
+    if domain in domains:
+        domains.remove(domain)
+        
+        # Update user with new domains list
+        await collection.update_one(
+            {"id": user_id},
+            {"$set": {"authorized_domains": domains}}
+        )
+        
+    return domains

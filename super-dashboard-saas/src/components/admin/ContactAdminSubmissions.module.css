@@ -1,0 +1,277 @@
+/* ContactAdminSubmissions.module.css */
+
+.container {
+  padding: 24px;
+  font-family: 'Inter', sans-serif;
+  max-width: 1600px;
+  margin: 0 auto;
+  background-color: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.heading {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #111827;
+  position: relative;
+  display: inline-block;
+}
+
+.heading::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background-color: #E01E26;
+  border-radius: 2px;
+}
+
+.description {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 24px;
+  max-width: 700px;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.refreshButton:hover {
+  background-color: #e5e7eb;
+}
+
+.buttonIcon {
+  animation: none;
+}
+
+.refreshButton:disabled .buttonIcon {
+  animation: spin 1s linear infinite;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHeader {
+  background-color: #f9fafb;
+}
+
+.tableHeaderCell {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tableBody {
+  background-color: white;
+}
+
+.tableRow {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background-color: #f9fafb;
+}
+
+.completedRow {
+  background-color: #f0fdf4;
+}
+
+.completedRow:hover {
+  background-color: #ecfdf5;
+}
+
+.tableCell {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.statusButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusIcon {
+  color: #9ca3af;
+  transition: color 0.2s;
+}
+
+.statusButton:hover .statusIcon {
+  color: #4f46e5;
+}
+
+.statusIconCompleted {
+  color: #10b981;
+}
+
+.statusButton:hover .statusIconCompleted {
+  color: #047857;
+}
+
+.contactLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4f46e5;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.contactLink:hover {
+  color: #4338ca;
+  text-decoration: underline;
+}
+
+.contactIcon {
+  flex-shrink: 0;
+}
+
+.messageCell {
+  max-width: 20rem;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.dateCell {
+  white-space: nowrap;
+  color: #6b7280;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+
+.loadingSpinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid #e5e7eb;
+  border-top-color: #4f46e5;
+  animation: spin 1s linear infinite;
+}
+
+.errorContainer {
+  padding: 16px;
+  border-radius: 6px;
+  background-color: #fee2e2;
+  border-left: 4px solid #ef4444;
+  color: #b91c1c;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.errorIcon {
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
+.errorMessage {
+  font-weight: 500;
+}
+
+.emptyMessage {
+  text-align: center;
+  padding: 48px 0;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.loginButton {
+  margin-top: 12px;
+  background-color: #4f46e5;
+  color: white;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.loginButton:hover {
+  background-color: #4338ca;
+}
+
+.loginButton:active {
+  background-color: #3730a3;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} 

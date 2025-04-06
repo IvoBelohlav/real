@@ -6,37 +6,64 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.utils.mongo import get_db
 from app.api.chat import get_ai_service
 from pydantic import BaseModel
+from app.utils.dependencies import get_current_active_customer
 
 router = APIRouter()
 
 @router.post("/comparison-configs/", response_model=ComparisonConfig, status_code=201)
-async def create_config(config: ComparisonConfig, db: AsyncIOMotorClient = Depends(get_db)):
+async def create_config(
+    config: ComparisonConfig, 
+    db: AsyncIOMotorClient = Depends(get_db),
+    current_user: Dict = Depends(get_current_active_customer)
+):
     """Create a new comparison configuration."""
-    return await create_comparison_config(config.model_dump())
+    # Add user_id to config data
+    config_data = config.model_dump()
+    config_data["user_id"] = current_user["id"]
+    return await create_comparison_config(config_data)
 
 @router.get("/comparison-configs/{category}", response_model=ComparisonConfig)
-async def get_config(category: str, db: AsyncIOMotorClient = Depends(get_db)):
+async def get_config(
+    category: str, 
+    db: AsyncIOMotorClient = Depends(get_db),
+    current_user: Dict = Depends(get_current_active_customer)
+):
     """Get a comparison configuration by category."""
-    config = await get_comparison_config(category)
+    config = await get_comparison_config(category, user_id=current_user["id"])
     if not config:
         raise HTTPException(status_code=404, detail="Comparison config not found")
     return config
 
 @router.put("/comparison-configs/{category}", response_model=ComparisonConfig)
-async def update_config(category: str, config: ComparisonConfig, db: AsyncIOMotorClient = Depends(get_db)):
+async def update_config(
+    category: str, 
+    config: ComparisonConfig, 
+    db: AsyncIOMotorClient = Depends(get_db),
+    current_user: Dict = Depends(get_current_active_customer)
+):
     """Update a comparison configuration."""
-    return await update_comparison_config(category, config.model_dump())
+    # Add user_id to config data
+    config_data = config.model_dump()
+    config_data["user_id"] = current_user["id"]
+    return await update_comparison_config(category, config_data, user_id=current_user["id"])
 
 @router.delete("/comparison-configs/{category}", status_code=204)
-async def delete_config(category: str, db: AsyncIOMotorClient = Depends(get_db)):
+async def delete_config(
+    category: str, 
+    db: AsyncIOMotorClient = Depends(get_db),
+    current_user: Dict = Depends(get_current_active_customer)
+):
     """Delete a comparison configuration."""
-    await delete_comparison_config(category)
+    await delete_comparison_config(category, user_id=current_user["id"])
     return {"message": "Comparison config deleted successfully"}
 
 @router.get("/comparison-configs/", response_model=List[ComparisonConfig])
-async def list_configs(db: AsyncIOMotorClient = Depends(get_db)):
+async def list_configs(
+    db: AsyncIOMotorClient = Depends(get_db),
+    current_user: Dict = Depends(get_current_active_customer)
+):
     """List all comparison configurations."""
-    return await get_all_comparison_configs()
+    return await get_all_comparison_configs(user_id=current_user["id"])
 
 class CategorySuggestions(BaseModel):
     """Response model for AI-generated suggestions."""

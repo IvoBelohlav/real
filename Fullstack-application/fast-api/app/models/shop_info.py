@@ -80,6 +80,7 @@ class ShopInfo(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     language: str = "cs"  # Default language
+    user_id: Optional[str] = None  # Owner user ID for multi-tenancy
     
     # Special fields for AI use
     ai_prompt_summary: str = Field(..., max_length=1000, description="Concise summary used in AI system prompts")

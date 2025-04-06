@@ -1,0 +1,394 @@
+/* Guided Chat Admin UI - Custom Styles */
+
+/* Input field styles for better visibility */
+.flow-node-input {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #9ca3af !important;
+  font-weight: 500 !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.flow-node-input:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+
+.flow-node-input::placeholder {
+  color: #6b7280 !important;
+  opacity: 0.8 !important;
+}
+
+/* Flow node container */
+.flow-node {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+.flow-node:hover {
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Flow connection handles */
+.flow-handle {
+  width: 8px !important;
+  height: 8px !important;
+  border: 2px solid white !important;
+}
+
+.flow-handle-source {
+  background-color: #22c55e !important;
+}
+
+.flow-handle-target {
+  background-color: #3b82f6 !important;
+}
+
+/* Flow selection indicator */
+.selected .flow-node {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+}
+
+/* Flow builder buttons */
+.flow-button {
+  color: #ffffff !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s !important;
+}
+
+.flow-button:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+.flow-button-primary {
+  background-color: #3b82f6 !important;
+}
+
+.flow-button-primary:hover {
+  background-color: #2563eb !important;
+}
+
+.flow-button-success {
+  background-color: #22c55e !important;
+}
+
+.flow-button-success:hover {
+  background-color: #16a34a !important;
+}
+
+.flow-button-danger {
+  background-color: #ef4444 !important;
+}
+
+.flow-button-danger:hover {
+  background-color: #dc2626 !important;
+}
+
+/* Flow node emoji selector */
+.flow-emoji-button {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  background-color: #f3f4f6 !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 9999px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.25rem !important;
+  transition: all 0.2s !important;
+}
+
+.flow-emoji-button:hover {
+  background-color: #e5e7eb !important;
+}
+
+/* Flow node label styles */
+.flow-node-label {
+  font-weight: 600 !important;
+  color: #1f2937 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* Flow editor minimap */
+.react-flow__minimap {
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Flow editor controls */
+.react-flow__controls {
+  border: 1px solid #d1d5db !important;
+  border-radius: 0.375rem !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+.react-flow__controls-button {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  color: #4b5563 !important;
+}
+
+.react-flow__controls-button:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Chat Preview Styles */
+.chat-preview {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+  max-width: 370px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.chat-preview-header {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 1rem;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.chat-preview-body {
+  padding: 1rem;
+  background-color: #ffffff;
+  min-height: 200px;
+}
+
+.chat-option {
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.chat-option:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.chat-option-icon {
+  font-size: 1.25rem;
+}
+
+.chat-option-text {
+  font-weight: 500;
+  color: #111827;
+}
+
+.chat-bot-message {
+  background-color: #f3f9ff;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-top-left-radius: 0;
+  position: relative;
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+.chat-bot-message::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -0.5rem;
+  width: 0.5rem;
+  height: 1rem;
+  background-color: #f3f9ff;
+  clip-path: polygon(100% 0, 0% 100%, 100% 100%);
+}
+
+.chat-bot-followup {
+  background-color: #f0f9ff;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  color: #0c4a6e;
+  font-weight: 500;
+}
+
+.chat-bot-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background-color: #3b82f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+.button-box {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f9fafb;
+}
+
+.flow-input {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #111827;
+  background-color: #ffffff;
+}
+
+.flow-input:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.flow-dropdown {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+/* Create a chat preview component for visualizing the flow */
+.chat-preview-component {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #f8fafc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.chat-preview-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f1f5f9;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 8px 12px;
+  font-weight: 600;
+  color: #334155;
+  font-size: 14px;
+}
+
+.chat-preview-body {
+  padding: 12px;
+  background-color: #ffffff;
+}
+
+.bot-message-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.bot-avatar {
+  width: 36px;
+  height: 36px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+
+.bot-message-content {
+  flex: 1;
+}
+
+.bot-message {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  border-radius: 12px 12px 12px 0;
+  padding: 10px 14px;
+  margin-bottom: 4px;
+  font-size: 14px;
+  word-break: break-word;
+  max-width: 90%;
+}
+
+.bot-message-followup {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e3a8a;
+  border-radius: 12px 12px 12px 0;
+  padding: 10px 14px;
+  font-size: 14px;
+  word-break: break-word;
+  max-width: 90%;
+}
+
+.chat-preview-options {
+  margin-top: 12px;
+}
+
+.user-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  border-radius: 20px;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  max-width: 80%;
+  margin-left: auto;
+}
+
+.user-option:hover {
+  background-color: #dcfce7;
+}
+
+.user-option-icon {
+  font-size: 16px;
+}
+
+.user-option-text {
+  font-weight: 500;
+}
+
+.next-flow-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  padding: 6px 10px;
+  background-color: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+} 

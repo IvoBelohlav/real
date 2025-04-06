@@ -1,0 +1,154 @@
+/* AdminNavigation.module.css */
+
+.navContainer {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-right: 1px solid #e2e8f0;
+  height: 100vh;
+  width: 250px;
+}
+
+.header {
+  padding: 1.25rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.logoText {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.mainContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.navItems {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  color: #64748b;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.navItem:hover {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+.navItemActive {
+  color: #3b82f6;
+  background-color: #eff6ff;
+  font-weight: 500;
+}
+
+.navItemInactive {
+  color: #64748b;
+}
+
+.icon {
+  margin-right: 0.75rem;
+}
+
+.navItemText {
+  font-size: 0.875rem;
+}
+
+.bottomActions {
+  padding: 0 1.25rem;
+  margin-top: 1rem;
+}
+
+.actionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+  padding: 0.5rem 0;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.logoutButton:hover {
+  background-color: #fee2e2;
+}
+
+.logoutIcon {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 768px) {
+  .navContainer {
+    width: 64px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .navItemText {
+    display: none;
+  }
+  
+  .icon {
+    margin-right: 0;
+  }
+  
+  .navItem {
+    justify-content: center;
+    padding: 0.75rem;
+  }
+  
+  .logoText {
+    display: none;
+  }
+  
+  .logoContainer {
+    justify-content: center;
+  }
+  
+  .logoutButton span {
+    display: none;
+  }
+  
+  .logoutButton {
+    justify-content: center;
+    padding: 0.5rem;
+  }
+  
+  .logoutIcon {
+    margin-right: 0;
+  }
+} 

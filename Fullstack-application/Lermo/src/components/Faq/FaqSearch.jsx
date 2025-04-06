@@ -2,52 +2,42 @@ import React from 'react';
 import { Search } from 'lucide-react';
 import styles from './FaqSearch.module.css';
 
-const FaqSearch = ({ faqSearchTerm, handleFaqSearch, theme, style }) => {
-    // Get primary color and background color directly from the widget config
-    const borderColor =
-        theme === 'light'
-            ? style?.primary_color_light
-            : style?.primary_color_dark;
-    const backgroundColor =
-        theme === 'light'
-            ? style?.background_color_light
-            : style?.background_color_dark;
-    const textColor =
-        theme === 'light'
-            ? style?.text_color_light
-            : style?.text_color_dark;
+const FaqSearch = ({ faqSearchTerm, handleFaqSearch, theme, style: widgetStyle }) => {
+    // Determine theme colors
+    const primaryColor = theme === 'light' ? widgetStyle?.primary_color_light : widgetStyle?.primary_color_dark;
+    const backgroundColor = theme === 'light' ? widgetStyle?.background_color_light : widgetStyle?.background_color_dark;
+    const textColor = theme === 'light' ? widgetStyle?.text_color_light : widgetStyle?.text_color_dark;
+    // Use primary color for border and icon, secondary or a lighter/darker shade for focus shadow if available
+    const focusShadowColor = theme === 'light' 
+        ? `${widgetStyle?.primary_color_light}40` // Add alpha for focus shadow
+        : `${widgetStyle?.primary_color_dark}40`; 
+
+    // Define CSS variables based on theme
+    const cssVariables = {
+        '--faq-border-color': primaryColor || '#cccccc', // Fallback border color
+        '--faq-bg-color': backgroundColor || (theme === 'light' ? '#ffffff' : '#333333'), // Fallback bg
+        '--faq-text-color': textColor || (theme === 'light' ? '#000000' : '#ffffff'), // Fallback text color
+        '--faq-icon-color': primaryColor || '#888888', // Fallback icon color
+        '--faq-focus-shadow-color': focusShadowColor || 'rgba(0, 0, 0, 0.1)', // Fallback focus shadow
+    };
 
     return (
-        <div className={styles.container}>
+        // Apply CSS variables to the container
+        <div className={styles.container} style={cssVariables}>
             <input
                 type="text"
                 placeholder="Najít otázku..."
                 value={faqSearchTerm}
                 onChange={handleFaqSearch}
                 className={styles.searchInput}
-                style={{
-                    backgroundColor: backgroundColor,
-                    color: textColor,
-                    border: `1px solid ${borderColor}`,
-                    borderRadius: '0.75rem',
-                    padding: '0.75rem 1rem 0.75rem 2.5rem',
-                    fontSize: '0.875rem',
-                }}
+                // Inline styles are now removed, handled by CSS Module + CSS variables
             />
             <Search
                 size={18}
                 className={styles.searchIcon}
-                style={{
-                    color: borderColor,
-                }}
+                // Inline style removed, handled by CSS Module + CSS variables
             />
-            <style jsx global>{`
-                input:focus {
-                    outline: none !important;
-                    box-shadow: none !important;
-                    border-color: ${borderColor} !important;
-                }
-            `}</style>
+            {/* Removed <style jsx global> tag */}
         </div>
     );
 };

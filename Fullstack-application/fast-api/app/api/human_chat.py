@@ -7,18 +7,25 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, De
 from fastapi.responses import JSONResponse
 from datetime import datetime, timezone
 import uuid
+from bson import ObjectId
 
 from app.models.human_chat_models import (
     HumanChatSession, ChatMessage, ChatSessionStatus, 
     AgentStatus, AgentStatusModel, ChatMessageType
 )
 from app.utils.mongo import (
-    get_human_chat_collection, 
-    get_db, 
+    get_human_chat_collection,
+    get_user_collection, # Need user collection to get domain_whitelist
+    get_db,
     serialize_mongo_doc
 )
 from app.utils.logging_config import get_module_logger
 from app.middleware import get_user_from_token
+# Import verify_widget_origin and keep get_current_active_customer for other endpoints
+from app.utils.dependencies import get_current_active_customer, verify_widget_origin
+# Need urlparse and re for origin checking logic
+from urllib.parse import urlparse
+import re
 
 logger = get_module_logger(__name__)
 router = APIRouter()
@@ -198,186 +205,42 @@ async def save_chat_message(message: ChatMessage, db=None) -> ChatMessage:
 
 async def create_human_chat_session(conversation_id: str, user_id: str) -> HumanChatSession:
     """Create a new human chat session"""
-    db = await get_db()
     collection = await get_human_chat_collection()
     
-    # First check if there's already an active session for this conversation
+    # Check if there's already an active session for this conversation
     existing_session = await collection.find_one({
         "conversation_id": conversation_id,
-        "user_id": user_id,
         "status": {"$in": [ChatSessionStatus.WAITING, ChatSessionStatus.ACTIVE]}
     })
     
     if existing_session:
+        logger.info(f"Returning existing session for conversation {conversation_id}")
         return HumanChatSession(**existing_session)
     
-    # Create a new session
     session = HumanChatSession(
+        session_id=str(uuid.uuid4()),
         conversation_id=conversation_id,
         user_id=user_id,
+        created_at=datetime.now(timezone.utc),
         status=ChatSessionStatus.WAITING
     )
     
     # Save to database
-    session_dict = session.model_dump()
-    await collection.insert_one(session_dict)
+    await collection.insert_one(session.model_dump())
+    logger.info(f"Created new human chat session: {session.session_id}")
     
-    # Create a system message
-    welcome_message = ChatMessage(
-        session_id=session.session_id,
-        content="Váš požadavek na lidskou podporu byl přijat. Jakmile bude k dispozici operátor, připojí se k vám. Děkujeme za trpělivost.",
-        sender_id="system",
-        sender_type="system",
-        message_type=ChatMessageType.SYSTEM,
-    )
-    
-    await save_chat_message(welcome_message)
-    
-    # Try to assign an available agent
-    agent_id = await get_available_agent()
-    if agent_id:
-        await assign_agent_to_session(session.session_id, agent_id)
-    
-    logger.info(f"Human chat session created: {session.session_id} for user {user_id}")
     return session
-
-async def assign_agent_to_session(session_id: str, agent_id: str) -> bool:
-    """Assign an agent to a waiting session"""
-    db = await get_db()
-    collection = await get_human_chat_collection()
-    
-    # Get the session
-    session_data = await collection.find_one({"session_id": session_id})
-    if not session_data:
-        logger.error(f"Session {session_id} not found")
-        return False
-    
-    session = HumanChatSession(**session_data)
-    
-    # Check if session is in WAITING status
-    if session.status != ChatSessionStatus.WAITING:
-        logger.warning(f"Cannot assign agent to session {session_id} with status {session.status}")
-        return False
-    
-    # Update session
-    now = datetime.now(timezone.utc)
-    await collection.update_one(
-        {"session_id": session_id},
-        {"$set": {
-            "agent_id": agent_id,
-            "status": ChatSessionStatus.ACTIVE,
-            "started_at": now
-        }}
-    )
-    
-    # Update agent's active sessions count
-    agent_collection = db.get_collection("agent_statuses")
-    await agent_collection.update_one(
-        {"agent_id": agent_id},
-        {"$inc": {"active_sessions": 1}}
-    )
-    
-    # Create a system message
-    join_message = ChatMessage(
-        session_id=session_id,
-        content=f"Operátor se připojil k chatu a je připraven vám pomoci.",
-        sender_id="system",
-        sender_type="system",
-        message_type=ChatMessageType.SYSTEM,
-    )
-    
-    await save_chat_message(join_message)
-    
-    # Notify everyone in the session that an agent has joined
-    await manager.broadcast_to_session(
-        session_id, 
-        {
-            "type": "agent_joined",
-            "agent_id": agent_id,
-            "timestamp": now.isoformat(),
-            "message": serialize_mongo_doc(join_message.model_dump())
-        }
-    )
-    
-    logger.info(f"Agent {agent_id} assigned to session {session_id}")
-    return True
-
-async def close_chat_session(session_id: str, closed_by: str, reason: str = None) -> bool:
-    """Close a chat session"""
-    db = await get_db()
-    collection = await get_human_chat_collection()
-    
-    # Get the session
-    session_data = await collection.find_one({"session_id": session_id})
-    if not session_data:
-        logger.error(f"Session {session_id} not found")
-        return False
-    
-    session = HumanChatSession(**session_data)
-    
-    # Check if session is already closed
-    if session.status == ChatSessionStatus.CLOSED:
-        logger.warning(f"Session {session_id} is already closed")
-        return False
-    
-    # Update session
-    now = datetime.now(timezone.utc)
-    await collection.update_one(
-        {"session_id": session_id},
-        {"$set": {
-            "status": ChatSessionStatus.CLOSED,
-            "closed_at": now,
-            "metadata": {
-                **(session.metadata or {}),
-                "closed_by": closed_by,
-                "close_reason": reason
-            }
-        }}
-    )
-    
-    # If an agent was assigned, decrement their active sessions count
-    if session.agent_id:
-        agent_collection = db.get_collection("agent_statuses")
-        await agent_collection.update_one(
-            {"agent_id": session.agent_id},
-            {"$inc": {"active_sessions": -1}}
-        )
-    
-    # Create a system message
-    close_message = ChatMessage(
-        session_id=session_id,
-        content=f"Chat byl ukončen{'.' if not reason else f': {reason}'}",
-        sender_id="system",
-        sender_type="system",
-        message_type=ChatMessageType.SYSTEM,
-    )
-    
-    await save_chat_message(close_message)
-    
-    # Notify everyone in the session that it has been closed
-    await manager.broadcast_to_session(
-        session_id, 
-        {
-            "type": "session_closed",
-            "closed_by": closed_by,
-            "reason": reason,
-            "timestamp": now.isoformat(),
-            "message": serialize_mongo_doc(close_message.model_dump())
-        }
-    )
-    
-    logger.info(f"Chat session {session_id} closed by {closed_by}")
-    return True
 
 @router.post("/human-chat/request", response_model=Dict[str, Any])
 async def request_human_chat(
     request: Request,
-    conversation_id: Optional[str] = Query(None),  # Accept as query parameter, but make it optional
-    user_id: Optional[str] = Depends(get_user_from_token)
+    conversation_id: Optional[str] = Query(None),
+    # Use the stricter origin verification dependency for this widget endpoint
+    current_user: dict = Depends(verify_widget_origin)
 ):
     """
     Request a human chat session.
-    If user_id is not provided by the token, use 'anonymous' or generate a guest ID.
+    Uses the current active customer's ID for multi-tenancy.
     """
     try:
         # First try to get conversation_id from query parameters
@@ -406,15 +269,8 @@ async def request_human_chat(
                 detail={"message": "field_required", "detail": ["conversation_id is required"]}
             )
         
-        # If user_id wasn't resolved from token, use a guest ID or 'anonymous'
-        if not user_id:
-            # Try to get the guest ID from the request header if available
-            guest_id = request.headers.get("X-Guest-ID")
-            if not guest_id:
-                # Generate a new guest ID
-                user_id = f"guest_{uuid.uuid4().hex[:8]}"
-            else:
-                user_id = guest_id
+        # Get user_id from the authenticated customer
+        user_id = current_user["id"]
         
         logger.info(f"Creating human chat session for conversation: {actual_conversation_id}, user: {user_id}")
         session = await create_human_chat_session(actual_conversation_id, user_id)
@@ -424,44 +280,46 @@ async def request_human_chat(
     except Exception as e:
         logger.error(f"Error requesting human chat: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
 @router.get("/human-chat/sessions", response_model=List[Dict[str, Any]])
 async def get_user_chat_sessions(
-    user_id: str = Depends(get_user_from_token),
+    current_user: dict = Depends(get_current_active_customer),
     status: Optional[str] = Query(None)
 ):
-    """Get all chat sessions for a user"""
+    """Get chat sessions for the authenticated user"""
     try:
         collection = await get_human_chat_collection()
+        user_id = current_user["id"]
         
-        # Build query
-        query = {"user_id": user_id}
+        # Build query filter
+        query_filter = {"user_id": user_id}
         if status:
-            query["status"] = status
+            query_filter["status"] = status
         
-        # Get sessions
-        sessions = await collection.find(query).sort("requested_at", -1).to_list(length=50)
+        sessions = await collection.find(query_filter).sort("created_at", -1).to_list(length=100)
         return [serialize_mongo_doc(session) for session in sessions]
     except Exception as e:
-        logger.error(f"Error getting user chat sessions: {str(e)}")
+        logger.error(f"Error retrieving user chat sessions: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/human-chat/sessions/{session_id}", response_model=Dict[str, Any])
 async def get_chat_session(
     session_id: str,
-    user_id: str = Depends(get_user_from_token)
+    current_user: dict = Depends(get_current_active_customer)
 ):
     """Get details of a specific chat session"""
     try:
         collection = await get_human_chat_collection()
+        user_id = current_user["id"]
         
-        # Get the session
-        session = await collection.find_one({"session_id": session_id})
+        # Get the session with user_id filter for multi-tenancy
+        session = await collection.find_one({
+            "session_id": session_id,
+            "user_id": user_id
+        })
+        
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
-        
-        # Check permissions - either the user is the session owner or an agent
-        if session["user_id"] != user_id and session.get("agent_id") != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to access this session")
         
         return serialize_mongo_doc(session)
     except HTTPException:
@@ -475,68 +333,58 @@ async def get_chat_messages(
     session_id: str,
     limit: int = Query(50),
     before: Optional[str] = Query(None),
-    user_id: str = Depends(get_user_from_token)
+    current_user: dict = Depends(get_current_active_customer)
 ):
     """Get messages for a specific chat session"""
     try:
-        db = await get_db()
-        collection = db.get_collection("human_chat_messages")
+        collection = await get_human_chat_collection()
+        user_id = current_user["id"]
         
-        # Check permissions
-        session_collection = await get_human_chat_collection()
-        session = await session_collection.find_one({"session_id": session_id})
+        # Check if session exists and belongs to user
+        session = await collection.find_one({
+            "session_id": session_id,
+            "user_id": user_id
+        })
+        
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
         
-        if session["user_id"] != user_id and session.get("agent_id") != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to access this session")
+        # Get messages
+        db = await get_db()
+        message_collection = db.get_collection("human_chat_messages")
         
         # Build query
         query = {"session_id": session_id}
         if before:
-            query["timestamp"] = {"$lt": datetime.fromisoformat(before.replace("Z", "+00:00"))}
+            query["_id"] = {"$lt": ObjectId(before)}
         
-        # Get messages
-        messages = await collection.find(query).sort("timestamp", -1).limit(limit).to_list(length=limit)
-        messages.reverse()  # Return in chronological order
-        
-        # Mark messages as read for this user
-        if messages:
-            unread_message_ids = []
-            for msg in messages:
-                if not msg.get("read", False) and msg.get("sender_id") != user_id:
-                    unread_message_ids.append(msg["message_id"])
-            
-            if unread_message_ids:
-                await collection.update_many(
-                    {"message_id": {"$in": unread_message_ids}},
-                    {"$set": {"read": True}}
-                )
-        
+        messages = await message_collection.find(query).sort("timestamp", -1).limit(limit).to_list(length=limit)
         return [serialize_mongo_doc(message) for message in messages]
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting chat messages: {str(e)}")
+        logger.error(f"Error retrieving chat messages: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/human-chat/sessions/{session_id}/close", response_model=Dict[str, Any])
 async def close_session(
     session_id: str,
     reason: Optional[str] = Query(None),
-    user_id: str = Depends(get_user_from_token)
+    current_user: dict = Depends(get_current_active_customer)
 ):
     """Close a chat session"""
     try:
+        user_id = current_user["id"]
+        
         # Check permissions
         collection = await get_human_chat_collection()
-        session = await collection.find_one({"session_id": session_id})
+        session = await collection.find_one({
+            "session_id": session_id,
+            "user_id": user_id
+        })
         
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
-        
-        if session["user_id"] != user_id and session.get("agent_id") != user_id:
-            raise HTTPException(status_code=403, detail="Not authorized to close this session")
         
         success = await close_chat_session(session_id, user_id, reason)
         return {"success": success}
@@ -695,10 +543,61 @@ async def websocket_endpoint(
         logger.warning(f"User {user_id} not authorized for session {session_id}")
         await websocket.close(code=1008, reason="Not authorized")
         return
-    
-    logger.info(f"WebSocket connection established for session {session_id}, user {user_id}")
+
+    # --- Add Origin Verification for WebSocket ---
+    origin_header = websocket.headers.get("origin")
+    if not origin_header:
+        logger.warning(f"Origin header missing for WebSocket connection to session {session_id}")
+        await websocket.close(code=1008, reason="Origin header missing")
+        return
+
+    request_hostname = None
+    try:
+        parsed_origin = urlparse(origin_header)
+        request_hostname = parsed_origin.hostname
+        if not request_hostname:
+             logger.warning(f"Could not parse hostname from Origin header: '{origin_header}' for WebSocket session {session_id}")
+             await websocket.close(code=1008, reason="Invalid Origin header")
+             return
+    except Exception as e:
+        logger.error(f"Error parsing Origin header '{origin_header}' for WebSocket: {e}", exc_info=True)
+        await websocket.close(code=1008, reason="Origin header parsing error")
+        return
+
+    # Fetch user document to get domain_whitelist (session only has user_id)
+    user_collection = await get_user_collection(db)
+    user_doc = await user_collection.find_one({"id": session["user_id"]})
+    if not user_doc:
+        # Should not happen if session exists, but handle defensively
+        logger.error(f"User document not found for user_id {session['user_id']} associated with session {session_id}")
+        await websocket.close(code=1008, reason="User data inconsistency")
+        return
+
+    authorized_domains = user_doc.get("domain_whitelist", [])
+    is_authorized = False
+    normalized_request_hostname = request_hostname.lower()
+
+    for auth_domain in authorized_domains:
+        normalized_auth_domain = auth_domain.lower().strip()
+        if not normalized_auth_domain: continue
+        if normalized_auth_domain.startswith('*.'):
+            pattern = r'^(.*\.)?' + re.escape(normalized_auth_domain[2:]) + r'$'
+            if re.fullmatch(pattern, normalized_request_hostname):
+                is_authorized = True
+                break
+        elif normalized_auth_domain == normalized_request_hostname:
+            is_authorized = True
+            break
+
+    if not is_authorized:
+        logger.warning(f"Unauthorized Origin: '{origin_header}' (parsed as '{request_hostname}') for WebSocket session {session_id}, User: {session['user_id']}")
+        await websocket.close(code=1008, reason="Domain not authorized")
+        return
+    # --- End Origin Verification ---
+
+    logger.info(f"WebSocket connection established and origin verified for session {session_id}, user {user_id}")
     await manager.connect(websocket, session_id, user_id)
-    
+
     try:
         # Load recent messages history
         message_collection = db.get_collection("human_chat_messages")

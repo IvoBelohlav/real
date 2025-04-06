@@ -12,12 +12,14 @@ const MessageInput = ({
   onBlur,
   widgetConfig,
   inputRef,
+  // style prop is passed from Widget.jsx but not used directly here anymore
 }) => {
   const [text, setText] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const textareaRef = useRef(null);
-  const currentTheme = themes[theme] || themes.light;
+  // We'll get theme colors directly from widgetConfig or fallbacks
+  // const currentThemeStyle = themes[theme] || themes.light; // No longer needed for direct style access
 
   useEffect(() => {
     if (inputRef && textareaRef.current) {
@@ -68,10 +70,36 @@ const MessageInput = ({
     };
   }, [text, textareaRef]);
 
-  const primaryColor =
-    theme === "light"
-      ? widgetConfig?.primary_color_light || "#FF007F"
-      : widgetConfig?.primary_color_dark || "#FF80AB";
+  // Determine theme colors for CSS variables
+  const primaryColor = theme === "light" ? widgetConfig?.primary_color_light : widgetConfig?.primary_color_dark;
+  const inputBgColor = theme === "light" ? widgetConfig?.input_bg_color_light : widgetConfig?.input_bg_color_dark; // Assuming these exist in config
+  const inputTextColor = theme === 'light' ? widgetConfig?.text_color_light : widgetConfig?.text_color_dark;
+  const containerBgColor = theme === 'light' ? widgetConfig?.background_color_light : widgetConfig?.background_color_dark; // Or a specific footer bg color if available
+  const placeholderColor = theme === 'light' ? '#a0aec0' : '#718096'; // Example placeholder colors
+  const focusShadowColor = theme === 'light' ? `${primaryColor}40` : `${primaryColor}40`;
+  const buttonTextColor = text.trim() && !disabled ? (theme === 'light' ? widgetConfig?.button_text_color_light : widgetConfig?.button_text_color_dark || '#FFFFFF') : (inputTextColor || (theme === 'light' ? '#000000' : '#FFFFFF'));
+  const buttonBgColor = text.trim() && !disabled ? primaryColor : 'transparent';
+  const buttonCursor = text.trim() && !disabled ? 'pointer' : 'default';
+  const buttonOpacity = disabled ? 0.5 : 1;
+
+  // Define CSS variables
+  const cssVariables = {
+    '--input-container-bg': containerBgColor || (theme === 'light' ? '#ffffff' : '#1a202c'), // Fallback container bg
+    '--input-border-top-color': `${primaryColor}20` || 'rgba(0,0,0,0.1)', // Fallback border top
+    '--input-shadow-color': `${primaryColor}05` || 'rgba(0,0,0,0.02)', // Fallback shadow
+    '--input-bg-color': inputBgColor || (theme === 'light' ? '#f7fafc' : '#2d3748'), // Fallback input bg
+    '--input-text-color': inputTextColor || (theme === 'light' ? '#000000' : '#ffffff'), // Fallback text color
+    '--input-placeholder-color': placeholderColor,
+    '--input-focus-shadow-color': focusShadowColor || 'rgba(0,0,0,0.1)', // Fallback focus shadow
+    '--scrollbar-track-color': `${primaryColor}10` || 'rgba(0,0,0,0.05)',
+    '--scrollbar-thumb-color': `${primaryColor}30` || 'rgba(0,0,0,0.2)',
+    '--scrollbar-thumb-hover-color': `${primaryColor}50` || 'rgba(0,0,0,0.3)',
+    '--button-bg-color': buttonBgColor,
+    '--button-text-color': buttonTextColor,
+    '--button-cursor': buttonCursor,
+    '--button-opacity': buttonOpacity,
+  };
+
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -119,13 +147,10 @@ const MessageInput = ({
   const computedLineHeight = text.trim() === "" ? "34px" : "1.3";
 
   return (
+    // Apply CSS variables to the container
     <div
       className={styles.container}
-      style={{
-        backgroundColor: currentTheme.inputBg,
-        borderTop: `1px solid ${primaryColor}20`,
-        boxShadow: `0 -4px 6px -1px ${primaryColor}05`,
-      }}
+      style={cssVariables}
     >
       <motion.form
         onSubmit={handleSubmit}
@@ -151,19 +176,8 @@ const MessageInput = ({
             placeholder="Zadejte své otázky..."
             disabled={disabled}
             className={styles.textarea}
-            style={{
-              backgroundColor: currentTheme.inputBg,
-              color: currentTheme.textColor,
-              boxShadow: isFocused ? `0 0 0 2px ${primaryColor}40` : "none",
-              minHeight: "34px",
-              maxHeight: "60px",
-              lineHeight: computedLineHeight,
-              paddingLeft: "12px",
-              paddingRight: "12px",
-              paddingTop: text.trim() === "" ? "0px" : "8px",
-              paddingBottom: text.trim() === "" ? "0px" : "8px",
-              borderRadius: "8px",
-            }}
+            // Inline styles removed - handled by CSS Module + CSS variables
+            // Note: line-height calculation might need adjustment if it was dynamic based on text
           />
         </motion.div>
 
@@ -172,13 +186,8 @@ const MessageInput = ({
             type="submit"
             disabled={!text.trim() || disabled || isLoading}
             className={styles.submitButton}
-            style={{
-              backgroundColor: text.trim() && !disabled ? primaryColor : "transparent",
-              color: text.trim() && !disabled ? "#FFFFFF" : currentTheme.textColor,
-              cursor: text.trim() && !disabled ? "pointer" : "default",
-              opacity: disabled ? 0.5 : 1,
-            }}
-            whileHover={!disabled && text.trim() ? { scale: 1.05 } : {}}
+            // Inline styles removed - handled by CSS Module + CSS variables
+            whileHover={!disabled && text.trim() ? { scale: 1.05, filter: 'brightness(1.1)' } : {}} // Add brightness effect on hover
             whileTap={!disabled && text.trim() ? { scale: 0.95 } : {}}
             initial={{ rotate: 0 }}
             animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
@@ -193,38 +202,7 @@ const MessageInput = ({
           </motion.button>
         </AnimatePresence>
       </motion.form>
-
-      <style jsx global>{`
-        textarea,
-        textarea:focus,
-        textarea:focus-visible {
-          outline: none !important;
-          border: none;
-          transition: all 0.3s ease;
-        }
-        textarea::placeholder {
-          opacity: 0.8;
-          transition: opacity 0.2s ease;
-        }
-        textarea:focus::placeholder {
-          opacity: 0.5;
-        }
-        textarea::-webkit-scrollbar {
-          width: 6px;
-        }
-        textarea::-webkit-scrollbar-track {
-          background: ${primaryColor}10;
-          border-radius: 8px;
-        }
-        textarea::-webkit-scrollbar-thumb {
-          background: ${primaryColor}30;
-          border-radius: 8px;
-          transition: background 0.2s ease;
-        }
-        textarea::-webkit-scrollbar-thumb:hover {
-          background: ${primaryColor}50;
-        }
-      `}</style>
+      {/* Removed <style jsx global> tag */}
     </div>
   );
 };

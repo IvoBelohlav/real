@@ -10,7 +10,6 @@ import { getAuthToken } from "./utils/auth";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "./App.module.css";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import headingStyles from './headingFix.module.css'
 import WidgetContainer from "./components/WidgetContainer";
 
@@ -57,8 +56,6 @@ const PrivateOutlet = () => {
   }
   return <Outlet />;
 };
-
-const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {

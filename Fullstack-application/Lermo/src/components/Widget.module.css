@@ -430,11 +430,35 @@
 
 .dvojkavit-widget-content {
   overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal overflow */
   flex: 1;
   padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overscroll-behavior: contain; /* Prevent scrolling page behind widget */
+
+  /* Basic Firefox Scrollbar Styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)) transparent; /* thumb track */
+}
+/* Custom Scrollbar for Webkit */
+.dvojkavit-widget-content::-webkit-scrollbar {
+  width: 6px;
+}
+.dvojkavit-widget-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dvojkavit-widget-content::-webkit-scrollbar-thumb {
+  background-color: transparent; /* Hide by default */
+  border-radius: 3px;
+  transition: background-color 0.2s ease-in-out; /* Smooth transition */
+}
+.dvojkavit-widget-content:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)); /* Show on container hover */
+}
+.dvojkavit-widget-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-color, rgba(0, 0, 0, 0.4)); /* Darker on thumb hover */
 }
 
 .dvojkavit-welcome-banner {
@@ -504,10 +528,12 @@
 
 /* Contact Form - Desktop */
 .dvojkavit-contact-form {
-  
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-left: 1rem; /* Keep left padding */
+  padding-right: 0; /* Remove right padding */
+  box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .dvojkavit-form-header {
@@ -553,7 +579,9 @@
   width: 100%;
   border-radius: 6px; /* Removed duplicate declaration */
   transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
-  padding: 0.625rem;
+  padding: 0.625rem 0 0.625rem 0.625rem; /* top right bottom left */
+  padding-right: 0 !important; /* Explicitly remove right padding */
+  box-sizing: border-box; /* Ensure padding is included in width */
   font-size: 14px !important;
 }
 
@@ -563,7 +591,9 @@
   border-radius: 6px; /* Removed duplicate declaration */
   transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
   resize: none;
-  padding: 0.625rem;
+  padding: 0.625rem 0 0.625rem 0.625rem; /* top right bottom left */
+  padding-right: 0 !important; /* Explicitly remove right padding */
+  box-sizing: border-box; /* Ensure padding is included in width */
   font-size: 14px !important;
 }
 
@@ -631,6 +661,8 @@
 /* Footer - Desktop */
 .dvojkavit-widget-footer {
   padding: 16px 16px 24px;
+  box-sizing: border-box; /* Ensure padding is included in width */
+  width: 100%; /* Ensure footer takes full width of its container */
 }
 
 .dvojkavit-guided-footer {
@@ -670,6 +702,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+  width: 100%; /* Ensure it takes full width */
 }
 
 .dvojkavit-faq-title {
@@ -718,6 +752,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+  width: 100%; /* Ensure it takes full width */
 }
 
 .dvojkavit-contact-admin-button {
@@ -894,12 +930,37 @@
 
 .dvojkavit-mobile-content {
   overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal overflow */
   flex: 1;
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overscroll-behavior: contain; /* Prevent scrolling page behind widget */
+
+  /* Basic Firefox Scrollbar Styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)) transparent; /* thumb track */
 }
+/* Custom Scrollbar for Webkit */
+.dvojkavit-mobile-content::-webkit-scrollbar {
+  width: 6px;
+}
+.dvojkavit-mobile-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.dvojkavit-mobile-content::-webkit-scrollbar-thumb {
+  background-color: transparent; /* Hide by default */
+  border-radius: 3px;
+  transition: background-color 0.2s ease-in-out; /* Smooth transition */
+}
+.dvojkavit-mobile-content:hover::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color, rgba(0, 0, 0, 0.2)); /* Show on container hover */
+}
+.dvojkavit-mobile-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-color, rgba(0, 0, 0, 0.4)); /* Darker on thumb hover */
+}
+
 
 .dvojkavit-mobile-welcome-banner {
   background-color: #E01E26;    padding: 12px;
@@ -971,6 +1032,283 @@
   gap: 6px;
 }
 
+/* --- Contact Form Styles --- */
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* 16px */
+}
+
+.formHeader {
+  border-radius: 0.75rem; /* 12px */
+  padding: 1rem; /* 16px */
+  margin-bottom: 0.75rem; /* 12px */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(4px);
+  /* Background color/gradient will be applied via inline style based on theme */
+}
+
+.formTitle {
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important; /* 4px */
+  /* Color/gradient applied via inline style */
+}
+
+.formSubtitle {
+  font-size: 0.875rem !important; /* 14px */
+  /* Color applied via inline style */
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  margin-bottom: 0.25rem !important; /* 4px */
+  overflow-wrap: break-word; /* Allow long labels to wrap */
+  word-break: break-word; /* Ensure wrapping works reliably */
+  /* Color applied via inline style */
+}
+
+.formLabelIcon {
+  display: inline-block;
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+  margin-right: 0.25rem; /* 4px */
+  vertical-align: text-top;
+}
+
+.formInput,
+.formTextarea {
+  display: block;
+  width: 100%;
+  /* box-sizing: border-box; /* Reverted */
+  border-radius: 0.375rem; /* 6px */
+  transition: border-color 200ms, box-shadow 200ms;
+  padding: 0.625rem 0 0.625rem 0.625rem; /* top right bottom left */
+  padding-right: 0 !important; /* Explicitly remove right padding */
+  font-size: 0.875rem !important; /* 14px */
+  border: 1px solid; /* Border color applied via inline style */
+  /* Background and text color applied via inline style */
+}
+
+.formTextarea {
+  resize: none;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem; /* 8px */
+  padding-top: 0.5rem; /* 8px */
+}
+
+.formCancelButton,
+.formSubmitButton {
+  padding: 0.5rem 1rem; /* 8px 16px */
+  border-radius: 0.375rem; /* 6px */
+  outline: none;
+  transition: background-color 200ms, color 200ms, box-shadow 200ms, transform 200ms;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  cursor: pointer;
+  border: none;
+}
+
+.formCancelButton {
+  background-color: transparent;
+  border: 1px solid; /* Border color applied via inline style */
+  /* Text color applied via inline style */
+}
+
+.formSubmitButton {
+  /* Background and text color applied via inline style */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* --- Thank You Message Styles --- */
+.thankYouContainer {
+  text-align: center;
+  padding: 1.5rem; /* 24px */
+  border-radius: 0.5rem; /* 8px */
+  /* Background/border applied via inline style */
+}
+
+.thankYouIconContainer {
+  width: 4rem; /* 64px */
+  height: 4rem; /* 64px */
+  margin: 0 auto 1rem; /* 16px */
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Background/border applied via inline style */
+}
+
+.thankYouTitle {
+  font-size: 1.25rem !important; /* 20px */
+  font-weight: 700 !important;
+  margin-bottom: 0.5rem !important; /* 8px */
+  /* Color applied via inline style */
+}
+
+.thankYouText {
+  font-size: 1rem !important; /* 16px */
+  margin-bottom: 1rem !important; /* 16px */
+  /* Color applied via inline style */
+}
+
+.thankYouButton {
+  padding: 0.5rem 1rem; /* 8px 16px */
+  border-radius: 0.5rem; /* 8px */
+  transition: background-color 200ms, color 200ms, box-shadow 200ms, transform 200ms;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  cursor: pointer;
+  border: none;
+  /* Background/color/shadow applied via inline style */
+}
+
+/* --- Mobile Form Styles --- */
+.mobileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* 16px */
+  padding-left: 1rem; /* Keep left padding */
+  padding-right: 0; /* Remove right padding */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+.mobileFormHeader {
+  border-radius: 0.5rem; /* 8px */
+  padding: 0.75rem; /* 12px */
+  margin-bottom: 0.5rem; /* 8px */
+  /* Background applied via inline style */
+}
+
+.mobileFormTitle {
+  font-size: 1rem !important; /* 16px */
+  font-weight: 600 !important;
+  margin-bottom: 0.25rem !important; /* 4px */
+  /* Color applied via inline style */
+}
+
+.mobileFormSubtitle {
+  font-size: 0.875rem !important; /* 14px */
+  /* Color applied via inline style */
+}
+
+.mobileFormLabel {
+  display: block;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  margin-bottom: 0.25rem !important; /* 4px */
+  overflow-wrap: break-word; /* Allow long labels to wrap */
+  word-break: break-word; /* Ensure wrapping works reliably */
+  /* Color applied via inline style */
+}
+
+.mobileFormLabelIcon {
+  display: inline-block;
+  width: 1rem; /* 16px */
+  height: 1rem; /* 16px */
+  margin-right: 0.25rem; /* 4px */
+  vertical-align: text-top;
+}
+
+.mobileFormInput,
+.mobileFormTextarea {
+  display: block;
+  width: 100%;
+  /* box-sizing: border-box; /* Reverted */
+  border-radius: 0.375rem; /* 6px */
+  outline: none;
+  border: 0;
+  transition: border-color 200ms, box-shadow 200ms;
+  padding: 0.625rem 0 0.625rem 0.625rem; /* top right bottom left */
+  padding-right: 0 !important; /* Explicitly remove right padding */
+  font-size: 0.875rem !important; /* 14px */
+  /* Background, text, border color applied via inline style */
+}
+
+.mobileFormTextarea {
+  resize: none;
+}
+
+.mobileFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem; /* 8px */
+  padding-top: 0.5rem; /* 8px */
+}
+
+.mobileFormCancelButton,
+.mobileFormSubmitButton {
+  padding: 0.5rem 1rem; /* 8px 16px */
+  border-radius: 0.375rem; /* 6px */
+  outline: none;
+  transition: background-color 200ms, color 200ms, box-shadow 200ms, transform 200ms;
+  font-size: 0.875rem !important; /* 14px */
+  font-weight: 500 !important;
+  cursor: pointer;
+  border: none;
+}
+
+.mobileFormCancelButton {
+  background-color: transparent;
+  border: 1px solid; /* Border color applied via inline style */
+  /* Text color applied via inline style */
+}
+
+.mobileFormSubmitButton {
+  border-radius: 0.5rem; /* 8px */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  /* Background and text color applied via inline style */
+}
+
+/* --- Mobile Thank You Message Styles --- */
+.mobileThankYouContainer {
+  text-align: center;
+  padding: 1rem; /* 16px */
+  border-radius: 0.5rem; /* 8px */
+  /* Background/border applied via inline style */
+}
+
+.mobileThankYouIconContainer {
+  width: 3rem; /* 48px */
+  height: 3rem; /* 48px */
+  margin: 0 auto 0.5rem; /* 8px */
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Background/border applied via inline style */
+}
+
+.mobileThankYouTitle {
+  font-size: 1.125rem !important; /* 18px */
+  font-weight: 700 !important;
+  margin-bottom: 0.25rem !important; /* 4px */
+  /* Color applied via inline style */
+}
+
+.mobileThankYouText {
+  font-size: 0.875rem !important; /* 14px */
+  margin-bottom: 0.75rem !important; /* 12px */
+  /* Color applied via inline style */
+}
+
+.mobileThankYouButton {
+  padding: 0.5rem 1rem; /* 8px 16px */
+  border-radius: 0.5rem; /* 8px */
+  transition: background-color 200ms, color 200ms, box-shadow 200ms, transform 200ms;
+  font-size: 0.875rem !important; /* 14px */
+  cursor: pointer;
+  border: none;
+  /* Background/color/shadow applied via inline style */
+}
+
+
 /* Contact Form - Mobile */
 .dvojkavit-mobile-form {
   display: flex;
@@ -1017,7 +1355,9 @@
   outline: none;
   border: 0;
   transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
-  padding: 0.625rem;
+  padding: 0.625rem 0 0.625rem 0.625rem; /* top right bottom left */
+  padding-right: 0 !important; /* Explicitly remove right padding */
+  box-sizing: border-box; /* Ensure padding is included in width */
   font-size: 14px !important;
 }
 
@@ -1029,7 +1369,9 @@
   border: 0;
   resize: none;
   transition: border-color 200ms, box-shadow 200ms; /* Specified properties */
-  padding: 0.625rem;
+  padding: 0.625rem 0 0.625rem 0.625rem; /* top right bottom left */
+  padding-right: 0 !important; /* Explicitly remove right padding */
+  box-sizing: border-box; /* Ensure padding is included in width */
   font-size: 14px !important;
 }
 
@@ -1096,6 +1438,8 @@
 /* Footer - Mobile */
 .dvojkavit-mobile-footer {
   padding: 12px 12px 16px;
+  box-sizing: border-box; /* Ensure padding is included in width */
+  width: 100%; /* Ensure footer takes full width of its container */
 }
 
 .dvojkavit-mobile-guided-footer {
@@ -1294,222 +1638,6 @@ html body .dvojkavit-widget-container .dvojkavit-mobile-welcome-text {
   transform-origin: bottom center;
   position: relative;
   margin: 0 0.25px;
-}
-
-/* Additional utility classes for the widget that were previously provided by Tailwind */
-.flex {
-  display: flex;
-}
-
-.flex-row {
-  flex-direction: row;
-}
-
-.flex-col {
-  flex-direction: column;
-}
-
-.items-center {
-  align-items: center;
-}
-
-.items-start {
-  align-items: flex-start;
-}
-
-.items-end {
-  align-items: flex-end;
-}
-
-.justify-center {
-  justify-content: center;
-}
-
-.justify-between {
-  justify-content: space-between;
-}
-
-.justify-end {
-  justify-content: flex-end;
-}
-
-.gap-1 {
-  gap: 0.25rem;
-}
-
-.gap-2 {
-  gap: 0.5rem;
-}
-
-.gap-3 {
-  gap: 0.75rem;
-}
-
-.gap-4 {
-  gap: 1rem;
-}
-
-.w-full {
-  width: 100%;
-}
-
-.h-full {
-  height: 100%;
-}
-
-.rounded-md {
-  border-radius: 0.375rem;
-}
-
-.rounded-lg {
-  border-radius: 0.5rem;
-}
-
-.rounded-xl {
-  border-radius: 0.75rem;
-}
-
-.rounded-full {
-  border-radius: 9999px;
-}
-
-.p-1 {
-  padding: 0.25rem;
-}
-
-.p-2 {
-  padding: 0.5rem;
-}
-
-.p-3 {
-  padding: 0.75rem;
-}
-
-.p-4 {
-  padding: 1rem;
-}
-
-.px-2 {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-}
-
-.py-2 {
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
-}
-
-.pb-2 {
-  padding-bottom: 0.5rem;
-}
-
-.pt-2 {
-  padding-top: 0.5rem;
-}
-
-.text-sm {
-  font-size: 0.875rem;
-}
-
-.text-base {
-  font-size: 1rem;
-}
-
-.text-lg {
-  font-size: 1.125rem;
-}
-
-.font-medium {
-  font-weight: 500;
-}
-
-.font-semibold {
-  font-weight: 600;
-}
-
-.font-bold {
-  font-weight: 700;
-}
-
-.text-white {
-  color: #ffffff;
-}
-
-.text-gray-500 {
-  color: #6b7280;
-}
-
-.text-gray-700 {
-  color: #374151;
-}
-
-.bg-white {
-  background-color: #ffffff;
-}
-
-.shadow-sm {
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-}
-
-.shadow {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-}
-
-.shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.cursor-pointer {
-  cursor: pointer;
-}
-
-.absolute {
-  position: absolute;
-}
-
-.relative {
-  position: relative;
-}
-
-.fixed {
-  position: fixed;
-}
-
-.overflow-hidden {
-  overflow: hidden;
-}
-
-.overflow-y-auto {
-  overflow-y: auto;
-}
-
-.transition {
-  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-.hover\:bg-gray-100:hover {
-  background-color: #f3f4f6;
-}
-
-.hover\:shadow-md:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.focus\:outline-none:focus {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
-}
-
-.focus\:ring-2:focus {
-  --ring-offset-shadow: var(--ring-inset) 0 0 0 var(--ring-offset-width) var(--ring-offset-color);
-  --ring-shadow: var(--ring-inset) 0 0 0 calc(2px + var(--ring-offset-width)) var(--ring-color);
-  box-shadow: var(--ring-offset-shadow), var(--ring-shadow), var(--shadow, 0 0 #0000);
 }
 
 /* Add the new button styles after existing styles */

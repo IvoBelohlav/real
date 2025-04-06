@@ -11,7 +11,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from app.utils.logging_config import get_module_logger
 from app.services.knowledge_base import KnowledgeBase
 from app.services.ai_service import AIService
-from app.utils.dependencies import get_current_active_customer
+# Use verify_widget_origin for auth/origin check
+from app.utils.dependencies import verify_widget_origin
+# Import user model and mongo utils for limit checking
+from app.models.user import SubscriptionTier
+from app.utils.mongo import get_user_collection
+from datetime import timedelta # Import timedelta for month check
 
 router = APIRouter()
 logger = get_module_logger(__name__)
@@ -41,7 +46,8 @@ async def get_ai_service():
 async def handle_message(
     request: ChatRequest,
     background_tasks: BackgroundTasks,
-    current_user: Dict = Depends(get_current_active_customer),
+    # Use the new dependency for authentication and origin check
+    current_user: Dict = Depends(verify_widget_origin),
     db = Depends(get_conversations_collection),
     ai_service = Depends(get_ai_service)
 ) -> ChatResponse:
@@ -50,6 +56,62 @@ async def handle_message(
     """
     try:
         user_id = current_user["id"]
+        user_collection = await get_user_collection() # Get user collection
+
+        # --- Check and Update Monthly Conversation Limit ---
+        is_new_conversation = request.context is None or request.context.conversation_id is None
+        if is_new_conversation:
+            now = datetime.now(timezone.utc)
+            usage_start = current_user.get("usage_period_start_date")
+            needs_reset = False
+
+            if usage_start is None:
+                needs_reset = True
+            else:
+                # Check if more than ~30 days have passed
+                if now > usage_start + timedelta(days=30): # Approximation for a month
+                    needs_reset = True
+
+            if needs_reset:
+                await user_collection.update_one(
+                    {"id": user_id},
+                    {"$set": {"conversation_count_current_month": 0, "usage_period_start_date": now}}
+                )
+                current_user["conversation_count_current_month"] = 0 # Update local copy
+                current_user["usage_period_start_date"] = now
+                logger.info(f"Reset monthly conversation count for user {user_id}")
+
+            # Check limit before incrementing
+            tier_str = current_user.get("subscription_tier", "free")
+            try:
+                tier = SubscriptionTier(tier_str)
+            except ValueError:
+                tier = SubscriptionTier.FREE
+
+            limits = {
+                SubscriptionTier.FREE: 0, # No conversations for free tier? Or a small number? Let's assume 0 for now.
+                SubscriptionTier.BASIC: 500,
+                SubscriptionTier.PREMIUM: 1500,
+                SubscriptionTier.ENTERPRISE: float('inf') # Unlimited
+            }
+            max_convos = limits.get(tier, 0)
+            current_convo_count = current_user.get("conversation_count_current_month", 0)
+
+            if current_convo_count >= max_convos:
+                logger.warning(f"User {user_id} (Tier: {tier.value}) tried to start new conversation but reached monthly limit ({max_convos})")
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Monthly conversation limit ({max_convos}) reached for your '{tier.value}' plan."
+                )
+
+            # Increment count for the new conversation
+            await user_collection.update_one(
+                {"id": user_id},
+                {"$inc": {"conversation_count_current_month": 1}}
+            )
+            logger.info(f"Incremented monthly conversation count for user {user_id} (New count: {current_convo_count + 1})")
+        # --- End Limit Check ---
+
 
         # Ensure we have a valid conversation context
         if request.context is None:

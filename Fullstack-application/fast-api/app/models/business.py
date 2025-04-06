@@ -11,11 +11,15 @@ class BusinessType(BaseModel):
     comparison_config: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Configuration for product comparisons") # NEW FIELD
 
     @validator('validation_rules')
-    def validate_rules(cls, v):
-        required_rules = ['product_name', 'category']
-        for rule in required_rules:
-            if rule not in v:
-                raise ValueError(f"Missing required validation rule: {rule}")
+    def validate_rules(cls, v: Dict[str, Any]) -> Dict[str, Any]:
+        # Only enforce required keys if the dictionary is not empty
+        if v: # Check if the dictionary has content
+            required_rules = ['product_name', 'category']
+            for rule in required_rules:
+                if rule not in v:
+                    # If the dict is not empty but missing a required key, raise error
+                    raise ValueError(f"Missing required validation rule: {rule}")
+        # Return the original (potentially empty) dictionary if validation passes
         return v
 
     class Config:

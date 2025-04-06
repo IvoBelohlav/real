@@ -7,7 +7,8 @@ const LOCAL_API_URL = 'http://localhost:8000/';
 const PROD_API_URL = 'https://lermobackend.up.railway.app/';
 
 // Choose the API URL based on environment
-const API_URL = process.env.NODE_ENV === 'production' ? PROD_API_URL : LOCAL_API_URL;
+// const API_URL = process.env.NODE_ENV === 'production' ? PROD_API_URL : LOCAL_API_URL; // Original line - Keep for reference
+const API_URL = LOCAL_API_URL; // Force local API for testing admin panel
 
 // API configuration
 let apiKey = null;
@@ -54,18 +55,14 @@ api.interceptors.request.use(
             delete config.headers['Content-Type'];
         }
 
-        // First try API key for widget authentication
+        // Add API key for widget authentication if available
         if (apiKey) {
             config.headers['X-Api-Key'] = apiKey;
-        } 
-        // Fallback to JWT for admin dashboard
-        else {
-            // Add authentication token if available
-            const token = getAuthToken();
-            if (token) {
-                config.headers['Authorization'] = `Bearer ${token}`;
-            }
+        } else {
+            // Log a warning if the API key is missing, as it's expected for the widget
+            console.warn('Lermo Widget API key is missing. API calls may fail.');
         }
+        // Removed JWT fallback logic as it's not relevant for the widget context
         
         // Debug logging
         console.log(`API Request: ${config.method?.toUpperCase()} ${config.url}`, { 
@@ -148,14 +145,13 @@ api.interceptors.response.use(
             if (error.response.status === 401) {
                 console.error('Authentication error: Token expired or invalid');
                 
-                // If using API key, show widget-specific error
+                // If using API key (which should always be the case for the widget), throw specific error
                 if (apiKey) {
                     throw new Error('Widget API key is invalid or expired. Please contact support.');
                 } else {
-                    // If using JWT, redirect to login
-                    removeAuthToken();
-                    window.location.href = '/admin/login'; // Redirect to login
-                    throw new Error('Session expired. Please login again.');
+                    // This case should ideally not happen if init requires apiKey
+                    console.error('Unauthorized request without API key.');
+                    throw new Error('Authentication failed.');
                 }
             }
 

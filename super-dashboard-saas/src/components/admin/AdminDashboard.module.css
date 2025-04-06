@@ -1,0 +1,268 @@
+/* AdminDashboard.module.css */
+
+.container {
+  padding: 1.5rem;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #333333;
+  margin-bottom: 0.5rem;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 80px;
+  height: 3px;
+  background-color: #E01E26;
+}
+
+.subtitle {
+  color: #6b7280;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 640px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statCard {
+  background-color: white;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #f5f5f5;
+  transition: all 0.2s ease-in-out;
+}
+
+.statCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(224, 30, 38, 0.08);
+}
+
+.statCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.statCardTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.statCardValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #333333;
+}
+
+/* Base colors for the LERMO branding */
+.blue {
+  background-color: rgba(224, 30, 38, 0.08);
+  color: #E01E26;
+}
+
+.green {
+  background-color: #ecfdf5;
+  color: #10b981;
+}
+
+.purple {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+.amber {
+  background-color: #fff7ed;
+  color: #f97316;
+}
+
+.quickAccessGrid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .quickAccessGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .quickAccessGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.quickAccessCard {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  border: 1px solid #f5f5f5;
+  height: 100%;
+}
+
+.quickAccessCard:hover {
+  box-shadow: 0 6px 16px rgba(224, 30, 38, 0.12);
+  transform: translateY(-4px);
+  text-decoration: none;
+  border-color: rgba(224, 30, 38, 0.2);
+}
+
+.iconContainer {
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 0.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.quickAccessCard:hover .iconContainer {
+  transform: scale(1.05);
+}
+
+.cardTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #333333;
+}
+
+.cardDescription {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Icon background colors */
+.bgBlue {
+  background-color: rgba(224, 30, 38, 0.08);
+}
+
+.bgPurple {
+  background-color: #f5f3ff;
+}
+
+.bgGreen {
+  background-color: #ecfdf5;
+}
+
+.bgOrange {
+  background-color: #fff7ed;
+}
+
+.bgTeal {
+  background-color: #f0fdfa;
+}
+
+.bgYellow {
+  background-color: #fefce8;
+}
+
+.bgIndigo {
+  background-color: #eef2ff;
+}
+
+.bgPink {
+  background-color: #fdf2f8;
+}
+
+/* Icon text colors */
+.textBlue {
+  color: #E01E26;
+}
+
+.textPurple {
+  color: #7c3aed;
+}
+
+.textGreen {
+  color: #10b981;
+}
+
+.textOrange {
+  color: #f97316;
+}
+
+.textTeal {
+  color: #14b8a6;
+}
+
+.textYellow {
+  color: #eab308;
+}
+
+.textIndigo {
+  color: #4f46e5;
+}
+
+.textPink {
+  color: #ec4899;
+}
+
+/* Error states */
+.errorContainer {
+  background-color: #fee2e2;
+  border: 1px solid #f87171;
+  color: #E01E26;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 5px rgba(224, 30, 38, 0.1);
+}
+
+.errorBold {
+  font-weight: 700;
+}
+
+.loadingText {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+a:hover {
+  text-decoration: none;
+} 

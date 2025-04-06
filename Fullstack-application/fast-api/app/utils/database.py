@@ -45,25 +45,34 @@ async def get_user_by_email(db: AsyncIOMotorClient, email: str):
         print(f"Error in get_user_by_email: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-async def save_conversation(query: str, response: str):
+async def save_conversation(query: str, response: str, user_id: str = None):
     new_conversation = {
         "query": query,
         "response": response,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.utcnow().isoformat(),
+        "user_id": user_id
     }
     await logs_collection.insert_one(new_conversation)
     return new_conversation
 
-async def get_conversations():
+async def get_conversations(user_id: str = None):
     try:
-        conversations = await conversations_collection.find().to_list(length=None)
+        filter_query = {}
+        if user_id:
+            filter_query["user_id"] = user_id
+            
+        conversations = await conversations_collection.find(filter_query).to_list(length=None)
         return conversations
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-async def get_logs():
+async def get_logs(user_id: str = None):
     try:
-        logs = await logs_collection.find().to_list(length=None)
+        filter_query = {}
+        if user_id:
+            filter_query["user_id"] = user_id
+            
+        logs = await logs_collection.find(filter_query).to_list(length=None)
         return logs
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

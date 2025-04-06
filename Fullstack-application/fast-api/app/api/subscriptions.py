@@ -1,298 +1,231 @@
-from fastapi import APIRouter, Depends, HTTPException, Header, Request, status, Body
+from fastapi import APIRouter, Depends, HTTPException, Header, Request, status, Body # Keep Body import
+from pydantic import BaseModel, HttpUrl, Field
 from app.models.subscription import (
-    CreateCheckoutSessionRequest, 
     CreateCheckoutSessionResponse,
     SubscriptionDetails,
     CustomerPortalRequest,
-    CustomerPortalResponse,
-    EmbedSnippet,
-    ApiKeyResponse
+    CustomerPortalResponse # Re-import CustomerPortalResponse
+    # Removed EmbedSnippet, ApiKeyResponse as they belong elsewhere
 )
-from app.utils.dependencies import get_current_user, generate_api_key
+# Removed generate_api_key from dependencies as it's not directly used here anymore
+# Webhook logic uses it, but it's called within the webhook handler itself
+from app.utils.dependencies import get_current_user
+from app.utils.mongo import get_user_collection, get_db
 from app.utils.stripe_utils import (
     create_checkout_session,
     get_subscription,
     create_portal_session,
     create_customer,
     get_subscription_price_id,
-    construct_event
+    STRIPE_WEBHOOK_SECRET
 )
-from datetime import datetime, timezone
-from app.utils.mongo import get_user_collection, serialize_mongo_doc
+from datetime import datetime, timezone, timedelta
 from app.utils.logging_config import get_module_logger
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from motor.motor_asyncio import AsyncIOMotorClient
-import json
 import os
-from app.models.user import SubscriptionTier, SubscriptionStatus
+from app.models.user import SubscriptionTier, SubscriptionStatus # Import Enums
+import stripe
+from bson import ObjectId
+
+# Setup Stripe
+STRIPE_SECRET_KEY = os.getenv("STRIPE_API_KEY")
+DASHBOARD_URL = os.getenv("DASHBOARD_URL", "http://localhost:3000")
 
 logger = get_module_logger(__name__)
 
+if not STRIPE_SECRET_KEY:
+    logger.warning("STRIPE_API_KEY not set. Stripe functionality will not work.")
+else:
+    stripe.api_key = STRIPE_SECRET_KEY
+
+if not STRIPE_WEBHOOK_SECRET:
+     logger.warning("STRIPE_WEBHOOK_SECRET not set. Webhook verification will fail.")
+
+# --- Pydantic Models ---
+class CreateCheckoutSessionRequest(BaseModel):
+    priceId: str = Field(..., description="The Stripe Price ID for the subscription.")
+    success_url: Optional[HttpUrl] = Field(None, description="URL to redirect to on successful checkout.")
+    cancel_url: Optional[HttpUrl] = Field(None, description="URL to redirect to on canceled checkout.")
+
+# --- Router ---
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
+# --- Helper ---
+def get_tier_from_price_id(priceId: Optional[str]) -> SubscriptionTier:
+    # Directly use the known Price IDs provided by the user
+    BASIC_PRICE_ID = "price_1RAIdCR4qkxDUOaXTJ7tN1HU"
+    PREMIUM_PRICE_ID = "price_1RAIdbR4qkxDUOaXOszn1Fs2"
+    ENTERPRISE_PRICE_ID = "price_1RAIeIR4qkxDUOaXS39pud7M"
+
+    logger.debug(f"[getTierFromPriceId] Determining tier for priceId: {priceId}")
+    if priceId == BASIC_PRICE_ID:
+        logger.debug(f"Matched BASIC tier for priceId: {priceId}")
+        return SubscriptionTier.BASIC
+    if priceId == PREMIUM_PRICE_ID:
+        logger.debug(f"Matched PREMIUM tier for priceId: {priceId}")
+        return SubscriptionTier.PREMIUM
+    if priceId == ENTERPRISE_PRICE_ID:
+        logger.debug(f"Matched ENTERPRISE tier for priceId: {priceId}")
+        return SubscriptionTier.ENTERPRISE
+
+    # Fallback if no match (or if priceId is None)
+    logger.warning(f"[getTierFromPriceId] Price ID '{priceId}' did not match known tiers. Defaulting to 'free'.")
+    return SubscriptionTier.FREE
+
+# --- API Endpoints ---
 @router.post("/create-checkout-session", response_model=CreateCheckoutSessionResponse)
 async def create_new_checkout_session(
     request: CreateCheckoutSessionRequest,
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(get_current_user),
+    db: AsyncIOMotorClient = Depends(get_db) # Add DB dependency
 ):
     """
-    Create a checkout session for a new subscription.
+    Create a checkout session for a new subscription, only if the user doesn't already have one.
     """
     user_id = current_user.get("id")
     email = current_user.get("email")
     username = current_user.get("username")
-    
-    # Check if user already has a customer ID
-    stripe_customer_id = current_user.get("stripe_customer_id")
-    
-    # If no Stripe customer ID exists, create a new one
-    if not stripe_customer_id:
-        customer = await create_customer(email=email, name=username)
-        stripe_customer_id = customer.id
-        
-        # Update user with Stripe customer ID
-        user_collection = await get_user_collection()
-        await user_collection.update_one(
-            {"id": user_id},
-            {"$set": {"stripe_customer_id": stripe_customer_id}}
-        )
-    
-    # Get price ID based on the subscription tier
-    price_id = get_subscription_price_id(request.tier)
-    
-    # Create checkout session
-    checkout_session = await create_checkout_session(
-        customer_id=stripe_customer_id,
-        price_id=price_id,
-        user_id=user_id,
-        success_url=request.success_url,
-        cancel_url=request.cancel_url
-    )
-    
-    return CreateCheckoutSessionResponse(
-        checkout_url=checkout_session.url,
-        session_id=checkout_session.id
-    )
+    # Check current subscription status directly from the user object fetched by get_current_user
+    current_status_str = current_user.get("subscription_status")
+    try:
+        current_status = SubscriptionStatus(current_status_str) if current_status_str else SubscriptionStatus.INACTIVE
+    except ValueError:
+        current_status = SubscriptionStatus.INACTIVE # Default if invalid value in DB
 
-@router.get("/current", response_model=SubscriptionDetails)
-async def get_current_subscription(current_user: Dict = Depends(get_current_user)):
-    """
-    Get the current subscription details for the user.
-    """
-    subscription_id = current_user.get("stripe_subscription_id")
-    
-    if not subscription_id:
+    # Prevent creating a new session if already active or trialing
+    if current_status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING]:
+        logger.warning(f"User {user_id} attempted to create checkout session while already having status: {current_status}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No active subscription found"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already has an active or trialing subscription."
         )
-    
-    subscription = await get_subscription(subscription_id)
-    
-    # Determine tier from the subscription
-    items = subscription.get("items", {}).get("data", [])
-    price_id = items[0].get("price", {}).get("id") if items else None
-    
-    # Map price ID to tier (this is a simplification - in a real app you might store tier mapping in the DB)
-    tiers = {
-        os.getenv("STRIPE_BASIC_PRICE_ID"): SubscriptionTier.BASIC,
-        os.getenv("STRIPE_PREMIUM_PRICE_ID"): SubscriptionTier.PREMIUM,
-        os.getenv("STRIPE_ENTERPRISE_PRICE_ID"): SubscriptionTier.ENTERPRISE
-    }
-    
-    tier = tiers.get(price_id, SubscriptionTier.FREE)
-    
-    return SubscriptionDetails(
-        id=subscription.id,
-        customer_id=subscription.customer,
-        status=subscription.status,
-        current_period_end=datetime.fromtimestamp(subscription.current_period_end, tz=timezone.utc),
-        tier=tier,
-        cancel_at_period_end=subscription.cancel_at_period_end,
-        created_at=datetime.fromtimestamp(subscription.created, tz=timezone.utc),
-        payment_method=subscription.default_payment_method
-    )
 
-@router.post("/portal", response_model=CustomerPortalResponse)
-async def create_customer_portal(
-    request: CustomerPortalRequest,
+    stripe_customer_id = current_user.get("stripe_customer_id")
+
+    if not user_id or not email:
+         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User information missing")
+
+    if not stripe_customer_id:
+        logger.info(f"No Stripe customer ID found for user {user_id}. Creating new customer.")
+        try:
+            customer = await create_customer(email=email, name=username)
+            stripe_customer_id = customer.id
+            # Use the db dependency directly
+            user_collection = db.get_collection("users") # Assuming collection name is 'users'
+            await user_collection.update_one(
+                {"id": user_id},
+                {"$set": {"stripe_customer_id": stripe_customer_id}}
+            )
+            logger.info(f"Associated Stripe customer {stripe_customer_id} with user {user_id}")
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            logger.error(f"Unexpected error creating/updating customer for user {user_id}: {e}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create customer record")
+
+    try:
+        checkout_session = await create_checkout_session(
+            customer_id=stripe_customer_id,
+            price_id=request.priceId,
+            user_id=str(user_id),
+            success_url=str(request.success_url) if request.success_url else None,
+            cancel_url=str(request.cancel_url) if request.cancel_url else None
+        )
+    except HTTPException as e:
+         raise e
+    except Exception as e:
+        logger.error(f"Unexpected error creating checkout session for user {user_id}: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create checkout session")
+
+    return CreateCheckoutSessionResponse(checkout_url=checkout_session.url, session_id=checkout_session.id)
+
+@router.get("/status", response_model=Optional[SubscriptionDetails])
+async def get_current_subscription_status(current_user: Dict = Depends(get_current_user)):
+    """
+    Get the current subscription status and details for the user from the database.
+    Returns null if no active/trialing subscription exists in the DB.
+    """
+    user_id = current_user.get("id")
+    db_status_str = current_user.get("subscription_status")
+    db_tier_str = current_user.get("subscription_tier") # This is the Stripe Price ID
+    db_end_date = current_user.get("subscription_current_period_end") # Correct field name
+    subscription_id = current_user.get("stripe_subscription_id")
+    stripe_customer_id = current_user.get("stripe_customer_id")
+    cancel_at_period_end = current_user.get("cancel_at_period_end", False) # This field might not be set by current webhook logic
+    created_at = current_user.get("created_at")
+
+    logger.debug(f"Fetching subscription status for user {user_id} from DB.")
+
+    try:
+        db_status = SubscriptionStatus(db_status_str) if db_status_str else SubscriptionStatus.INACTIVE
+        # Use the helper function to convert Price ID string to SubscriptionTier enum
+        db_tier = get_tier_from_price_id(db_tier_str) if db_tier_str else SubscriptionTier.FREE
+    except ValueError:
+        # This should ideally not happen now with the helper, but keep for safety
+        logger.error(f"Invalid status enum value found in DB for user {user_id}: status='{db_status_str}'")
+        db_status = SubscriptionStatus.INACTIVE # Default to inactive on error
+        db_tier = SubscriptionTier.FREE # Default to free on error
+
+    if db_status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING] and db_tier and db_end_date:
+         logger.info(f"Returning subscription status from DB for user {user_id}: Status={db_status}, Tier={db_tier}")
+         return SubscriptionDetails(
+            id=subscription_id or "db_managed",
+            customer_id=stripe_customer_id or "",
+            status=db_status.value,
+            current_period_end=db_end_date,
+            tier=db_tier,
+            cancel_at_period_end=cancel_at_period_end,
+            created_at=created_at or datetime.now(timezone.utc),
+            payment_method=""
+        )
+    else:
+        logger.info(f"No active/trialing subscription found in DB for user {user_id}. Status: {db_status}")
+        return None
+
+# Reinstate response_model
+@router.post("/create-portal-session", response_model=CustomerPortalResponse)
+async def create_customer_portal_session(
+    # Provide a default instance using Body if the request body is empty/missing
+    request: CustomerPortalRequest = Body(default=CustomerPortalRequest()),
     current_user: Dict = Depends(get_current_user)
 ):
     """
     Create a Stripe customer portal session for managing subscriptions.
     """
     stripe_customer_id = current_user.get("stripe_customer_id")
-    
+    user_id = current_user.get("id")
+
     if not stripe_customer_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No Stripe customer found"
-        )
-    
-    portal_session = await create_portal_session(
-        customer_id=stripe_customer_id,
-        return_url=request.return_url
-    )
-    
-    return CustomerPortalResponse(portal_url=portal_session.url)
+        logger.warning(f"User {user_id} attempted to access portal without stripe_customer_id")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Stripe customer ID not found for this user.")
 
-@router.post("/webhook", status_code=status.HTTP_200_OK)
-async def stripe_webhook(
-    request: Request,
-    stripe_signature: str = Header(None)
-):
-    """
-    Handle Stripe webhook events.
-    """
-    if not stripe_signature:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Stripe signature missing"
-        )
-    
-    # Get the request body
-    payload = await request.body()
-    payload_str = payload.decode("utf-8")
-    
-    # Construct and validate the event
-    event = construct_event(payload_str, stripe_signature)
-    
-    # Handle different event types
-    event_type = event.type
-    event_data = event.data.object
-    
-    user_collection = await get_user_collection()
-    
-    if event_type == "checkout.session.completed":
-        # Customer completed the checkout process
-        user_id = event_data.get("client_reference_id") or event_data.get("metadata", {}).get("user_id")
-        
-        if not user_id:
-            logger.error("No user ID found in checkout session event")
-            return {"status": "error", "message": "No user ID found"}
-        
-        subscription_id = event_data.get("subscription")
-        
-        if subscription_id:
-            # Update user with subscription ID
-            await user_collection.update_one(
-                {"id": user_id},
-                {"$set": {
-                    "stripe_subscription_id": subscription_id,
-                    "subscription_status": SubscriptionStatus.ACTIVE,
-                }}
-            )
-            logger.info(f"Updated user {user_id} with subscription {subscription_id}")
-    
-    elif event_type == "customer.subscription.updated":
-        # Subscription was updated
-        subscription_id = event_data.get("id")
-        customer_id = event_data.get("customer")
-        
-        if not subscription_id or not customer_id:
-            logger.error("Missing subscription or customer ID in event")
-            return {"status": "error", "message": "Missing subscription or customer ID"}
-        
-        status = event_data.get("status")
-        current_period_end = datetime.fromtimestamp(event_data.get("current_period_end", 0), tz=timezone.utc)
-        
-        # Update user with new subscription status
-        await user_collection.update_one(
-            {"stripe_customer_id": customer_id},
-            {"$set": {
-                "subscription_status": status,
-                "subscription_end_date": current_period_end
-            }}
-        )
-        logger.info(f"Updated subscription status to {status} for customer {customer_id}")
-    
-    elif event_type == "customer.subscription.deleted":
-        # Subscription was canceled or expired
-        subscription_id = event_data.get("id")
-        customer_id = event_data.get("customer")
-        
-        if not subscription_id or not customer_id:
-            logger.error("Missing subscription or customer ID in event")
-            return {"status": "error", "message": "Missing subscription or customer ID"}
-        
-        # Update user - subscription is now inactive
-        await user_collection.update_one(
-            {"stripe_customer_id": customer_id},
-            {"$set": {
-                "subscription_status": SubscriptionStatus.INACTIVE,
-                "subscription_tier": SubscriptionTier.FREE
-            }}
-        )
-        logger.info(f"Marked subscription {subscription_id} as inactive for customer {customer_id}")
-    
-    return {"status": "success"}
+    return_url = str(request.return_url) if request.return_url else f"{DASHBOARD_URL}/billing"
 
-@router.get("/embed-snippet", response_model=EmbedSnippet)
-async def get_embed_snippet(current_user: Dict = Depends(get_current_user)):
-    """
-    Get the embed snippet for the widget.
-    """
-    user_id = current_user.get("id")
-    api_key = current_user.get("api_key")
-    
-    # If user doesn't have an API key, generate one
-    if not api_key:
-        api_key = generate_api_key()
-        
-        # Update user with API key
-        user_collection = await get_user_collection()
-        await user_collection.update_one(
-            {"id": user_id},
-            {"$set": {"api_key": api_key}}
-        )
-    
-    # API endpoint with HTTPS
-    api_url = "https://lermobackend.up.railway.app"
-    
-    # Generate embed snippet
-    html = f"""<!-- Lermo Widget Container -->
-<div id="lermo-widget-container"></div>"""
-    
-    javascript = f"""<!-- Lermo Widget Script -->
-<script src="https://widget.lermo.ai/index.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {{
-    window.LermoWidget.init({{
-      apiKey: "{api_key}",
-      apiUrl: "{api_url}",
-      containerId: "lermo-widget-container"
-    }});
-  }});
-</script>"""
-    
-    instructions = """
-1. Add the HTML code in your website where you want the widget to appear
-2. Place the JavaScript code just before the closing </body> tag
-3. The widget will automatically load when your page loads
-4. Your API key is embedded in the script and will authenticate your requests
-"""
-    
-    return EmbedSnippet(
-        html=html,
-        javascript=javascript,
-        instructions=instructions
-    )
+    try:
+        portal_session = await create_portal_session(customer_id=stripe_customer_id, return_url=return_url)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Unexpected error creating portal session for customer {stripe_customer_id}: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create portal session")
 
-@router.post("/api-key", response_model=ApiKeyResponse)
-async def regenerate_api_key(current_user: Dict = Depends(get_current_user)):
-    """
-    Regenerate API key for the user.
-    """
-    user_id = current_user.get("id")
-    
-    # Generate new API key
-    new_api_key = generate_api_key()
-    
-    # Update user with new API key
-    user_collection = await get_user_collection()
-    await user_collection.update_one(
-        {"id": user_id},
-        {"$set": {"api_key": new_api_key}}
-    )
-    
-    return ApiKeyResponse(api_key=new_api_key) 
+    # Log the portal session object before attempting to access .url
+    logger.debug(f"Stripe Portal Session object received: {portal_session}")
+
+    # Explicitly return the CustomerPortalResponse model using the URL from the session
+    # Use dictionary access ['url'] which is safer for Stripe objects and add error handling
+    try:
+        portal_url = portal_session['url'] # Use dictionary access
+        return CustomerPortalResponse(portal_url=portal_url)
+    except KeyError:
+        logger.error(f"Stripe portal session object missing 'url' key: {portal_session}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve portal session URL from Stripe response.")
+    except Exception as e: # Catch any other unexpected errors accessing the url
+        logger.error(f"Unexpected error accessing portal session URL: {e}. Session object: {portal_session}")
+        raise HTTPException(status_code=500, detail="Unexpected error processing portal session response.")
+
+# NOTE: The /webhook endpoint below was likely a duplicate or intended for internal use.
+# The primary webhook handler used by 'stripe listen' and configured in Stripe
+# should be the one in `payments.py` mounted at `/api/webhooks/stripe`.
+# Removing this duplicate handler to avoid confusion.

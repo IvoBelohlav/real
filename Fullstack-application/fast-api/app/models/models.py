@@ -242,6 +242,13 @@ class AuthResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str = "bearer"
+    api_key: Optional[str] = None # Add optional api_key field
+
+class MessageResponse(BaseModel):
+    message: str
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
 
 class GuidedChatOption(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

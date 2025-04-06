@@ -33,6 +33,7 @@ class GuidedChatFlow(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str = Field(..., max_length=100)
     options: List[GuidedChatOption] = Field(default_factory=list)
+    user_id: Optional[str] = None # Add user_id field to associate flow with a user
     language: str = "cze"
     active: bool = True
 

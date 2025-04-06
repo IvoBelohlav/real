@@ -110,9 +110,12 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
     const {
         data: fetchedWidgetConfig,
     } = useQuery({
-        key: ['widgetConfig'],
+        // Use a unique query key for the public endpoint to avoid cache conflicts
+        // if the dashboard also fetches config (though it uses a different endpoint now)
+        key: ['publicWidgetConfig'], 
         queryFn: async () => {
-            const response = await api.get('/api/widget-config');
+            // Use the correct public endpoint which validates API key and origin
+            const response = await api.get('/api/public/widget-config'); 
             return response.data;
         },
         onSuccess: (data) => {
@@ -1090,75 +1093,76 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                     {isContactAdminFormVisible && (
                         <motion.form
                             onSubmit={handleContactFormSubmit}
-                            className={styles['dvojkavit-contact-form']}
+                            className={styles.contactForm} // Use new module class
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0, transition: { duration: 0.4 } }}
                         >
-                            <div className={styles['dvojkavit-form-header']} style={{ backgroundColor: brandTheme.secondaryColor, color: "#FFFFFF", borderRadius: '0.5rem 0.5rem 0 0' }}>
-                                <h3 className={styles['dvojkavit-form-title']} style={{ color: "#FFFFFF" }}>
+                            <div className={styles.formHeader} style={{ backgroundColor: brandTheme.secondaryColor }}>
+                                <h3 className={styles.formTitle} style={{ color: "#FFFFFF" }}>
                                     Kontaktujte nás ✨
                                 </h3>
-                                <p className={styles['dvojkavit-form-subtitle']} style={{ color: "#FFFFFF" }}>
+                                <p className={styles.formSubtitle} style={{ color: "#FFFFFF" }}>
                                     Vyplňte prosím formulář a my se vám ozveme co nejdříve.
                                 </p>
                             </div>
 
                             <div>
-                                <label htmlFor="contact-email" className={styles['dvojkavit-form-label']} style={{ color: brandTheme.textColor }}>
-                                    <Mail className={styles['dvojkavit-form-label-icon']} /> Váš email *
+                                <label htmlFor="contact-email" className={styles.formLabel} style={{ color: brandTheme.textColor }}>
+                                    <Mail className={styles.formLabelIcon} /> Váš email *
                                 </label>
                                 <input
                                     type="email"
                                     id="contact-email"
-                                    className={styles['dvojkavit-form-input']}
+                                    className={styles.formInput} // Use new module class
                                     value={contactEmail}
                                     onChange={(e) => setContactEmail(e.target.value)}
                                     required
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.primaryColor}80`,
+                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
                                     }}
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="contact-phone" className={styles['dvojkavit-form-label']} style={{ color: brandTheme.textColor }}>
-                                    <Phone className={styles['dvojkavit-form-label-icon']} /> Telefonní číslo (nepovinné)
+                                <label htmlFor="contact-phone" className={styles.formLabel} style={{ color: brandTheme.textColor }}>
+                                    <Phone className={styles.formLabelIcon} /> Telefonní číslo (nepovinné)
                                 </label>
                                 <input
                                     type="tel"
                                     id="contact-phone"
-                                    className={styles['dvojkavit-form-input']}
+                                    className={styles.formInput} // Use new module class
                                     value={contactPhone}
                                     onChange={(e) => setContactPhone(e.target.value)}
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.primaryColor}80`,
+                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
                                     }}
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="contact-message" className={styles['dvojkavit-form-label']} style={{ color: brandTheme.textColor }}>
+                                <label htmlFor="contact-message" className={styles.formLabel} style={{ color: brandTheme.textColor }}>
                                     Vaše zpráva *
                                 </label>
                                 <textarea
                                     id="contact-message"
                                     rows={3}
-                                    className={styles['dvojkavit-form-textarea']}
+                                    className={styles.formTextarea} // Use new module class
                                     value={contactMessage}
                                     onChange={(e) => setContactMessage(e.target.value)}
                                     required
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.primaryColor}80`,
+                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
                                     }}
                                 ></textarea>
                             </div>
 
+                            {/* Keep focus styles */}
                             <style jsx global>{`
                                 input:focus, textarea:focus {
                                     outline: none !important;
@@ -1167,15 +1171,14 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                 }
                             `}</style>
 
-                            <div className={styles['dvojkavit-form-actions']}>
+                            <div className={styles.formActions}>
                                 <motion.button
                                     type="button"
                                     onClick={handleContactFormCancel}
-                                    className={styles['dvojkavit-form-cancel-button']}
+                                    className={styles.formCancelButton} // Use new module class
                                     style={{
-                                        backgroundColor: 'transparent',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.secondaryColor}80`,
+                                        borderColor: `${brandTheme.secondaryColor}80`, // Use borderColor
                                     }}
                                     whileHover={{ scale: 1.03, boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
                                     whileTap={{ scale: 0.98 }}
@@ -1185,11 +1188,10 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
 
                                 <motion.button
                                     type="submit"
-                                    className={styles['dvojkavit-form-submit-button']}
+                                    className={styles.formSubmitButton} // Use new module class
                                     style={{
                                         background: brandTheme.primaryColor,
                                         color: '#FFFFFF',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                     }}
                                     whileHover={{ scale: 1.03, boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }}
                                     whileTap={{ scale: 0.98 }}
@@ -1200,13 +1202,12 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                         </motion.form>
                     )}
 
-                    {/* Thank You Message */}
+                    {/* Thank You Message - Desktop */}
                     {contactFormSubmitted && (
                         <motion.div
-                            className={styles['dvojkavit-thank-you-container']}
+                            className={styles.thankYouContainer} // Use new module class
                             style={{
                                 background: `linear-gradient(to right, ${brandTheme.primaryColor}10, ${brandTheme.secondaryColor}10)`,
-                                borderRadius: '1rem',
                                 border: `1px solid ${brandTheme.primaryColor}30`,
                             }}
                             initial={{ opacity: 0, y: 20 }}
@@ -1214,7 +1215,7 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                             exit={{ opacity: 0, y: 20, transition: { duration: 0.2 } }}
                         >
                             <motion.div
-                                className={styles['dvojkavit-thank-you-icon-container']}
+                                className={styles.thankYouIconContainer} // Use new module class
                                 style={{
                                     backgroundColor: `${brandTheme.primaryColor}20`,
                                     border: `2px solid ${brandTheme.primaryColor}`
@@ -1226,11 +1227,11 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                 <CheckCircle size={32} color={brandTheme.primaryColor} />
                             </motion.div>
 
-                            <h3 className={styles['dvojkavit-thank-you-title']} style={{ color: brandTheme.primaryColor }}>
+                            <h3 className={styles.thankYouTitle} style={{ color: brandTheme.primaryColor }}>
                                 Děkujeme!
                             </h3>
 
-                            <p className={styles['dvojkavit-thank-you-text']} style={{ color: brandTheme.textColor }}>
+                            <p className={styles.thankYouText} style={{ color: brandTheme.textColor }}>
                                 Vaše zpráva byla úspěšně odeslána. Budeme vás kontaktovat co nejdříve.
                             </p>
 
@@ -1239,7 +1240,7 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                     setContactFormSubmitted(false);
                                     setMode('chat');
                                 }}
-                                className={styles['dvojkavit-thank-you-button']}
+                                className={styles.thankYouButton} // Use new module class
                                 style={{
                                     background: brandTheme.accentGradient,
                                     color: '#FFFFFF',
@@ -1707,78 +1708,80 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                         </div>
                     )}
 
+                    {/* --- CONTACT ADMIN FORM (Mobile) --- */}
                     {isContactAdminFormVisible && (
                         <motion.form
                             onSubmit={handleContactFormSubmit}
-                            className={styles['dvojkavit-mobile-form']}
+                            className={styles.mobileForm} // Use new module class
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0, transition: { duration: 0.4 } }}
                         >
-                            <div className={styles['dvojkavit-mobile-form-header']} style={{ backgroundColor: brandTheme.secondaryColor, color: "#FFFFFF", borderRadius: '0.5rem 0.5rem 0 0' }}>
-                                <h3 className={styles['dvojkavit-mobile-form-title']} style={{ color: "#FFFFFF" }}>
+                            <div className={styles.mobileFormHeader} style={{ backgroundColor: brandTheme.secondaryColor }}>
+                                <h3 className={styles.mobileFormTitle} style={{ color: "#FFFFFF" }}>
                                     Kontaktujte nás
                                 </h3>
-                                <p className={styles['dvojkavit-mobile-form-subtitle']} style={{ color: "#FFFFFF" }}>
+                                <p className={styles.mobileFormSubtitle} style={{ color: "#FFFFFF" }}>
                                     Vyplňte prosím formulář a my se vám ozveme co nejdříve.
                                 </p>
                             </div>
 
                             <div>
-                                <label htmlFor="contact-email" className={styles['dvojkavit-mobile-form-label']} style={{ color: brandTheme.textColor }}>
-                                    <Mail className={styles['dvojkavit-mobile-form-label-icon']} /> Váš email *
+                                <label htmlFor="contact-email-mobile" className={styles.mobileFormLabel} style={{ color: brandTheme.textColor }}>
+                                    <Mail className={styles.mobileFormLabelIcon} /> Váš email *
                                 </label>
                                 <input
                                     type="email"
-                                    id="contact-email"
-                                    className={styles['dvojkavit-mobile-form-input']}
+                                    id="contact-email-mobile"
+                                    className={styles.mobileFormInput} // Use new module class
                                     value={contactEmail}
                                     onChange={(e) => setContactEmail(e.target.value)}
                                     required
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.primaryColor}80`,
+                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
                                     }}
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="contact-phone" className={styles['dvojkavit-mobile-form-label']} style={{ color: brandTheme.textColor }}>
-                                    <Phone className={styles['dvojkavit-mobile-form-label-icon']} /> Telefonní číslo (nepovinné)
+                                <label htmlFor="contact-phone-mobile" className={styles.mobileFormLabel} style={{ color: brandTheme.textColor }}>
+                                    <Phone className={styles.mobileFormLabelIcon} /> Telefonní číslo (nepovinné)
                                 </label>
                                 <input
                                     type="tel"
-                                    id="contact-phone"
-                                    className={styles['dvojkavit-mobile-form-input']}
+                                    id="contact-phone-mobile"
+                                    className={styles.mobileFormInput} // Use new module class
                                     value={contactPhone}
                                     onChange={(e) => setContactPhone(e.target.value)}
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.primaryColor}80`,
+                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
                                     }}
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="contact-message" className={styles['dvojkavit-mobile-form-label']} style={{ color: brandTheme.textColor }}>
+                                <label htmlFor="contact-message-mobile" className={styles.mobileFormLabel} style={{ color: brandTheme.textColor }}>
                                     Vaše zpráva *
                                 </label>
                                 <textarea
-                                    id="contact-message"
+                                    id="contact-message-mobile"
                                     rows={3}
-                                    className={styles['dvojkavit-mobile-form-textarea']}
+                                    className={styles.mobileFormTextarea} // Use new module class
                                     value={contactMessage}
                                     onChange={(e) => setContactMessage(e.target.value)}
                                     required
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.primaryColor}80`,
+                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
                                     }}
                                 ></textarea>
                             </div>
 
+                            {/* Keep focus styles */}
                             <style jsx global>{`
                                 input:focus, textarea:focus {
                                     outline: none !important;
@@ -1787,15 +1790,14 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                 }
                             `}</style>
 
-                            <div className={styles['dvojkavit-mobile-form-actions']}>
+                            <div className={styles.mobileFormActions}>
                                 <motion.button
                                     type="button"
                                     onClick={handleContactFormCancel}
-                                    className={styles['dvojkavit-mobile-form-cancel-button']}
+                                    className={styles.mobileFormCancelButton} // Use new module class
                                     style={{
-                                        backgroundColor: 'transparent',
                                         color: brandTheme.textColor,
-                                        border: `1px solid ${brandTheme.secondaryColor}80`,
+                                        borderColor: `${brandTheme.secondaryColor}80`, // Use borderColor
                                     }}
                                     whileHover={{ scale: 1.03, boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}
                                     whileTap={{ scale: 0.98 }}
@@ -1805,12 +1807,10 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
 
                                 <motion.button
                                     type="submit"
-                                    className={styles['dvojkavit-mobile-form-submit-button']}
+                                    className={styles.mobileFormSubmitButton} // Use new module class
                                     style={{
                                         backgroundColor: brandTheme.primaryColor,
                                         color: '#FFFFFF',
-                                        borderRadius: '0.5rem',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                                     }}
                                     whileHover={{ scale: 1.03, boxShadow: '0 4px 8px rgba(0,0,0,0.15)' }}
                                     whileTap={{ scale: 0.98 }}
@@ -1821,13 +1821,12 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                         </motion.form>
                     )}
 
-                    {/* Thank You Message - Mobile*/}
+                    {/* Thank You Message - Mobile */}
                     {contactFormSubmitted && (
                         <motion.div
-                            className={styles['dvojkavit-mobile-thank-you-container']}
+                            className={styles.mobileThankYouContainer} // Use new module class
                             style={{
                                 background: `linear-gradient(to right, ${brandTheme.primaryColor}10, ${brandTheme.secondaryColor}10)`,
-                                borderRadius: '0.8rem',
                                 border: `1px solid ${brandTheme.primaryColor}30`,
                             }}
                             initial={{ opacity: 0, y: 10 }}
@@ -1835,7 +1834,7 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                             exit={{ opacity: 0, y: 10, transition: { duration: 0.2 } }}
                         >
                             <motion.div
-                                className={styles['dvojkavit-mobile-thank-you-icon-container']}
+                                className={styles.mobileThankYouIconContainer} // Use new module class
                                 style={{
                                     backgroundColor: `${brandTheme.primaryColor}20`,
                                     border: `2px solid ${brandTheme.primaryColor}`
@@ -1847,11 +1846,11 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                 <CheckCircle size={24} color={brandTheme.primaryColor} />
                             </motion.div>
 
-                            <h3 className={styles['dvojkavit-mobile-thank-you-title']} style={{ color: brandTheme.primaryColor }}>
+                            <h3 className={styles.mobileThankYouTitle} style={{ color: brandTheme.primaryColor }}>
                                 Děkujeme!
                             </h3>
 
-                            <p className={styles['dvojkavit-mobile-thank-you-text']} style={{ color: brandTheme.textColor }}>
+                            <p className={styles.mobileThankYouText} style={{ color: brandTheme.textColor }}>
                                 Vaše zpráva byla odeslána.
                             </p>
 
@@ -1860,7 +1859,7 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                     setContactFormSubmitted(false);
                                     setMode('chat');
                                 }}
-                                className={styles['dvojkavit-mobile-thank-you-button']}
+                                className={styles.mobileThankYouButton} // Use new module class
                                 style={{
                                     background: brandTheme.accentGradient,
                                     color: '#FFFFFF',

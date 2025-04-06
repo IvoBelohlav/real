@@ -7,6 +7,7 @@ from bson import ObjectId
 from app.models.widget_faq_models import WidgetFAQItem, WidgetFAQCreate
 from app.utils.mongo import get_widget_faq_collection, serialize_mongo_doc
 from app.utils.logging_config import get_module_logger
+from app.utils.dependencies import get_current_active_customer
 
 router = APIRouter()
 logger = get_module_logger(__name__)
@@ -15,15 +16,19 @@ async def get_widget_faq_items_collection(): # Dependency function to get widget
     return await get_widget_faq_collection()
 
 @router.get("/widget-faqs", response_model=List[WidgetFAQItem])
-async def get_widget_faqs_endpoint(widget_faq_collection = Depends(get_widget_faq_items_collection)):
+async def get_widget_faqs_endpoint(
+    current_user: dict = Depends(get_current_active_customer),
+    widget_faq_collection = Depends(get_widget_faq_items_collection)
+):
     """
     Retrieve all widget FAQs.
     """
     try:
         logger.debug("Fetching widget FAQs from database...")
+        user_id = current_user["id"]
         
-        # Construct the filter
-        filter_criteria = {"active": True, "show_in_widget": True}
+        # Construct the filter with user_id for multi-tenancy
+        filter_criteria = {"active": True, "show_in_widget": True, "user_id": user_id}
 
         # Print the filter criteria to the console
         print(f"Filter criteria: {filter_criteria}")
@@ -33,7 +38,7 @@ async def get_widget_faqs_endpoint(widget_faq_collection = Depends(get_widget_fa
         )
 
         # DETAILED LOGGING BEFORE QUERY EXECUTION:
-        logger.debug(f"Query filter being used: {json.dumps({'active': True, 'show_in_widget': True})}")
+        logger.debug(f"Query filter being used: {json.dumps(filter_criteria)}")
 
         widget_faqs_raw = await widget_faqs_cursor.to_list(length=None)
 
@@ -52,12 +57,17 @@ async def get_widget_faqs_endpoint(widget_faq_collection = Depends(get_widget_fa
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not retrieve widget FAQs")
 
 @router.get("/widget-faqs/{faq_id}", response_model=WidgetFAQItem)
-async def get_widget_faq_by_id(faq_id: str, widget_faq_collection = Depends(get_widget_faq_items_collection)):
+async def get_widget_faq_by_id(
+    faq_id: str, 
+    current_user: dict = Depends(get_current_active_customer),
+    widget_faq_collection = Depends(get_widget_faq_items_collection)
+):
     """
     Retrieve a specific widget FAQ by ID.
     """
     try:
         logger.debug(f"Fetching widget FAQ with ID: {faq_id}")
+        user_id = current_user["id"]
         
         # Convert string ID to ObjectId for MongoDB
         try:
@@ -66,8 +76,8 @@ async def get_widget_faq_by_id(faq_id: str, widget_faq_collection = Depends(get_
             logger.error(f"Invalid FAQ ID format: {faq_id}, error: {e}")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid FAQ ID format")
         
-        # Find the FAQ
-        faq = await widget_faq_collection.find_one({"_id": obj_id})
+        # Find the FAQ with user_id filter
+        faq = await widget_faq_collection.find_one({"_id": obj_id, "user_id": user_id})
         
         if not faq:
             logger.error(f"FAQ not found for ID: {faq_id}")
@@ -89,16 +99,23 @@ async def get_widget_faq_by_id(faq_id: str, widget_faq_collection = Depends(get_
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not retrieve widget FAQ")
 
 @router.post("/widget-faqs", response_model=WidgetFAQItem, status_code=status.HTTP_201_CREATED)
-async def create_widget_faq(widget_faq_create: WidgetFAQCreate, widget_faq_collection = Depends(get_widget_faq_items_collection)):
+async def create_widget_faq(
+    widget_faq_create: WidgetFAQCreate, 
+    current_user: dict = Depends(get_current_active_customer),
+    widget_faq_collection = Depends(get_widget_faq_items_collection)
+):
     """
     Create a new widget FAQ.
     """
     try:
         logger.debug(f"Creating new widget FAQ: {widget_faq_create}")
+        user_id = current_user["id"]
+        
         faq_data = widget_faq_create.model_dump()
 
-        # Force active to be True:
-        faq_data["active"] = True  # Add this line
+        # Force active to be True and set user_id
+        faq_data["active"] = True
+        faq_data["user_id"] = user_id
 
         result = await widget_faq_collection.insert_one(faq_data)
         new_faq = await widget_faq_collection.find_one({"_id": result.inserted_id})
@@ -111,12 +128,18 @@ async def create_widget_faq(widget_faq_create: WidgetFAQCreate, widget_faq_colle
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create widget FAQ")
 
 @router.put("/widget-faqs/{faq_id}", response_model=WidgetFAQItem)
-async def update_widget_faq(faq_id: str, widget_faq_update: WidgetFAQCreate, widget_faq_collection = Depends(get_widget_faq_items_collection)):
+async def update_widget_faq(
+    faq_id: str, 
+    widget_faq_update: WidgetFAQCreate, 
+    current_user: dict = Depends(get_current_active_customer),
+    widget_faq_collection = Depends(get_widget_faq_items_collection)
+):
     """
     Update an existing widget FAQ.
     """
     try:
         logger.debug(f"Updating widget FAQ with ID: {faq_id}")
+        user_id = current_user["id"]
         
         # Convert string ID to ObjectId for MongoDB
         try:
@@ -124,20 +147,21 @@ async def update_widget_faq(faq_id: str, widget_faq_update: WidgetFAQCreate, wid
         except Exception:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid FAQ ID format")
         
-        # Check if the FAQ exists
-        existing_faq = await widget_faq_collection.find_one({"_id": obj_id})
+        # Check if the FAQ exists and belongs to the user
+        existing_faq = await widget_faq_collection.find_one({"_id": obj_id, "user_id": user_id})
         if not existing_faq:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="FAQ not found")
         
         # Prepare update data
         update_data = widget_faq_update.model_dump()
         
-        # Force active to be True
+        # Force active to be True and ensure user_id is set
         update_data["active"] = True
+        update_data["user_id"] = user_id
         
         # Update the FAQ
         result = await widget_faq_collection.update_one(
-            {"_id": obj_id},
+            {"_id": obj_id, "user_id": user_id},
             {"$set": update_data}
         )
         
@@ -154,12 +178,17 @@ async def update_widget_faq(faq_id: str, widget_faq_update: WidgetFAQCreate, wid
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update widget FAQ")
 
 @router.delete("/widget-faqs/{faq_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_widget_faq(faq_id: str, widget_faq_collection = Depends(get_widget_faq_items_collection)):
+async def delete_widget_faq(
+    faq_id: str, 
+    current_user: dict = Depends(get_current_active_customer),
+    widget_faq_collection = Depends(get_widget_faq_items_collection)
+):
     """
     Delete a widget FAQ.
     """
     try:
         logger.debug(f"Deleting widget FAQ with ID: {faq_id}")
+        user_id = current_user["id"]
         
         # Convert string ID to ObjectId for MongoDB
         try:
@@ -167,13 +196,13 @@ async def delete_widget_faq(faq_id: str, widget_faq_collection = Depends(get_wid
         except Exception:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid FAQ ID format")
         
-        # Check if the FAQ exists
-        existing_faq = await widget_faq_collection.find_one({"_id": obj_id})
+        # Check if the FAQ exists and belongs to the user
+        existing_faq = await widget_faq_collection.find_one({"_id": obj_id, "user_id": user_id})
         if not existing_faq:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="FAQ not found")
         
         # Delete the FAQ
-        result = await widget_faq_collection.delete_one({"_id": obj_id})
+        result = await widget_faq_collection.delete_one({"_id": obj_id, "user_id": user_id})
         
         if result.deleted_count > 0:
             return None

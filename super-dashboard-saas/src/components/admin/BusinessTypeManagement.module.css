@@ -1,0 +1,513 @@
+/* BusinessTypeManagement.module.css */
+
+.container {
+  max-width: 1600px; /* Wider container similar to Guided Chat Manager */
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem; /* Increased margin */
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Increased gap */
+}
+
+.title {
+  font-size: 1.875rem; /* Larger font */
+  font-weight: 700;
+  color: #1f2937;
+  position: relative;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: #E01E26;
+  border-radius: 2px;
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: 0.75rem; /* Increased gap */
+  background-color: #E01E26;
+  color: white;
+  font-weight: 600; /* Bolder text */
+  padding: 0.75rem 1.5rem; /* Increased padding */
+  border-radius: 0.5rem; /* Slightly more rounded */
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px; /* Minimum width */
+  font-size: 1rem; /* Slightly larger font */
+}
+
+.addButton:hover {
+  background-color: #B61319;
+  transform: translateY(-1px); /* Subtle lift effect */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+}
+
+.addButtonIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: 0.75rem; /* Increased gap */
+  background-color: transparent;
+  color: #E01E26;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem; /* Increased padding */
+  border-radius: 0.5rem; /* Slightly more rounded */
+  border: 1px solid #E01E26;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 180px; /* Minimum width */
+}
+
+.backButton:hover {
+  background-color: #FEF2F2; /* Light red background */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: 0.75rem; /* Increased gap */
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem; /* Increased padding */
+  border-radius: 0.5rem; /* Slightly more rounded */
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px; /* Minimum width */
+}
+
+.refreshButton:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1.5rem; /* Added top margin */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Added subtle shadow */
+  border-radius: 0.5rem; /* Rounded corners */
+  overflow: hidden; /* Ensure border radius is applied */
+}
+
+.tableHeader {
+  text-align: left;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #4b5563;
+  text-transform: uppercase;
+  background-color: #f9fafb; /* Light background for header */
+  border-bottom: 2px solid #e5e7eb; /* Slightly thicker border */
+}
+
+.tableHeaderCell {
+  padding: 1rem 1.5rem; /* Increased padding */
+}
+
+.tableBody {
+  font-size: 0.9rem; /* Slightly larger text */
+}
+
+.tableRow {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.2s ease; /* Smooth transition */
+}
+
+.tableRow:hover {
+  background-color: #f9fafb;
+}
+
+.tableCell {
+  padding: 1.25rem 1.5rem; /* Increased padding */
+  color: #4b5563;
+}
+
+.businessType {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1rem; /* Slightly larger */
+}
+
+.actionsCell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem; /* Increased gap */
+  justify-content: flex-end; /* Align to the right */
+}
+
+.iconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s ease;
+  padding: 0.5rem; /* Increased padding */
+  border-radius: 0.375rem; /* Rounded corners */
+  width: 2.5rem; /* Fixed width */
+  height: 2.5rem; /* Fixed height */
+}
+
+.iconButton:hover {
+  color: #E01E26;
+  background-color: #f3f4f6; /* Background on hover */
+}
+
+.deleteButton:hover {
+  color: #dc2626;
+  background-color: #FEE2E2; /* Light red background */
+}
+
+.productsButton {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: 0.5rem; /* Increased gap */
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-size: 0.875rem; /* Slightly larger */
+  font-weight: 500;
+  padding: 0.5rem 1rem; /* Increased padding */
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px; /* Minimum width */
+}
+
+.productsButton:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.productsButtonIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.emptyState {
+  padding: 4rem 2rem; /* Increased padding */
+  text-align: center;
+  border-radius: 0.75rem; /* More rounded */
+  border: 2px dashed #e5e7eb;
+  margin-top: 2rem; /* Increased margin */
+  background-color: #f9fafb; /* Light background */
+}
+
+.emptyStateText {
+  color: #6b7280;
+  margin-bottom: 1.5rem; /* Increased margin */
+  font-size: 1.125rem; /* Larger text */
+}
+
+.emptyStateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center; /* Center content */
+  gap: 0.75rem; /* Increased gap */
+  background-color: #E01E26;
+  color: white;
+  font-weight: 600; /* Bolder text */
+  padding: 0.75rem 1.5rem; /* Increased padding */
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 200px; /* Wider button */
+  font-size: 1rem; /* Slightly larger font */
+}
+
+.emptyStateButton:hover {
+  background-color: #B61319;
+  transform: translateY(-1px); /* Subtle lift effect */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+}
+
+/* Improved loading state */
+.loadingState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 0; /* Increased padding */
+  width: 100%;
+}
+
+.loadingSpinner {
+  width: 3rem; /* Larger spinner */
+  height: 3rem; /* Larger spinner */
+  border: 3px solid #e5e7eb;
+  border-radius: 50%;
+  border-top-color: #E01E26;
+  animation: spin 1s linear infinite;
+}
+
+/* Make sure mobile view is responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 1.5rem;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .actionsCell {
+    justify-content: flex-start;
+  }
+  
+  .addButton, .backButton, .refreshButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Add back the animation keyframes */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 32rem;
+  height: 100vh;
+  background-color: white;
+  box-shadow: -10px 0 15px -3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+.sidebarOpen {
+  transform: translateX(0);
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sidebarTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #E01E26;
+}
+
+.sectionMargin {
+  margin-bottom: 2rem;
+}
+
+.flexContainer {
+  display: flex;
+  align-items: center;
+}
+
+.flexBetween {
+  justify-content: space-between;
+}
+
+.marginBottom4 {
+  margin-bottom: 1rem;
+}
+
+.marginBottom6 {
+  margin-bottom: 1.5rem;
+}
+
+.subheading {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.accentText {
+  color: #E01E26;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.buttonPrimary {
+  background-color: #E01E26;
+  color: white;
+  border: 1px solid #E01E26;
+}
+
+.buttonPrimary:hover {
+  background-color: #B61319;
+}
+
+.iconMarginRight {
+  margin-right: 0.5rem;
+}
+
+.helpContainer {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.helpHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.helpHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.infoIcon {
+  color: #E01E26;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.helpHeaderTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.chevronIcon {
+  color: #6b7280;
+}
+
+.helpContent {
+  padding: 1.5rem;
+  display: none;
+}
+
+.helpParagraph {
+  margin-bottom: 1rem;
+}
+
+.helpList {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.helpListItem {
+  margin-bottom: 0.5rem;
+}
+
+.marginTop6 {
+  margin-top: 1.5rem;
+}
+
+.productSection {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.businessTypesContainer {
+  width: 100%;
+  margin-top: 1.5rem;
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon {
+  color: #E01E26;
+} 

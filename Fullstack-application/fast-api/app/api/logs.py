@@ -6,6 +6,7 @@ from app.models.models import ConversationEntry
 from app.utils.mongo import get_db, get_conversations_collection, serialize_mongo_doc
 from motor.motor_asyncio import AsyncIOMotorClient
 from app.utils.logging_config import get_module_logger
+from app.utils.dependencies import get_current_active_customer
 
 logger = get_module_logger(__name__)
 
@@ -13,6 +14,7 @@ router = APIRouter()
 
 @router.get("/conversations", response_model=List[ConversationEntry])
 async def get_conversations_endpoint(
+    current_user: dict = Depends(get_current_active_customer),
     db: AsyncIOMotorClient = Depends(get_db),
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(10, ge=1, le=100, description="Page size"),
@@ -24,11 +26,15 @@ async def get_conversations_endpoint(
     logger.info(f"Fetching conversations - page: {page}, page_size: {page_size}, query: {query}")
     conversations_collection = await get_conversations_collection()
     skip = (page - 1) * page_size
+    user_id = current_user["id"]
 
     try:
-        query_filter = {}
+        # Start with user_id filter for multi-tenancy
+        query_filter = {"user_id": user_id}
+        
+        # Add text search if query is provided
         if query:
-            query_filter["$text"] = {"$search": query} # Enable text search if query is provided
+            query_filter["$text"] = {"$search": query}
 
         cursor = conversations_collection.find(query_filter).sort([("timestamp", -1)]).skip(skip).limit(page_size)
         conversations = await cursor.to_list(length=page_size)
@@ -40,13 +46,24 @@ async def get_conversations_endpoint(
         raise HTTPException(status_code=500, detail="Could not retrieve conversations")
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationEntry)
-async def get_conversation_by_id(conversation_id: str, db: AsyncIOMotorClient = Depends(get_db)):
+async def get_conversation_by_id(
+    conversation_id: str, 
+    current_user: dict = Depends(get_current_active_customer),
+    db: AsyncIOMotorClient = Depends(get_db)
+):
     """
     Retrieves a specific conversation by its ID.
     """
     conversations_collection = await get_conversations_collection()
+    user_id = current_user["id"]
+    
     try:
-        conversation = await conversations_collection.find_one({"conversation_id": conversation_id})
+        # Add user_id filter for multi-tenancy
+        conversation = await conversations_collection.find_one({
+            "conversation_id": conversation_id,
+            "user_id": user_id
+        })
+        
         if conversation:
             return ConversationEntry(**serialize_mongo_doc(conversation))
         else:

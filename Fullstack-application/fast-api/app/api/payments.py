@@ -1,14 +1,18 @@
 import stripe
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, List # Added List
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
 from pydantic import BaseModel, Field
 from starlette.responses import JSONResponse
+from datetime import datetime # Added datetime
 from app.utils.mongo import get_user_collection
 from app.models.user import User
 import uuid
 import logging
 from dotenv import load_dotenv
+from app.utils.dependencies import get_current_active_customer, get_current_user
+from app.utils.stripe_utils import construct_event, handle_webhook_event # Added import for webhook handlers
+from fastapi import status
 
 # Reload environment variables to ensure we get the latest values
 load_dotenv()
@@ -103,7 +107,6 @@ CANCEL_URL = f"{FRONTEND_URL}/subscription-test?stripe_checkout=cancelled"
 
 class CheckoutSessionRequest(BaseModel):
     price_id: str = Field(..., description="Stripe Price ID for the subscription")
-    user_id: str = Field(..., description="Test User ID for this checkout session")
 
 class CheckoutSessionResponse(BaseModel):
     checkout_url: str = Field(..., description="URL to redirect the user to Stripe Checkout")
@@ -118,9 +121,18 @@ class WidgetSnippetResponse(BaseModel):
 @router.post("/payments/create-checkout-session", response_model=CheckoutSessionResponse)
 async def create_checkout_session(
     request: CheckoutSessionRequest,
-    background_tasks: BackgroundTasks
+    background_tasks: BackgroundTasks,
+    current_user: Optional[Dict] = Depends(get_current_user)
 ):
     try:
+        # Ensure user is authenticated
+        if not current_user:
+            logger.error("Unauthenticated request to create checkout session")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Authentication required to create checkout session"
+            )
+            
         # Ensure Stripe API key is set
         if not stripe.api_key:
             # Try to load it again
@@ -129,26 +141,16 @@ async def create_checkout_session(
                 logger.error("Stripe API key still not available")
                 raise HTTPException(status_code=500, detail="Stripe API key not configured on server")
         
-        # For testing purposes, we'll generate a basic user record
-        user_collection = await get_user_collection()
-        
-        # Check if user exists by ID
-        existing_user = await user_collection.find_one({"id": request.user_id})
-        
-        if not existing_user:
-            # Create a test user if it doesn't exist
-            user = {
-                "id": request.user_id,
-                "email": f"test_{request.user_id}@example.com",
-                "subscription_status": "pending"
-            }
-            await user_collection.insert_one(user)
+        # Get user ID from the authenticated user
+        user_id = current_user["id"]
+        logger.info(f"Creating checkout session for user {user_id}")
         
         # If the price ID provided doesn't exist, try to use our test price
         price_id = request.price_id
         try:
             # Verify the price exists
             stripe.Price.retrieve(price_id)
+            logger.info(f"Using price ID: {price_id}")
         except stripe.error.StripeError:
             # Price doesn't exist, use our test price
             logger.warning(f"Price ID {price_id} not found in Stripe, using test price")
@@ -168,13 +170,17 @@ async def create_checkout_session(
                 "quantity": 1,
             }],
             mode="subscription",
-            success_url=SUCCESS_URL.replace("{USER_ID}", request.user_id),
+            success_url=SUCCESS_URL.replace("{USER_ID}", user_id),
             cancel_url=CANCEL_URL,
-            client_reference_id=request.user_id,
+            client_reference_id=user_id,
         )
         
-        return {"checkout_url": checkout_session.url}
+        logger.info(f"Checkout session created: {checkout_session.id} for user {user_id}")
+        return {"checkout_url": checkout_session.url, "session_id": checkout_session.id}
         
+    except HTTPException:
+        # Re-raise HTTP exceptions as they already have the right status code
+        raise
     except stripe.error.StripeError as e:
         logger.error(f"Stripe error: {str(e)}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -183,27 +189,23 @@ async def create_checkout_session(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/widget-snippet", response_model=WidgetSnippetResponse)
-async def get_widget_snippet(user_id: str):
+async def get_widget_snippet(current_user: Dict = Depends(get_current_active_customer)):
     try:
-        # Check if user has an active subscription
-        user_collection = await get_user_collection()
-        user = await user_collection.find_one({"id": user_id})
+        # Get user_id from current_user
+        user_id = current_user["id"]
         
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-        
-        # In a real implementation, we would check if user.subscription_status == "active"
-        # For test purposes, we'll generate a snippet regardless
+        # User is already authenticated via the dependency, no need to check if user exists
+        # Check if user already has an API key
+        api_key = current_user.get("api_key")
         
         # Generate a unique API key if the user doesn't have one
-        if not user.get("api_key"):
+        if not api_key:
             api_key = f"test_api_{uuid.uuid4().hex}"
+            user_collection = await get_user_collection()
             await user_collection.update_one(
                 {"id": user_id},
                 {"$set": {"api_key": api_key}}
             )
-        else:
-            api_key = user["api_key"]
         
         # Generate the widget snippet with the API key
         snippet = f"""<!-- Lermo AI Widget -->
@@ -231,6 +233,10 @@ async def get_widget_snippet(user_id: str):
 
 @router.post("/webhooks/stripe")
 async def stripe_webhook(request: Request):
+    """
+    Webhook endpoint for Stripe events.
+    Uses the centralized handler from stripe_utils.py.
+    """
     # Get the webhook signature from request headers
     signature = request.headers.get("stripe-signature")
     
@@ -241,51 +247,125 @@ async def stripe_webhook(request: Request):
     payload = await request.body()
     
     try:
-        # Verify the event with Stripe
-        event = stripe.Webhook.construct_event(
+        # Verify and construct the event using the utility function
+        event = await construct_event(
             payload=payload,
             sig_header=signature,
             secret=STRIPE_WEBHOOK_SECRET
         )
-    except stripe.error.SignatureVerificationError:
-        raise HTTPException(status_code=400, detail="Invalid signature")
-    
-    # Handle the event
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        user_id = session.get("client_reference_id")
+
+        # Get user collection for database operations
+        user_collection = await get_user_collection()
+
+        # Use centralized webhook handler from stripe_utils
+        result = await handle_webhook_event(event, user_collection)
+
+        # Return the result from the handler
+        logger.info(f"Webhook event {event.type} processed with result: {result}")
+        return JSONResponse(content=result, status_code=200)
+
+    except HTTPException as http_exc:
+        # Re-raise HTTP exceptions from construct_event or handle_webhook_event
+        logger.error(f"HTTP exception during webhook processing: {http_exc.detail}")
+        raise http_exc
+    except Exception as e:
+        # Catch any other unexpected errors during processing
+        logger.error(f"Unexpected error processing webhook {event.id if 'event' in locals() else 'unknown'}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error during webhook processing")
+
+@router.get("/payments/stripe-status")
+async def check_stripe_status():
+    """
+    Check if Stripe is configured properly on the server.
+    Frontend uses this to determine whether to show Stripe-related features.
+    """
+    try:
+        if not STRIPE_SECRET_KEY:
+            return {
+                "status": "error",
+                "message": "Stripe API key not configured on server",
+                "configured": False
+            }
         
-        if user_id:
-            # Get subscription ID from session
-            subscription_id = session.get("subscription")
-            customer_id = session.get("customer")
-            
-            if subscription_id and customer_id:
-                # Update user in the database
-                user_collection = await get_user_collection()
-                await user_collection.update_one(
-                    {"id": user_id},
-                    {
-                        "$set": {
-                            "stripe_customer_id": customer_id,
-                            "stripe_subscription_id": subscription_id,
-                            "subscription_status": "active"
-                        }
-                    }
+        # Test Stripe API key by making a simple request
+        stripe.Account.retrieve()
+        
+        return {
+            "status": "success",
+            "message": "Stripe is configured properly",
+            "configured": True
+        }
+    except stripe.error.AuthenticationError:
+        return {
+            "status": "error",
+            "message": "Invalid Stripe API key",
+            "configured": False
+        }
+    except Exception as e:
+        logger.error(f"Error checking Stripe status: {str(e)}")
+        return {
+            "status": "error",
+            "message": f"Stripe configuration error: {str(e)}",
+            "configured": False
+        }
+
+# --- Invoice Models ---
+class InvoiceItem(BaseModel):
+    id: str
+    created: datetime
+    amount_due: float
+    currency: str
+    status: str
+    invoice_pdf: Optional[str] = None # URL to download the invoice PDF
+    hosted_invoice_url: Optional[str] = None # URL to view the invoice online
+
+class InvoiceListResponse(BaseModel):
+    invoices: List[InvoiceItem]
+
+# --- Invoice Endpoint ---
+@router.get("/payments/invoices", response_model=InvoiceListResponse)
+async def list_invoices(
+    current_user: Dict = Depends(get_current_user) # Use JWT authentication
+):
+    """
+    Retrieves a list of invoices for the authenticated user from Stripe.
+    """
+    if not stripe.api_key:
+        logger.error("Stripe API key not configured for listing invoices.")
+        raise HTTPException(status_code=500, detail="Stripe API key not configured on server")
+
+    stripe_customer_id = current_user.get("stripe_customer_id")
+
+    if not stripe_customer_id:
+        logger.info(f"User {current_user.get('id')} has no Stripe customer ID. Returning empty invoice list.")
+        # It's not an error if the user hasn't subscribed yet
+        return {"invoices": []}
+
+    try:
+        logger.info(f"Fetching invoices for Stripe customer ID: {stripe_customer_id}")
+        # List invoices for the customer
+        stripe_invoices = stripe.Invoice.list(customer=stripe_customer_id, limit=100) # Adjust limit as needed
+
+        invoices_data = []
+        for inv in stripe_invoices.data:
+            invoices_data.append(
+                InvoiceItem(
+                    id=inv.id,
+                    created=datetime.fromtimestamp(inv.created), # Convert timestamp to datetime
+                    amount_due=inv.amount_due / 100.0, # Convert cents to dollars/euros etc.
+                    currency=inv.currency,
+                    status=inv.status,
+                    invoice_pdf=inv.invoice_pdf,
+                    hosted_invoice_url=inv.hosted_invoice_url
                 )
-    
-    # Handle other subscription events
-    elif event["type"] in ["customer.subscription.updated", "customer.subscription.deleted"]:
-        subscription = event["data"]["object"]
-        customer_id = subscription.get("customer")
-        status = subscription.get("status")
-        
-        if customer_id and status:
-            # Update user subscription status
-            user_collection = await get_user_collection()
-            await user_collection.update_one(
-                {"stripe_customer_id": customer_id},
-                {"$set": {"subscription_status": status}}
             )
-    
-    return JSONResponse({"status": "success"}) 
+
+        logger.info(f"Found {len(invoices_data)} invoices for customer {stripe_customer_id}")
+        return {"invoices": invoices_data}
+
+    except stripe.error.StripeError as e:
+        logger.error(f"Stripe error fetching invoices for customer {stripe_customer_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Could not retrieve invoices: {str(e)}")
+    except Exception as e:
+        logger.error(f"Unexpected error fetching invoices for customer {stripe_customer_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred while fetching invoices.")
