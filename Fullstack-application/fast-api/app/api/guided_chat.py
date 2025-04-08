@@ -6,17 +6,18 @@ from app.models.guided_chat import GuidedChatFlow, GuidedChatOption
 from app.services.guided_chat_manager import GuidedChatManager, get_guided_chat_manager
 from app.utils.logging_config import get_module_logger
 # Import require_active_subscription for protected endpoints and SubscriptionTier for limit checks
-from app.utils.dependencies import get_current_user, require_active_subscription
+# Also import verify_widget_origin for the public-facing endpoint
+from app.utils.dependencies import get_current_user, require_active_subscription, verify_widget_origin
 from app.models.user import SubscriptionTier # Import SubscriptionTier
 from pydantic import ValidationError
 
 logger = get_module_logger(__name__)
 router = APIRouter()
 
-@router.get("/guided-flows", response_model=List[GuidedChatFlow])
+@router.get("/guided-flows", response_model=List[GuidedChatFlow], name="widget:get-guided-flows") # Added name
 async def get_all_guided_flows(
-    # Use get_current_user for dashboard authentication
-    current_user: dict = Depends(get_current_user),
+    # Use verify_widget_origin for widget authentication
+    current_user: dict = Depends(verify_widget_origin),
     guided_chat_manager: GuidedChatManager = Depends(get_guided_chat_manager),
 ):
     """Retrieves all guided chat flows for the current user."""

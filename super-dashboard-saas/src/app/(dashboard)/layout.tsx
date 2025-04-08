@@ -9,8 +9,10 @@ import AuthGuard from '@/components/auth/AuthGuard';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
-import { usePathname } from 'next/navigation'; // Import usePathname
-import clsx from 'clsx'; // Import clsx for conditional classes
+import { TutorialProvider } from '@/contexts/TutorialContext'; // Import TutorialProvider
+import DashboardTutorial from '@/components/tutorial/DashboardTutorial';
+import { usePathname } from 'next/navigation';
+import clsx from 'clsx';
 import {
   FiHome, FiSettings, FiMessageSquare, FiUsers, FiBox, FiInfo, FiBriefcase,
   FiMail, FiBarChart2, FiCode, FiGlobe, FiCreditCard, FiUser, FiLogOut,
@@ -53,25 +55,35 @@ export default function DashboardLayout({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthGuard> {/* Wrap the layout content with AuthGuard */}
-        <SubscriptionProvider> {/* Wrap content further with SubscriptionProvider */}
-          <div className="flex h-screen bg-gray-100">
-            {/* Sidebar Navigation */}
-            <aside className="w-64 bg-gradient-to-b from-gray-800 to-gray-900 text-gray-200 p-4 flex flex-col shadow-lg">
-              <h2 className="text-2xl font-bold mb-8 text-white text-center">SuperDash</h2>
-              <nav className="flex-1">
-                <ul className="space-y-1">
-                  {navItems.map((item) => {
+      <AuthGuard>
+        <SubscriptionProvider>
+          <TutorialProvider> {/* Wrap SubscriptionProvider with TutorialProvider */}
+            <div className="flex h-screen bg-gray-100">
+              {/* Sidebar Navigation */}
+              {/* Updated for Clean/Minimalist Theme */}
+              <aside className="w-64 bg-white text-gray-800 p-6 flex flex-col shadow-lg border-r border-gray-200"> {/* Reverted bg to white */}
+              <h2 className="text-2xl font-bold mb-10 text-gray-900 text-center">SuperDash</h2> {/* Increased margin */}
+              {/* Add data-intro attribute for intro.js */}
+              <nav className="flex-1" data-intro="sidebar-nav" data-step="2">
+                <ul className="space-y-2"> {/* Increased spacing */}
+                  {navItems.map((item, index) => { // Add index for data-step
                     const isActive = pathname.startsWith(item.href);
+                    // Generate data-intro attribute based on href
+                    const introAttribute = `nav-${item.href.replace('/', '') || 'dashboard'}`;
+                    // Determine step number (start from 3 as step 1 is body, step 2 is nav)
+                    const stepNumber = index + 3;
                     return (
+                      // Add data-intro and data-step to the Link or li if needed
                       <li key={item.href}>
                         <Link
                           href={item.href}
+                          data-intro={introAttribute} // Add data-intro here
+                          data-step={stepNumber}      // Add data-step here
                           className={clsx(
-                            'flex items-center py-2.5 px-4 rounded transition duration-200 ease-in-out',
+                            'flex items-center py-2.5 px-4 rounded transition duration-200 ease-in-out text-gray-700', // Reverted default text color to slightly darker gray-700
                             isActive
-                              ? 'bg-blue-600 text-white shadow-inner' // Active state
-                              : 'hover:bg-gray-700 hover:text-white' // Hover state
+                              ? 'bg-blue-600 text-white font-medium' // Active state: removed shadow, added font-medium
+                              : 'hover:bg-blue-100 hover:text-blue-700' // Hover state: branded hover
                           )}
                         >
                           <item.icon className="mr-3 h-5 w-5" /> {/* Icon */}
@@ -87,9 +99,9 @@ export default function DashboardLayout({
                         <Link
                           href="/superadmin/users" // Link to the super admin users page
                           className={clsx(
-                            'flex items-center py-2.5 px-4 rounded transition duration-200 ease-in-out text-red-400 hover:bg-red-700 hover:text-white', // Distinct styling
+                            'flex items-center py-2.5 px-4 rounded transition duration-200 ease-in-out text-red-600 hover:bg-red-100 hover:text-red-700', // Distinct styling for light theme
                             pathname.startsWith('/superadmin')
-                              ? 'bg-red-600 text-white shadow-inner' // Active state for superadmin section
+                              ? 'bg-red-600 text-white font-medium' // Active state: removed shadow, added font-medium
                               : ''
                           )}
                         >
@@ -100,10 +112,10 @@ export default function DashboardLayout({
                   )}
                 </ul>
               </nav>
-              {/* Logout button */}
+              {/* Logout button - Updated for Light Theme */}
               <button
                 onClick={logout}
-                className="mt-auto w-full flex items-center justify-center bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded transition duration-200 ease-in-out"
+                className="mt-auto w-full flex items-center justify-center bg-transparent border border-red-300 text-red-600 hover:bg-red-50 py-2 px-4 rounded transition duration-200 ease-in-out" // Adjusted logout button style
               >
                 <FiLogOut className="mr-2 h-5 w-5" />
                 Logout
@@ -139,9 +151,11 @@ export default function DashboardLayout({
             pauseOnHover
             theme="light"
           />
+          <DashboardTutorial />
         </div>
-        </SubscriptionProvider> {/* Close SubscriptionProvider */}
-      </AuthGuard>
-    </QueryClientProvider>
+        </TutorialProvider> {/* Close TutorialProvider */}
+      </SubscriptionProvider>
+    </AuthGuard>
+  </QueryClientProvider>
   );
 }

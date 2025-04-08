@@ -1,26 +1,128 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+    /* --- Minimalist Color Palette --- */
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    /* Primary (Refined Blue) */
+    --primary-50: #f0f9ff;
+    --primary-100: #e0f2fe;
+    --primary-200: #bae6fd;
+    --primary-300: #7dd3fc;
+    --primary-400: #38bdf8;
+    --primary-500: #0ea5e9; /* Main Primary */
+    --primary-600: #0284c7;
+    --primary-700: #0369a1;
+    --primary-800: #075985;
+    --primary-900: #0c4a6e;
+    --primary-950: #082f49;
+
+    /* Neutral (Tailwind Slate - good choice) */
+    --neutral-50: #f8fafc;
+    --neutral-100: #f1f5f9;
+    --neutral-200: #e2e8f0;
+    --neutral-300: #cbd5e1;
+    --neutral-400: #94a3b8;
+    --neutral-500: #64748b; /* Main Neutral */
+    --neutral-600: #475569;
+    --neutral-700: #334155;
+    --neutral-800: #1e293b;
+    --neutral-900: #0f172a;
+    --neutral-950: #020617;
+
+    /* Accent (Teal) */
+    --accent-50: #f0fdfa;
+    --accent-100: #ccfbf1;
+    --accent-200: #99f6e4;
+    --accent-300: #5eead4;
+    --accent-400: #2dd4bf;
+    --accent-500: #14b8a6; /* Main Accent */
+    --accent-600: #0d9488;
+    --accent-700: #0f766e;
+    --accent-800: #115e59;
+    --accent-900: #134e4a;
+    --accent-950: #042f2e;
+
+    /* Semantic Colors (Light Mode) */
+    --background: var(--neutral-50);      /* Light background */
+    --foreground: var(--neutral-900);    /* Dark text on light background */
+    --card-background: #ffffff;          /* White cards */
+    --card-foreground: var(--neutral-900);
+    --primary: var(--primary-600);       /* Main primary color for elements */
+    --primary-foreground: #ffffff;       /* Text on primary elements */
+    --secondary: var(--neutral-200);     /* Subtle secondary elements */
+    --secondary-foreground: var(--neutral-800);
+    --accent: var(--accent-600);         /* Accent color for highlights */
+    --accent-foreground: #ffffff;
+    --muted: var(--neutral-200);         /* Muted elements/text */
+    --muted-foreground: var(--neutral-500);
+    --border: var(--neutral-300);        /* Borders */
+    --input: var(--neutral-300);         /* Input fields */
+    --ring: var(--primary-500);          /* Focus rings */
+
+    /* Radius Variables (Keep existing ones) */
+    --radius-sm: 0.125rem;
+    --radius-md: 0.25rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-full: 9999px;
+  }
+
+  /* Dark mode variables */
+  .dark {
+    /* Primary (Adjusted for Dark) */
+    --primary-50: #082f49;
+    --primary-100: #0c4a6e;
+    --primary-200: #075985;
+    --primary-300: #0369a1;
+    --primary-400: #0284c7;
+    --primary-500: #0ea5e9; /* Main Primary */
+    --primary-600: #38bdf8;
+    --primary-700: #7dd3fc;
+    --primary-800: #bae6fd;
+    --primary-900: #e0f2fe;
+    --primary-950: #f0f9ff;
+
+    /* Neutral (Keep slate, good contrast) */
+    /* --neutral-*: same as :root */
+
+    /* Accent (Adjusted for Dark) */
+    --accent-50: #042f2e;
+    --accent-100: #134e4a;
+    --accent-200: #115e59;
+    --accent-300: #0f766e;
+    --accent-400: #0d9488;
+    --accent-500: #14b8a6; /* Main Accent */
+    --accent-600: #2dd4bf;
+    --accent-700: #5eead4;
+    --accent-800: #99f6e4;
+    --accent-900: #ccfbf1;
+    --accent-950: #f0fdfa;
+
+    /* Semantic Colors (Dark Mode) */
+    --background: var(--neutral-950);      /* Dark background */
+    --foreground: var(--neutral-200);    /* Light text on dark background */
+    --card-background: var(--neutral-900); /* Darker cards */
+    --card-foreground: var(--neutral-200);
+    --primary: var(--primary-500);       /* Main primary color */
+    --primary-foreground: var(--neutral-950); /* Text on primary elements */
+    --secondary: var(--neutral-800);     /* Subtle secondary elements */
+    --secondary-foreground: var(--neutral-300);
+    --accent: var(--accent-500);         /* Accent color */
+    --accent-foreground: var(--neutral-950);
+    --muted: var(--neutral-800);         /* Muted elements/text */
+    --muted-foreground: var(--neutral-400);
+    --border: var(--neutral-700);        /* Borders */
+    --input: var(--neutral-700);         /* Input fields */
+    --ring: var(--primary-500);          /* Focus rings */
+  }
+
+  /* --- Base Styles --- */
+ 
+  /* --- Typography Hierarchy --- */
+ 
+  /* Add more base styles as needed (e.g., lists, blockquotes) */
+
 }

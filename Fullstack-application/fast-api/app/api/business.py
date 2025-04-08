@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends, status
-from app.models.business import BusinessType
+from fastapi import APIRouter, HTTPException, Depends, status, Query
+from app.models.business import BusinessType # Assuming these exist or adjust as needed
 from app.utils.mongo import get_db, get_business_configs_collection, serialize_mongo_doc
 from typing import Dict, Optional, List
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel, Field # Import BaseModel and Field
 from app.utils.logging_config import get_module_logger
 from app.api.chat import get_ai_service
 from app.services.ai_service import AIService
@@ -10,170 +11,253 @@ from app.services.ai_service import AIService
 from app.utils.dependencies import get_current_user
 from bson import ObjectId
 from pydantic import ValidationError
-import uuid # For potential future use if switching from ObjectId
+
+import uuid
+import re # Import re for JSON extraction
+import json # Import json
 
 logger = get_module_logger(__name__)
 
 # Use a more specific tag for OpenAPI docs
 router = APIRouter(prefix="/business-types", tags=["Business Types"])
 
-# Cache for business configurations - Consider if this cache needs invalidation on CUD operations
-business_configs_cache = {}
+# --- Pydantic Models for Suggestions ---
+class BusinessSuggestionsResponse(BaseModel):
+    """Response model for AI-generated business type suggestions."""
+    key_features: List[str] = Field(default_factory=list, description="Suggested key features for comparison.")
+    comparison_metrics: List[str] = Field(default_factory=list, description="Suggested comparison metrics.")
 
-async def get_business_config_from_db(business_type: str, db: AsyncIOMotorClient, user_id: str = None) -> Optional[Dict]:
-    """Get business configuration from database or cache by type name"""
-    # Ensure user_id is always provided for cache key consistency in multi-tenant env
+# --- AI Suggestions Endpoint ---
+@router.get("/suggestions", response_model=BusinessSuggestionsResponse)
+async def get_business_type_suggestions(
+    type_name: str = Query(..., description="Name/Type of the business (e.g., 'Electronics Shop')"),
+    # Removed description, domain, primary_category as they are no longer part of the simplified model
+    language: str = Query("cs", description="Language for suggestions (cs or en)"), # Keep language for prompt generation
+    current_user: Dict = Depends(get_current_user),
+    ai_service: AIService = Depends(get_ai_service)
+):
+    """Generate AI suggestions for key features and comparison metrics based on the business type name."""
+    user_id = current_user.get("id")
     if not user_id:
-        logger.warning("Attempted to get business config without user_id")
-        return None # Or raise error
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
 
-    cache_key = f"{business_type}_{user_id}"
+    logger.info(f"Generating comparison suggestions for business type: {type_name}, lang: {language}, user: {user_id}")
+
+    language = language.lower()
+    if language not in ["cs", "en"]:
+        language = "cs" # Default to Czech
+
+    # Build the prompt for key features and comparison metrics
+    if language == "cs":
+        prompt = f"""
+        Pro typ podnikání '{type_name}' navrhni 3-7 relevantních klíčových vlastností (key_features) a 3-7 metrik pro porovnání (comparison_metrics), které by byly užitečné pro porovnávání produktů v tomto odvětví.
+
+        Příklady pro 'Obchod s elektronikou':
+        - Klíčové vlastnosti: Velikost obrazovky, RAM, Úložiště, Procesor
+        - Metriky pro porovnání: Cena, Hodnocení zákazníků, Výdrž baterie (hodiny)
+
+        Formátuj svou odpověď jako JSON objekt se dvěma poli: "key_features" a "comparison_metrics", kde každé pole obsahuje seznam stringů:
+        {{
+            "key_features": ["Navrhovaná vlastnost 1", "Navrhovaná vlastnost 2", ...],
+            "comparison_metrics": ["Navrhovaná metrika 1", "Navrhovaná metrika 2", ...]
+        }}
+        """
+    else: # English fallback/option
+        prompt = f"""
+        For the business type '{type_name}', suggest 3-7 relevant key features (key_features) and 3-7 comparison metrics (comparison_metrics) that would be useful for comparing products in this sector.
+
+        Examples for 'Electronics Shop':
+        - Key Features: Screen Size, RAM, Storage, Processor
+        - Comparison Metrics: Price, Customer Rating, Battery Life (hours)
+
+        Format your response as a JSON object with two fields: "key_features" and "comparison_metrics", where each field contains a list of strings:
+        {{
+            "key_features": ["Suggested Feature 1", "Suggested Feature 2", ...],
+            "comparison_metrics": ["Suggested Metric 1", "Suggested Metric 2", ...]
+        }}
+        """
+
+    try:
+        ai_response_data = await ai_service.generate_response(query=prompt, language=language)
+        content = ai_response_data.get("reply", "") # Get content from 'reply'
+        logger.debug(f"Raw AI reply for comparison suggestions: {content[:200]}...")
+
+        # Extract JSON specifically from ```json ... ``` block
+        json_match = re.search(r'```json\s*(\{.*?\})\s*```', content, re.DOTALL | re.IGNORECASE)
+        if json_match:
+            json_str = json_match.group(1) # Get the captured JSON part
+            logger.debug(f"Extracted JSON string for comparison suggestions: {json_str[:100]}...")
+            try:
+                suggestions_data = json.loads(json_str)
+
+                # Validate and limit (ensure fields are lists)
+                key_features = suggestions_data.get("key_features", [])
+                if not isinstance(key_features, list):
+                    logger.warning(f"AI returned 'key_features' but it's not a list: {type(key_features)}")
+                    key_features = []
+
+                comparison_metrics = suggestions_data.get("comparison_metrics", [])
+                if not isinstance(comparison_metrics, list):
+                    logger.warning(f"AI returned 'comparison_metrics' but it's not a list: {type(comparison_metrics)}")
+                    comparison_metrics = []
+
+                validated_suggestions = BusinessSuggestionsResponse(
+                    key_features=key_features[:10], # Limit to 10
+                    comparison_metrics=comparison_metrics[:10] # Limit to 10
+                )
+                logger.info(f"Generated {len(validated_suggestions.key_features)} key features and {len(validated_suggestions.comparison_metrics)} metrics for {type_name}")
+                return validated_suggestions
+            except (json.JSONDecodeError, ValidationError) as e:
+                logger.error(f"Error parsing/validating extracted AI JSON for comparison suggestions: {e}, JSON string: {json_str[:100]}...")
+                # Fall through to empty response
+        else:
+             logger.warning(f"Could not extract JSON block (```json ... ```) from AI reply for comparison suggestions: {content[:100]}...")
+
+        # Return empty suggestions if AI fails, response is invalid, or JSON extraction fails
+        return BusinessSuggestionsResponse()
+
+    except Exception as e:
+        logger.error(f"Error generating comparison suggestions for {type_name}: {e}", exc_info=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to generate suggestions")
+
+# --- CRUD Endpoints for Business Types (Simplified) ---
+
+# Cache for business configurations - Consider if this cache needs invalidation on CUD operations
+business_configs_cache: Dict[str, BusinessType] = {} # Cache stores the Pydantic model instance
+
+async def get_business_config_from_db(business_type_id: str, db: AsyncIOMotorClient, user_id: str) -> Optional[BusinessType]:
+    """Get business configuration from database or cache by ID."""
+    if not ObjectId.is_valid(business_type_id):
+        logger.warning(f"Invalid ObjectId format for business_type_id: {business_type_id}")
+        return None
+
+    cache_key = f"{business_type_id}_{user_id}"
 
     if cache_key in business_configs_cache:
-        logger.debug(f"Cache hit for business type '{business_type}' user '{user_id}'")
+        logger.debug(f"Cache hit for business type ID '{business_type_id}' user '{user_id}'")
         return business_configs_cache[cache_key]
 
-    logger.debug(f"Cache miss for business type '{business_type}' user '{user_id}'")
+    logger.debug(f"Cache miss for business type ID '{business_type_id}' user '{user_id}'")
     collection = await get_business_configs_collection()
+    filter_query = {"_id": ObjectId(business_type_id), "user_id": user_id}
+    config_doc = await collection.find_one(filter_query)
 
-    # Build filter including user_id
-    filter_query = {"type": business_type, "user_id": user_id}
-
-    config = await collection.find_one(filter_query)
-
-    if config:
-        # Serialize _id before caching and returning
-        serialized_config = serialize_mongo_doc(config)
-        business_configs_cache[cache_key] = serialized_config
-        return serialized_config
+    if config_doc:
+        try:
+            # Validate and store the Pydantic model in cache
+            config_model = BusinessType(**serialize_mongo_doc(config_doc))
+            business_configs_cache[cache_key] = config_model
+            return config_model
+        except ValidationError as e:
+            logger.error(f"Data validation error for business type {business_type_id} from DB: {e}")
+            return None # Data in DB is invalid
     else:
-        logger.warning(f"Business type '{business_type}' not found for user '{user_id}' in DB.")
+        logger.warning(f"Business type ID '{business_type_id}' not found for user '{user_id}' in DB.")
         return None
 
 
-# --- CRUD Endpoints for Business Types ---
-
 @router.post("/", response_model=BusinessType, status_code=status.HTTP_201_CREATED)
 async def create_business_type(
-    business_type_data: BusinessType,
+    business_type_data: BusinessType, # Input model is now simplified
     current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorClient = Depends(get_db) # Keep db dependency if needed by collection func
+    db: AsyncIOMotorClient = Depends(get_db)
 ):
-    """Creates a new business type configuration."""
+    """Creates a new simplified business type configuration."""
     user_id = current_user.get("id")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
 
     collection = await get_business_configs_collection()
 
-    # Check if a business type with the same 'type' already exists for this user
+    # Check for duplicate type name for the same user
     existing = await collection.find_one({"type": business_type_data.type, "user_id": user_id})
     if existing:
-        logger.warning(f"Attempt to create duplicate business type '{business_type_data.type}' for user {user_id}")
+        logger.warning(f"Attempt to create duplicate business type name '{business_type_data.type}' for user {user_id}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Business type '{business_type_data.type}' already exists for this user."
+            detail=f"A business type named '{business_type_data.type}' already exists."
         )
 
-    # Prepare data for insertion
-    insert_data = business_type_data.model_dump()
+    # Prepare data using the simplified model, exclude None values like id
+    insert_data = business_type_data.model_dump(exclude_none=True, by_alias=False) # Use field names, not aliases
     insert_data["user_id"] = user_id # Ensure user_id is set
 
     try:
         result = await collection.insert_one(insert_data)
+        # Fetch the created document to return it, including the generated _id
         created_doc = await collection.find_one({"_id": result.inserted_id})
 
         if not created_doc:
-             logger.error(f"Failed to fetch business type immediately after insertion for user {user_id}")
-             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create business type")
-
-        # Invalidate cache if necessary (though this specific type wasn't cached yet)
-        # cache_key = f"{business_type_data.type}_{user_id}"
-        # if cache_key in business_configs_cache: del business_configs_cache[cache_key]
+             logger.error(f"Failed to fetch business type immediately after insertion (ID: {result.inserted_id}) for user {user_id}")
+             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create and retrieve business type")
 
         logger.info(f"Created business type '{business_type_data.type}' with id {result.inserted_id} for user {user_id}")
-        return serialize_mongo_doc(created_doc)
+        # Return the validated Pydantic model, which handles alias automatically
+        return BusinessType(**serialize_mongo_doc(created_doc))
 
-    except ValidationError as ve:
-        logger.error(f"Validation error creating business type: {ve}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Validation error: {str(ve)}")
     except Exception as e:
-        logger.error(f"Failed to create business type: {e}", exc_info=True)
+        logger.error(f"Error creating business type '{business_type_data.type}' for user {user_id}: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Failed to create business type: {str(e)}")
 
-
+# GET / (List all business types for user) - Remains largely the same, but returns the simplified model
 @router.get("/", response_model=List[BusinessType])
 async def list_business_types(
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorClient = Depends(get_db)
 ):
-    """Lists all business type configurations for the current user."""
+    """Lists all simplified business type configurations for the current user."""
     user_id = current_user.get("id")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
 
     collection = await get_business_configs_collection()
     types_cursor = collection.find({"user_id": user_id})
-    business_types = await types_cursor.to_list(length=None) # Get all types for the user
+    business_types_docs = await types_cursor.to_list(length=None)
 
-    logger.info(f"Retrieved {len(business_types)} business types for user {user_id}")
-    # Serialize each document
-    return [serialize_mongo_doc(bt) for bt in business_types]
+    logger.info(f"Retrieved {len(business_types_docs)} business type documents for user {user_id}")
 
+    # Validate and serialize each document using the Pydantic model
+    result_list = []
+    for doc in business_types_docs:
+        try:
+            # Use the model for validation and serialization (handles alias)
+            result_list.append(BusinessType(**serialize_mongo_doc(doc)))
+        except ValidationError as e:
+            logger.error(f"Data validation error for business type doc {doc.get('_id')} for user {user_id}: {e}")
+            # Optionally skip invalid docs or handle differently
+            continue
+    return result_list
 
-# Keep the original endpoint for fetching by type name if needed by other parts of the app
-# But use the new endpoint with ID for dashboard CRUD operations
-@router.get("/by-name/{business_type_name}", response_model=BusinessType, tags=["Business Types (Legacy)"])
-async def get_business_config_by_name(
-    business_type_name: str,
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorClient = Depends(get_db)
-):
-    """Get configuration for a specific business type by its name."""
-    user_id = current_user.get("id")
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
-
-    config = await get_business_config_from_db(business_type_name, db, user_id)
-    if not config:
-        raise HTTPException(status_code=404, detail=f"Configuration for business type '{business_type_name}' not found.")
-    # get_business_config_from_db already returns serialized doc
-    return config
-
-
+# GET /{business_type_id} - Fetch by ID
 @router.get("/{business_type_id}", response_model=BusinessType)
 async def get_business_type_by_id(
     business_type_id: str,
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorClient = Depends(get_db)
 ):
-    """Retrieves a specific business type configuration by its MongoDB ID."""
+    """Retrieves a specific simplified business type configuration by its MongoDB ID."""
     user_id = current_user.get("id")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
 
-    if not ObjectId.is_valid(business_type_id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid business_type_id format")
+    # Use the refactored function which includes caching and validation
+    config_model = await get_business_config_from_db(business_type_id, db, user_id)
 
-    collection = await get_business_configs_collection()
-    business_type = await collection.find_one({"_id": ObjectId(business_type_id), "user_id": user_id})
-
-    if not business_type:
-        logger.warning(f"Business type with ID {business_type_id} not found for user {user_id}")
+    if not config_model:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Business type not found or access denied")
 
     logger.info(f"Retrieved business type with ID {business_type_id} for user {user_id}")
-    return serialize_mongo_doc(business_type)
+    return config_model # Return the validated Pydantic model
 
-
+# PUT /{business_type_id} - Update by ID
 @router.put("/{business_type_id}", response_model=BusinessType)
 async def update_business_type(
     business_type_id: str,
-    business_type_data: BusinessType,
+    business_type_data: BusinessType, # Input uses the simplified model
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorClient = Depends(get_db)
 ):
-    """Updates an existing business type configuration."""
+    """Updates an existing simplified business type configuration."""
     user_id = current_user.get("id")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
@@ -183,34 +267,35 @@ async def update_business_type(
 
     collection = await get_business_configs_collection()
 
-    # Check if the business type exists and belongs to the user
+    # Check if the target document exists and belongs to the user
     existing_doc = await collection.find_one({"_id": ObjectId(business_type_id), "user_id": user_id})
     if not existing_doc:
         logger.warning(f"Update failed: Business type {business_type_id} not found for user {user_id}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Business type not found or access denied")
 
-    # Prepare update data, excluding user_id and potentially _id
-    update_data = business_type_data.model_dump(exclude_unset=True) # Only include provided fields
-    if "user_id" in update_data:
-        del update_data["user_id"] # Prevent changing ownership
+    # Prepare update data using the simplified model
+    # Exclude 'id' and 'user_id' as they shouldn't be updated directly
+    update_data = business_type_data.model_dump(exclude={"id", "user_id"}, exclude_unset=True, by_alias=False)
 
-    # Check if the 'type' name is being changed and if it conflicts with another existing type for the user
-    if 'type' in update_data and update_data['type'] != existing_doc.get('type'):
+    # Check for type name conflict if the name is being changed
+    new_type_name = update_data.get('type')
+    if new_type_name and new_type_name != existing_doc.get('type'):
         conflict_check = await collection.find_one({
-            "type": update_data['type'],
+            "type": new_type_name,
             "user_id": user_id,
             "_id": {"$ne": ObjectId(business_type_id)} # Exclude the current document
         })
         if conflict_check:
-            logger.warning(f"Update conflict: Business type name '{update_data['type']}' already exists for user {user_id}")
+            logger.warning(f"Update conflict: Business type name '{new_type_name}' already exists for user {user_id}")
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail=f"Business type name '{update_data['type']}' already exists."
+                detail=f"A business type named '{new_type_name}' already exists."
             )
 
     if not update_data:
         logger.info(f"No fields to update for business type {business_type_id}")
-        return serialize_mongo_doc(existing_doc) # Return existing if no changes
+        # Return the existing data, validated through the model
+        return BusinessType(**serialize_mongo_doc(existing_doc))
 
     try:
         update_result = await collection.update_one(
@@ -219,43 +304,37 @@ async def update_business_type(
         )
 
         if update_result.matched_count == 0:
-             # Should not happen due to the check above, but for safety
-             logger.error(f"Update failed unexpectedly for business type {business_type_id} user {user_id}")
-             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Business type not found during update")
+             logger.error(f"Update failed unexpectedly for business type {business_type_id} user {user_id} despite pre-check")
+             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Business type not found during update operation")
 
-        # Fetch the updated document
+        # Fetch the updated document to return
         updated_doc = await collection.find_one({"_id": ObjectId(business_type_id), "user_id": user_id})
         if not updated_doc:
              logger.error(f"Update seemed successful but could not refetch business type {business_type_id} for user {user_id}")
              raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Failed to retrieve updated business type")
 
         # Invalidate cache
-        cache_key = f"{updated_doc['type']}_{user_id}"
-        if cache_key in business_configs_cache: del business_configs_cache[cache_key]
-        # Also remove old cache key if type name changed
-        if 'type' in update_data and update_data['type'] != existing_doc.get('type'):
-             old_cache_key = f"{existing_doc.get('type')}_{user_id}"
-             if old_cache_key in business_configs_cache: del business_configs_cache[old_cache_key]
-
+        cache_key = f"{business_type_id}_{user_id}"
+        if cache_key in business_configs_cache:
+            del business_configs_cache[cache_key]
+            logger.debug(f"Invalidated cache for business type ID {business_type_id} user {user_id}")
 
         logger.info(f"Updated business type {business_type_id} for user {user_id}")
-        return serialize_mongo_doc(updated_doc)
+        # Return the updated data, validated through the model
+        return BusinessType(**serialize_mongo_doc(updated_doc))
 
-    except ValidationError as ve:
-        logger.error(f"Validation error updating business type {business_type_id}: {ve}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Validation error: {str(ve)}")
     except Exception as e:
-        logger.error(f"Error updating business type {business_type_id}: {e}", exc_info=True)
+        logger.error(f"Error updating business type {business_type_id} for user {user_id}: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error updating business type: {str(e)}")
 
-
+# DELETE /{business_type_id} - Delete by ID
 @router.delete("/{business_type_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_business_type(
     business_type_id: str,
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorClient = Depends(get_db)
 ):
-    """Deletes a business type configuration."""
+    """Deletes a simplified business type configuration."""
     user_id = current_user.get("id")
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
@@ -265,170 +344,55 @@ async def delete_business_type(
 
     collection = await get_business_configs_collection()
 
-    # Find the document first to invalidate cache correctly
-    doc_to_delete = await collection.find_one({"_id": ObjectId(business_type_id), "user_id": user_id})
+    # Attempt to delete the document belonging to the user
+    result = await collection.delete_one({"_id": ObjectId(business_type_id), "user_id": user_id})
 
-    if not doc_to_delete:
+    if result.deleted_count == 0:
         logger.warning(f"Delete failed: Business type {business_type_id} not found for user {user_id}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Business type not found or access denied")
 
-    try:
-        result = await collection.delete_one({"_id": ObjectId(business_type_id), "user_id": user_id})
+    # Invalidate cache
+    cache_key = f"{business_type_id}_{user_id}"
+    if cache_key in business_configs_cache:
+        del business_configs_cache[cache_key]
+        logger.debug(f"Removed business type ID '{business_type_id}' user '{user_id}' from cache")
 
-        if result.deleted_count == 0:
-            # Should not happen due to the check above
-            logger.error(f"Delete failed unexpectedly for business type {business_type_id} user {user_id}")
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Business type not found during delete")
+    logger.info(f"Deleted business type {business_type_id} for user {user_id}")
+    # Return No Content status code (204) which doesn't require a body
 
-        # Invalidate cache
-        cache_key = f"{doc_to_delete['type']}_{user_id}"
-        if cache_key in business_configs_cache:
-            del business_configs_cache[cache_key]
-            logger.debug(f"Removed business type '{doc_to_delete['type']}' user '{user_id}' from cache")
+# --- Removed Endpoints ---
+# Removed /analyze-query/{business_type_name} as it relied on removed fields
+# Removed /validate-product/{business_type_name} as it relied on removed fields
+# Removed /by-name/{business_type_name} as ID-based fetching is preferred
 
-        logger.info(f"Deleted business type {business_type_id} for user {user_id}")
-        # Return No Content
-
-    except Exception as e:
-        logger.error(f"Error deleting business type {business_type_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error deleting business type: {str(e)}")
-
-
-# --- Existing Endpoints (Adjusted for consistency) ---
-
-@router.post("/analyze-query/{business_type_name}", tags=["Business Types (Legacy)"])
-async def analyze_business_query(
-    business_type_name: str,
-    query: str,
-    current_user: dict = Depends(get_current_user), # Switched to get_current_user
-    db: AsyncIOMotorClient = Depends(get_db),
-    ai_service: AIService = Depends(get_ai_service)
-):
-    """Analyze a query in the context of a specific business type (using type name)."""
-    user_id = current_user.get("id")
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
-
-    # Get business config for extra context using the name-based fetcher
-    business_config = await get_business_config_from_db(business_type_name, db, user_id)
-    if not business_config:
-        logger.warning(f"Business config for '{business_type_name}' not found for user {user_id}, proceeding without it")
-
-    # Use AI service to analyze the query
-    try:
-        analysis_result = await ai_service.analyze_query(
-            query=query,
-            language="cs",  # Default to Czech, can be parameterized later
-            context=None  # No conversation context for this endpoint
-        )
-
-        # Add business context to the result
-        if business_config:
-            analysis_result["business_context"] = {
-                "type": business_type_name, # Use the name provided
-                "domain": business_config.get("domain", ""),
-                "primary_category": business_config.get("primary_category", "")
-                # Add other relevant attributes from business_config if needed
-            }
-        else:
-             analysis_result["business_context"] = None
-
-        return analysis_result
-    except Exception as e:
-        logger.error(f"Error analyzing query for business type {business_type_name}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Error analyzing query")
-
-
-@router.post("/validate-product/{business_type_name}", tags=["Business Types (Legacy)"])
-async def validate_product_data(
-    business_type_name: str,
-    product_data: Dict,
-    current_user: dict = Depends(get_current_user), # Switched to get_current_user
-    db: AsyncIOMotorClient = Depends(get_db)
-):
-    """Validate product data against business-specific rules (using type name)."""
-    user_id = current_user.get("id")
-    if not user_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
-
-    # Get business config for validation rules using the name-based fetcher
-    business_config = await get_business_config_from_db(business_type_name, db, user_id)
-    if not business_config:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Business configuration for '{business_type_name}' not found for user {user_id}"
-        )
-
-    # Get validation rules from business config
-    validation_rules = business_config.get("validation_rules", {}) # Assuming structure from model
-
-    # Perform basic validation (Example - enhance as needed)
-    validation_errors = []
-
-    # Required fields check from rules
-    # Example: Check if 'product_name' rule exists and is required
-    if 'product_name' in validation_rules and validation_rules['product_name'].get('required'):
-        if 'product_name' not in product_data or not product_data['product_name']:
-            validation_errors.append("Missing required field: product_name")
-
-    # Example: Check type for 'price' if rule exists
-    if 'price' in validation_rules and 'price' in product_data:
-        price_rule = validation_rules['price']
-        if price_rule.get('type') == 'number' and not isinstance(product_data['price'], (int, float)):
-             validation_errors.append("Field 'price' must be a number")
-        # Add range checks etc. based on rules
-
-    # --- Add more specific validation logic based on validation_rules structure ---
-
-
-    # Process validation results
-    if validation_errors:
-        logger.warning(f"Product data validation failed for business type '{business_type_name}' user {user_id}: {validation_errors}")
-        # Return 422 for validation errors
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"valid": False, "errors": validation_errors}
-        )
-
-    logger.info(f"Product data validated successfully for business type '{business_type_name}' user {user_id}")
-    return {"valid": True, "message": "Product data is valid."}
-
-
-@router.post("/reload-config", tags=["Business Types (Admin)"]) # Potentially restrict access further
+# --- Cache Reload Endpoint (Adjusted) ---
+@router.post("/reload-config", tags=["Business Types (Admin)"]) # Consider admin-only access
 async def reload_config(
-    current_user: dict = Depends(get_current_user), # Switched to get_current_user
-    db: AsyncIOMotorClient = Depends(get_db)
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorClient = Depends(get_db) # Keep DB dependency if needed for potential pre-loading
 ):
-    """Reloads business configurations from the database into the cache for the current user."""
+    """Clears the business configuration cache for the current user."""
     user_id = current_user.get("id")
     if not user_id:
+        # This check might be redundant if get_current_user handles it, but good for clarity
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not identify user")
 
-    logger.info(f"Reloading business config cache for user {user_id}")
+    logger.info(f"Clearing business config cache for user {user_id}")
     cleared_count = 0
     try:
-        # Clear the configuration cache for the specific user
+        # Clear only the cache entries belonging to the current user
         keys_to_delete = [key for key in business_configs_cache if key.endswith(f"_{user_id}")]
         for key in keys_to_delete:
             del business_configs_cache[key]
             cleared_count += 1
-        logger.debug(f"Cleared {cleared_count} cache entries for user {user_id}")
+        logger.info(f"Cleared {cleared_count} cache entries for user {user_id}")
 
-        # Optionally, pre-load configurations after clearing (might be heavy)
-        # collection = await get_business_configs_collection()
-        # cursor = collection.find({"user_id": user_id})
-        # configs_loaded = 0
-        # async for config in cursor:
-        #     if "type" in config:
-        #         cache_key = f"{config['type']}_{user_id}"
-        #         business_configs_cache[cache_key] = serialize_mongo_doc(config)
-        #         configs_loaded += 1
-        # logger.info(f"Pre-loaded {configs_loaded} business configs into cache for user {user_id}")
+        # Pre-loading is generally not recommended unless specifically needed,
+        # as it can add load and complexity. Let the cache fill on demand.
 
         return {
-            "message": f"Business configuration cache cleared for user {user_id}. Cleared {cleared_count} entries.",
-            # "configs_loaded": configs_loaded # Uncomment if pre-loading
+            "message": f"Business configuration cache cleared for user {user_id}. Cleared {cleared_count} entries."
         }
     except Exception as e:
-        logger.error(f"Error reloading business configurations for user {user_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error reloading configurations: {str(e)}")
+        logger.error(f"Error clearing business configurations cache for user {user_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error clearing configurations cache: {str(e)}")

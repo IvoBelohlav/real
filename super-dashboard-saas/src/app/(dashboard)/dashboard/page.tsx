@@ -6,14 +6,27 @@ import { fetchApi } from '@/lib/api'; // Import fetchApi
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import Link from 'next/link'; // Import Link for navigation
 import { FiCreditCard, FiSettings, FiBarChart2, FiArrowRight } from 'react-icons/fi'; // Import icons for cards
+// Import Recharts components
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-// Define types for dashboard data
+// Define types for historical data points
+interface HistoryPoint {
+  date: string; // YYYY-MM-DD
+  count: number;
+}
+
+// Define types for dashboard data including history
 interface DashboardStats {
+  // Totals
   totalConversations: number;
   authorizedDomains: number;
-  totalMessages: number; // Added
-  activeWidgets: number; // Added
-  // widgetViews: number; // Keep commented out until implemented
+  totalMessages: number;
+  activeWidgets: number;
+  widgetViews?: number; // Optional, as it's a placeholder in backend
+  average_conversation_length?: number; // Added average length
+  // Historical Data
+  conversation_history: HistoryPoint[];
+  message_history: HistoryPoint[]; // Placeholder from backend
 }
 
 // Enhanced Card component with icon and optional link
@@ -47,8 +60,9 @@ export default function DashboardPage() {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Determine subscription status and plan from user context
-  const subscriptionPlan = user?.subscription_tier || 'Free'; // Default to Free if not set
+  // Determine subscription status and plan name from user context
+  // Use the new subscription_tier_name field for display
+  const subscriptionPlanName = user?.subscription_tier_name || 'Free'; // Default to Free if not set
   const subscriptionStatus = user?.subscription_status || 'inactive'; // Default to inactive
   const isActiveSubscription = subscriptionStatus === 'active' || subscriptionStatus === 'trialing';
 
@@ -71,15 +85,20 @@ export default function DashboardPage() {
         const fetchedStats = await fetchApi('/api/dashboard/stats');
         // console.log("Fetched Stats from API:", fetchedStats); // Removed log
 
-        // Map backend response fields to frontend state fields, ensuring keys exist
+        // Map backend response fields to frontend state fields, including history
         const newStatsData: DashboardStats = {
+          // Totals
           totalConversations: fetchedStats?.conversations ?? 0,
           authorizedDomains: fetchedStats?.domains ?? 0,
           totalMessages: fetchedStats?.messages ?? 0,
           activeWidgets: fetchedStats?.active_widgets ?? 0,
+          widgetViews: fetchedStats?.widget_views ?? 0, // Include optional field
+          average_conversation_length: fetchedStats?.average_conversation_length, // Map the new field
+          // Historical Data
+          conversation_history: fetchedStats?.conversation_history ?? [], // Default to empty array
+          message_history: fetchedStats?.message_history ?? [], // Default to empty array
         };
         setStats(newStatsData);
-        // console.log("Stats object set in state:", newStatsData); // Removed log
 
       } catch (err: any) { // Type assertion for error handling
         console.error("Failed to fetch dashboard stats:", err);
@@ -127,10 +146,10 @@ export default function DashboardPage() {
         {/* Subscription Status Card */}
         <InfoCard title="Subscription" icon={FiCreditCard} linkTo="/billing">
           <p className="text-2xl font-semibold text-gray-800 capitalize">
-            {subscriptionPlan} Plan
+            {subscriptionPlanName} Plan {/* Use the display name */}
           </p>
           <p className={`mt-1 text-sm font-medium capitalize ${isActiveSubscription ? 'text-green-600' : 'text-red-600'}`}>
-            Status: {subscriptionStatus}
+            Status: {subscriptionStatus} {/* Display the status */}
           </p>
         </InfoCard>
 
@@ -168,6 +187,15 @@ export default function DashboardPage() {
                   <p className="text-sm font-medium text-gray-500">Active Widgets</p>
                   <p className="text-2xl font-semibold text-gray-800">{stats.activeWidgets}</p>
                 </div>
+                {/* Added Average Conversation Length */}
+                {stats.average_conversation_length !== undefined && ( // Check if the value exists
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Avg. Conversation Length</p>
+                    <p className="text-2xl font-semibold text-gray-800">
+                      {stats.average_conversation_length.toFixed(1)} <span className="text-base font-normal text-gray-500">msgs/convo</span>
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-gray-500">Statistics data unavailable.</p>
@@ -179,12 +207,62 @@ export default function DashboardPage() {
       </div>
       {/* End of Grid */}
 
-      {/* Placeholder for recent activity or other sections */}
+      {/* Conversation Trend Chart */}
+      {stats && stats.conversation_history && stats.conversation_history.length > 0 && (
+        <div className="bg-white shadow rounded-lg p-6 mt-8">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Conversation Trends (Last 30 Days)</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={stats.conversation_history}
+              margin={{
+                top: 5, right: 30, left: 0, bottom: 5, // Adjusted left margin
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" /> {/* Lighter grid lines */}
+              <XAxis
+                dataKey="date"
+                tickFormatter={(tick) => {
+                  // Show only month and day for brevity
+                  const date = new Date(tick + 'T00:00:00Z'); // Ensure parsing as UTC date part
+                  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+                }}
+                angle={-45} // Angle ticks slightly if needed
+                textAnchor="end" // Adjust anchor for angled text
+                height={50} // Increase height to accommodate angled labels
+                interval="preserveStartEnd" // Show first and last tick
+                // Consider showing fewer ticks if too crowded:
+                // tickCount={7} // Example: Show ~7 ticks
+              />
+              <YAxis allowDecimals={false} /> {/* Ensure whole numbers for counts */}
+              <Tooltip
+                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '4px', border: '1px solid #ccc' }}
+                labelFormatter={(label) => new Date(label + 'T00:00:00Z').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
+              />
+              <Legend />
+              <Line type="monotone" dataKey="count" name="Conversations" stroke="#3b82f6" strokeWidth={2} activeDot={{ r: 8 }} dot={{ r: 3 }} /> {/* Blue line */}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {/* End of Conversation Trend Chart */}
+
+      {/* Placeholder for Message Trend Chart (using message_history - currently placeholder data) */}
       {/*
-      <div className="bg-white shadow rounded-lg p-6 mt-8">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
-        <p className="text-gray-500">Recent conversations or events will appear here...</p>
-      </div>
+      {stats && stats.message_history && stats.message_history.length > 0 && (
+         <div className="bg-white shadow rounded-lg p-6 mt-8">
+           <h3 className="text-lg font-medium text-gray-900 mb-4">Message Trends (Last 30 Days)</h3>
+           <ResponsiveContainer width="100%" height={300}>
+             <LineChart data={stats.message_history} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+               <XAxis dataKey="date" tickFormatter={(tick) => new Date(tick + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })} angle={-45} textAnchor="end" height={50} interval="preserveStartEnd" />
+               <YAxis allowDecimals={false} />
+               <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '4px', border: '1px solid #ccc' }} labelFormatter={(label) => new Date(label + 'T00:00:00Z').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })} />
+               <Legend />
+               <Line type="monotone" dataKey="count" name="Messages" stroke="#10b981" strokeWidth={2} activeDot={{ r: 8 }} dot={{ r: 3 }} /> // Green line
+             </LineChart>
+           </ResponsiveContainer>
+         </div>
+       )}
       */}
     </div>
   );

@@ -73,123 +73,61 @@ const WidgetPreview: React.FC = () => {
   return (
     <div className="space-y-4">
         {/* Mode Toggle Buttons */}
-        <div className="flex justify-center space-x-2 mb-2">
+        <div className="flex justify-center space-x-2 mb-4">
             <button
                 onClick={() => setPreviewMode('light')}
-                className={`px-3 py-1 text-xs rounded ${previewMode === 'light' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                className={`px-3 py-1 text-xs rounded-md border transition-colors ${previewMode === 'light' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`} /* Simplified style */
             >
                 Light
             </button>
             <button
                 onClick={() => setPreviewMode('dark')}
-                className={`px-3 py-1 text-xs rounded ${previewMode === 'dark' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                className={`px-3 py-1 text-xs rounded-md border transition-colors ${previewMode === 'dark' ? 'bg-gray-700 text-white border-gray-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`} /* Simplified style */
             >
                 Dark
             </button>
         </div>
 
         {/* Mock Website Area */}
-        <div className="relative w-full h-96 bg-gray-100 rounded-md overflow-hidden border border-gray-300 p-4 flex flex-col justify-end"
-             style={{ background: previewMode === 'dark' ? '#333' : '#f0f0f0' }} // Mock website bg change
+        <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 p-4 flex flex-col justify-end" /* Adjusted bg/border/rounding */
+             style={{ background: previewMode === 'dark' ? 'var(--neutral-900)' : 'var(--neutral-100)' }} /* Adjusted mock bg */
         >
-            <p className="absolute top-4 left-4 text-sm font-light" style={{ color: previewMode === 'dark' ? '#ccc' : '#555' }}>
-                Your Website Content Area
+            <p className="absolute top-4 left-4 text-xs font-light" style={{ color: previewMode === 'dark' ? 'var(--neutral-500)' : 'var(--neutral-500)' }}> 
+                Widget preview
             </p>
 
-            {/* Mock Widget Bubble */}
+            {/* Mock Widget Bubble - Updated Design */}
             <div
-                className={`absolute ${positionClasses} w-auto min-w-[4rem] h-16 px-4 rounded-full shadow-lg flex items-center justify-center cursor-pointer transition-all hover:scale-105 group`}
+                className={`absolute ${positionClasses} h-12 px-5 rounded-full shadow-lg flex items-center justify-center cursor-pointer group`} /* Adjusted height, padding, shadow */
                 style={{
-                    backgroundColor: buttonBgColor || '#3b82f6', // Fallback color
+                    backgroundColor: buttonBgColor || (previewMode === 'dark' ? '#DC2626' : '#DC2626'), // Defaulting to red as per image
                     color: buttonTextColor || '#ffffff',
-                    borderRadius: currentConfig.button_border_radius || '9999px',
+                    borderRadius: currentConfig.button_border_radius || '9999px', // Keep pill shape default
                     borderWidth: currentConfig.button_border_width || '0px',
                     borderStyle: currentConfig.button_border_style || 'none',
-                    // borderColor: ??? // Need border color field if style is not none
+                    borderColor: previewMode === 'dark' ? 'var(--neutral-600)' : 'var(--neutral-300)',
                 }}
                 title="Chat Widget Preview"
             >
-                {/* Show Logo if available, else icon */}
-                {logo ? (
-                    <img src={logo} alt="Logo" className="h-8 w-auto object-contain max-w-[80%]" /> // Added max-width
-                ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                {/* Text */}
+                <span className="text-sm font-semibold mr-2" style={{ fontWeight: currentConfig.button_font_weight || '600' }}> {/* Adjusted font weight */}
+                    {currentConfig.widget_button_text || 'Chat Now'} {/* Default to "Chat Now" */}
+                </span>
+
+                {/* Icon */}
+                <div className="bg-white/20 rounded-full p-1"> {/* Icon background circle */}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}> {/* Adjusted size/stroke */}
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                )}
-                {/* Show button text if logo isn't present */}
-                {!logo && currentConfig.widget_button_text && (
-                    <span className="ml-2 text-sm font-medium" style={{ fontWeight: currentConfig.button_font_weight || 'bold' }}>
-                        {currentConfig.widget_button_text}
-                    </span>
-                )}
+                </div>
 
-                {/* Tooltip showing help text */}
+                {/* Tooltip showing help text (Optional, kept from original) */}
                 <div className="absolute bottom-full mb-2 w-max max-w-xs p-2 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
                     style={{ backgroundColor: 'rgba(0,0,0,0.7)'}}
                 >
                     {currentConfig.widget_help_text || 'Need help?'}
                     <div className="absolute left-1/2 transform -translate-x-1/2 top-full w-0 h-0 border-x-4 border-x-transparent border-t-4 border-t-black" style={{ borderTopColor: 'rgba(0,0,0,0.7)'}}></div>
                 </div>
-            </div>
-
-            {/* Mock Expanded Widget (Simplified) - Uncomment to show basic expanded view */}
-
-            <div className={`absolute bottom-24 right-6 w-72 h-96 rounded-lg shadow-xl overflow-hidden flex flex-col`}
-                 style={{
-                     backgroundColor: bgColor || '#ffffff',
-                     borderRadius: currentConfig.widget_border_radius || '1.5rem',
-                     boxShadow: currentConfig.widget_shadow || 'none',
-                     borderWidth: currentConfig.widget_border_width || '0px',
-                     borderStyle: currentConfig.widget_border_style || 'none',
-                     // borderColor: ??? // Need border color field
-                     fontFamily: currentConfig.font_family || 'sans-serif',
-                 }}
-            >
-                {/* Header */}
-                <div className="h-14 flex items-center px-4 flex-shrink-0" style={{ backgroundColor: headerBg || primaryColor, color: headerText || '#ffffff' }}>
-                    {/* Header Logo */}
-                     {logo && (
-                         <img src={logo} alt="Header Logo" className="h-6 w-auto mr-2 object-contain" />
-                     )}
-                    <span className="font-semibold text-base" style={{ fontWeight: currentConfig.header_font_weight || 'bold' }}>
-                        {currentConfig.main_title || 'Chat'}
-                    </span>
-                    {/* Add close button icon placeholder */}
-                    <button className="ml-auto text-inherit opacity-70 hover:opacity-100">✕</button>
-                </div>
-                {/* Body */}
-                <div className="flex-1 p-4 text-sm overflow-y-auto" style={{ color: textColor || '#000000', fontSize: currentConfig.base_font_size || '1rem' }}>
-                    {/* Greeting Message */}
-                    <div className="mb-3 p-3 rounded-lg" style={{ backgroundColor: previewMode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)', borderRadius: currentConfig.message_bubble_border_radius || '1rem' }}>
-                        <p style={{ fontWeight: currentConfig.message_font_weight || 'normal' }}>
-                            {currentConfig.greeting_message || 'Hello!'}
-                        </p>
-                    </div>
-                    {/* Example User Message */}
-                     <div className="mb-3 p-3 rounded-lg ml-auto max-w-[80%]" style={{ backgroundColor: primaryColor || '#3b82f6', color: buttonTextColor || '#ffffff', borderRadius: currentConfig.message_bubble_border_radius || '1rem' }}>
-                        <p style={{ fontWeight: currentConfig.message_font_weight || 'normal' }}>
-                            This is a user message preview.
-                        </p>
-                    </div>
-                </div>
-                 {/* Input Area */}
-                 <div className="p-3 border-t" style={{ borderColor: previewMode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)' }}>
-                     <input
-                         type="text"
-                         placeholder="Type your message..."
-                         className="w-full px-3 py-2 border rounded-md text-sm"
-                         style={{
-                             padding: currentConfig.input_field_padding || '0.5rem',
-                             borderRadius: currentConfig.input_field_border_radius || '0.5rem',
-                             borderWidth: currentConfig.input_field_border_width || '1px',
-                             borderStyle: currentConfig.input_field_border_style || 'solid',
-                             borderColor: previewMode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.2)',
-                             backgroundColor: previewMode === 'dark' ? 'rgba(255,255,255,0.1)' : '#ffffff',
-                             color: textColor || '#000000',
-                         }}
-                     />
-                 </div>
             </div>
 
         </div>

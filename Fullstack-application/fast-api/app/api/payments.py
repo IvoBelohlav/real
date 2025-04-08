@@ -1,7 +1,8 @@
 import stripe
 import os
+import json # Import json for parsing forwarded event
 from typing import Dict, Optional, List # Added List
-from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks, Header # Added Header
 from pydantic import BaseModel, Field
 from starlette.responses import JSONResponse
 from datetime import datetime # Added datetime
@@ -18,6 +19,11 @@ from fastapi import status
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+# Get Internal Secret for verifying forwarded webhooks
+INTERNAL_SECRET = os.getenv("INTERNAL_SECRET")
+if not INTERNAL_SECRET:
+    logger.warning("INTERNAL_SECRET environment variable not set. Forwarded webhooks cannot be verified.")
 
 router = APIRouter()
 
@@ -232,28 +238,84 @@ async def get_widget_snippet(current_user: Dict = Depends(get_current_active_cus
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/webhooks/stripe")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(
+    request: Request,
+    internal_secret: Optional[str] = Header(None, alias="X-Internal-Secret") # Check for internal secret header
+):
     """
     Webhook endpoint for Stripe events.
+    Handles both direct Stripe calls (verifies signature) and
+    internally forwarded calls (verifies shared secret).
     Uses the centralized handler from stripe_utils.py.
     """
-    # Get the webhook signature from request headers
-    signature = request.headers.get("stripe-signature")
-    
-    if not signature or not STRIPE_WEBHOOK_SECRET:
-        raise HTTPException(status_code=400, detail="Missing signature or webhook secret")
-    
-    # Get request body
+    event = None
     payload = await request.body()
-    
-    try:
-        # Verify and construct the event using the utility function
-        event = await construct_event(
-            payload=payload,
-            sig_header=signature,
-            secret=STRIPE_WEBHOOK_SECRET
-        )
 
+    if internal_secret:
+        # --- Handle Internally Forwarded Event ---
+        logger.info("Processing webhook forwarded from internal service.")
+        if not INTERNAL_SECRET:
+             logger.error("Received forwarded webhook but INTERNAL_SECRET is not configured.")
+             raise HTTPException(status_code=500, detail="Internal configuration error: Missing shared secret.")
+        if internal_secret != INTERNAL_SECRET:
+             logger.error("Invalid internal secret received for forwarded webhook.")
+             raise HTTPException(status_code=403, detail="Forbidden: Invalid shared secret.")
+
+        # Payload is the JSON string of the verified event from Next.js
+        try:
+            event_data = json.loads(payload)
+            # Basic validation: Check if it looks like a Stripe event object
+            if not isinstance(event_data, dict) or 'id' not in event_data or 'type' not in event_data:
+                 raise ValueError("Parsed payload does not look like a Stripe event object.")
+            # Reconstruct a StripeObject-like structure if needed by handlers,
+            # or ensure handlers can work with plain dicts.
+            # For simplicity, we'll assume handlers work with dicts for now.
+            event = stripe.util.convert_to_stripe_object(event_data) # Try converting back
+            logger.info(f"Successfully parsed forwarded event: {event.type} (ID: {event.id})")
+        except json.JSONDecodeError:
+            logger.error("Failed to parse JSON payload of forwarded webhook.")
+            raise HTTPException(status_code=400, detail="Invalid JSON payload for forwarded event.")
+        except ValueError as e:
+             logger.error(f"Invalid event data in forwarded webhook: {e}")
+             raise HTTPException(status_code=400, detail=f"Invalid event data: {e}")
+        except Exception as e: # Catch potential stripe.util errors or others
+             logger.error(f"Error processing forwarded event data: {e}")
+             raise HTTPException(status_code=500, detail="Error processing forwarded event data.")
+
+    else:
+        # --- Handle Direct Stripe Event ---
+        logger.info("Processing direct webhook call from Stripe.")
+        signature = request.headers.get("stripe-signature")
+        if not signature:
+            logger.error("Missing stripe-signature header for direct webhook.")
+            raise HTTPException(status_code=400, detail="Missing stripe-signature header")
+        if not STRIPE_WEBHOOK_SECRET:
+            logger.error("STRIPE_WEBHOOK_SECRET not configured for direct webhook verification.")
+            raise HTTPException(status_code=500, detail="Webhook secret not configured")
+
+        try:
+            # Verify and construct the event using the utility function
+            event = await construct_event(
+                payload=payload,
+                sig_header=signature,
+                secret=STRIPE_WEBHOOK_SECRET
+            )
+        except HTTPException as http_exc:
+             # Re-raise exceptions from construct_event (e.g., 400 Bad Request for signature error)
+             logger.error(f"Webhook signature verification failed: {http_exc.detail}")
+             raise http_exc
+        except Exception as e:
+             # Catch any other unexpected errors during construction
+             logger.error(f"Unexpected error constructing direct webhook event: {e}", exc_info=True)
+             raise HTTPException(status_code=500, detail="Error constructing webhook event")
+
+    # --- Process the Event (Common Logic) ---
+    if not event:
+         # Should not happen if logic above is correct, but as a safeguard
+         logger.error("Event object was not created.")
+         raise HTTPException(status_code=500, detail="Internal server error: Event not processed")
+
+    try:
         # Get user collection for database operations
         user_collection = await get_user_collection()
 
@@ -265,13 +327,13 @@ async def stripe_webhook(request: Request):
         return JSONResponse(content=result, status_code=200)
 
     except HTTPException as http_exc:
-        # Re-raise HTTP exceptions from construct_event or handle_webhook_event
-        logger.error(f"HTTP exception during webhook processing: {http_exc.detail}")
+        # Re-raise known HTTP exceptions from handle_webhook_event
+        logger.error(f"HTTP exception during webhook handling: {http_exc.detail}")
         raise http_exc
     except Exception as e:
-        # Catch any other unexpected errors during processing
-        logger.error(f"Unexpected error processing webhook {event.id if 'event' in locals() else 'unknown'}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error during webhook processing")
+        # Catch any other unexpected errors during handling
+        logger.error(f"Unexpected error handling webhook {event.id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error during webhook handling")
 
 @router.get("/payments/stripe-status")
 async def check_stripe_status():

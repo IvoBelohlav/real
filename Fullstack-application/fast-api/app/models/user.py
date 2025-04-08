@@ -60,7 +60,8 @@ class UserProfile(BaseModel):
     username: str
     email: EmailStr
     company_name: Optional[str] = None
-    subscription_tier: SubscriptionTier # Reflects the plan level
+    subscription_tier: SubscriptionTier # The enum value (e.g., basic, premium)
+    subscription_tier_name: str # User-friendly display name (e.g., Basic, Premium)
     subscription_status: SubscriptionStatus # Reflects the activity status
     subscription_end_date: Optional[datetime] = None
     api_key: Optional[str] = None

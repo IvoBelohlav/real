@@ -1,0 +1,89 @@
+/* HeroSection.module.css */
+
+.heroGradient {
+  /* Ensure --primary-500 and --primary-700 are defined in globals.css or Tailwind config */
+  /* Example fallback: */
+  background: linear-gradient(135deg, var(--primary-500, #0098ee), var(--primary-700, #005790));
+}
+
+.heroPattern {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  /* Subtle pattern using SVG */
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FFFFFF' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  z-index: 0;
+  opacity: 0.5; /* Adjust opacity */
+}
+
+.heroBlob {
+  position: absolute;
+  z-index: 0;
+  width: 500px; /* Adjust size as needed */
+  height: 500px; /* Adjust size as needed */
+  border-radius: 50%;
+  /* Use a gradient matching the theme */
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  opacity: 0.4; /* Adjust opacity */
+  filter: blur(80px); /* Adjust blur */
+  pointer-events: none; /* Prevent interaction */
+}
+
+.heroBlob1 {
+  top: -150px;
+  right: -150px;
+}
+
+.heroBlob2 {
+  bottom: -200px;
+  left: -100px;
+}
+
+/* Ensure button styles are defined globally or in Tailwind config */
+/* Example btn styles if not using Tailwind components/plugins */
+/*
+.btn {
+  display: inline-block;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  border: 2px solid transparent;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
+}
+
+.btn-white {
+  background-color: white;
+  color: var(--primary-600, #0072b5);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-white:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: white;
+  color: white;
+}
+
+.btn-outline:hover {
+  background-color: white;
+  color: var(--primary-600, #0072b5);
+}
+*/

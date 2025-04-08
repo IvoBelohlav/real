@@ -77,8 +77,10 @@ export default function DomainManager() {
     setError(null);
 
     try {
+      // Encode the domainId to handle special characters like '/' and ':' correctly in the path
+      const encodedDomainId = encodeURIComponent(domainId);
       // The delete endpoint now also returns the updated list
-      const updatedDomainsArray: Domain[] = await fetchApi(`/api/domains/${domainId}`, {
+      const updatedDomainsArray: Domain[] = await fetchApi(`/api/domains/${encodedDomainId}`, {
         method: 'DELETE',
       });
        // Ensure the response is an array before setting state

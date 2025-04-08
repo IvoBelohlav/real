@@ -1,81 +1,94 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image'; // Use Next.js Image component
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import styles from './HeroSection.module.css'; // CSS Module for specific styles
 
 const HeroSection: React.FC = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        type: 'spring',
-        stiffness: 100,
-        damping: 10,
-      },
-    },
-  };
-
   return (
-    <motion.section
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="relative text-center py-24 md:py-32 px-4 overflow-hidden bg-gradient-to-b from-blue-50 via-white to-transparent"
-    >
-      {/* Background Gradient Shapes (Optional Enhancement) */}
-      <div className="absolute top-0 left-0 w-64 h-64 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
-      <div className="absolute bottom-10 left-20 w-64 h-64 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
+    <section className={`relative overflow-hidden pt-40 pb-20 md:pt-48 md:pb-28 ${styles.heroGradient}`} id="home">
+      {/* Background Elements */}
+      <div className={styles.heroPattern}></div>
+      <div className={`${styles.heroBlob} ${styles.heroBlob1}`}></div>
+      <div className={`${styles.heroBlob} ${styles.heroBlob2}`}></div>
 
+      <div className="container mx-auto px-4 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          {/* Content */}
+          <div className="text-center md:text-left text-white">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-6 leading-tight"
+            >
+              Elevate Your Business with AI-Powered Chat
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg md:text-xl opacity-90 mb-8 max-w-xl mx-auto md:mx-0"
+            >
+              Dvojkavit provides intelligent chatbot solutions to automate customer support, generate leads, and enhance user engagement.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start mb-10"
+            >
+              {/* Updated button styles to match the example */}
+              <Link href="/register" className="btn btn-white btn-lg">
+                Get Started Free
+              </Link>
+              <Link href="#features" className="btn btn-outline btn-lg border-white text-white hover:bg-white hover:text-primary-600">
+                Explore Features
+              </Link>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex justify-center md:justify-start space-x-8"
+            >
+              <div className="text-center">
+                <div className="text-3xl font-bold">10k+</div>
+                <div className="text-sm opacity-80">Active Users</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">98%</div>
+                <div className="text-sm opacity-80">Customer Satisfaction</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold">24/7</div>
+                <div className="text-sm opacity-80">Support Automation</div>
+              </div>
+            </motion.div>
+          </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto">
-        <motion.h1
-          variants={itemVariants}
-          className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-6 leading-tight"
-        >
-          Turn Conversations into <span className="text-blue-600">Conversions</span>
-        </motion.h1>
-        <motion.p
-          variants={itemVariants}
-          className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto"
-        >
-          Engage visitors, automate support, showcase products, and drive sales with our intelligent, customizable chat widget designed for growth.
-        </motion.p>
-        <motion.div
-          variants={itemVariants}
-          className="flex flex-col sm:flex-row justify-center items-center gap-4"
-        >
-          <Link href="/register">
-            <span className="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-300 ease-in-out cursor-pointer text-lg transform hover:scale-105 w-full sm:w-auto">
-              Get Started Today
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </span>
-          </Link>
-          <Link href="/login">
-             <span className="inline-flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-lg shadow-md transition duration-300 ease-in-out cursor-pointer text-lg w-full sm:w-auto">
-              Login
-            </span>
-          </Link>
-        </motion.div>
-         <motion.p variants={itemVariants} className="mt-6 text-sm text-gray-500">
-            Start boosting engagement today!
-          </motion.p>
+          {/* Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="relative flex justify-center"
+          >
+            {/* Placeholder Image - Replace with relevant screenshot or graphic */}
+            <Image
+              src="/api/placeholder/700/600" // Placeholder API
+              alt="Dvojkavit Dashboard Preview"
+              width={700}
+              height={600}
+              className="rounded-lg shadow-2xl object-cover"
+              priority // Load hero image faster
+            />
+          </motion.div>
+        </div>
       </div>
-    </motion.section>
+    </section>
   );
 };
 

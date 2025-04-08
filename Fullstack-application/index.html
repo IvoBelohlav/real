@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lermo Widget Test</title>
+  
+  <link rel="stylesheet" href="https://lermoplus.s3.eu-north-1.amazonaws.com/static/css/main.7448fe63.css">
+</head>
+<body>
+  <div id="widget-parent">
+      <div id="lermo-widget-container">
+      </div>
+  </div>
+
+  <script src="https://lermoplus.s3.eu-north-1.amazonaws.com/static/js/main.d69c8370.js" defer></script>
+
+  <script>
+    function initializeWidget() {
+        if (window.LermoWidget && typeof window.LermoWidget.init === 'function') {
+            try {
+                window.LermoWidget.init({
+                    apiKey: 'test_api_ac457e437fa448a4b39bfd15bf269c96',
+                    containerId: 'lermo-widget-container'
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    }
+    window.setTimeout(initializeWidget, 300);
+  </script>
+</body>
+</html>

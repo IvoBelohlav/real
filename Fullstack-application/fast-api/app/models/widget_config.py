@@ -3,7 +3,8 @@ from typing import Optional, Dict
 import base64
 
 class WidgetConfig(BaseModel):
-    id: int = 1
+    user_id: Optional[str] = Field(None, description="The ID of the user this config belongs to")
+    id: int = 1 # This might need adjustment depending on how IDs are managed (e.g., if it's DB generated)
     logo_light_mode: Optional[str] = Field(
         None,
         description="URL or Base64 encoded string of the logo for light mode"

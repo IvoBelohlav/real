@@ -120,7 +120,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
   const [keywords, setKeywords] = useState<string[]>([]);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isAiLoading, setIsAiLoading] = useState(false); // For AI button
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null); // State for AI errors
 
   // Fetch Business Types for dropdown
   const { data: businessTypes, isLoading: isLoadingBusinessTypes } = useQuery<BusinessType[], Error>({
@@ -157,8 +158,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please select an image file.');
+      // Updated validation to accept only webp
+      if (file.type !== 'image/webp') {
+        toast.error('Please select a WEBP image file (.webp).');
+        e.target.value = ''; // Clear the input
         return;
       }
       setImageFile(file);
@@ -172,14 +175,45 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
   };
 
   const handleGenerateSuggestions = async () => {
-      // ** Functionality Disabled **
+      if (!textData.product_name) {
+          toast.warn("Please enter a Product Name first to generate suggestions.");
+          return;
+      }
       setIsAiLoading(true);
-      toast.info("AI Suggestion feature is not available (missing backend endpoint).", { autoClose: 4000 });
-      console.warn("Attempted to use AI suggestions for products, but the backend endpoint is missing.");
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIsAiLoading(false);
-      // --- Original Logic Placeholder ---
-      // Requires backend endpoint like /api/products/suggestions
+      setAiError(null); // Clear previous errors
+      try {
+          const params = new URLSearchParams();
+          params.append('product_name', textData.product_name);
+          if (textData.description) params.append('description', textData.description);
+          if (textData.category) params.append('category', textData.category);
+          if (textData.business_type) params.append('business_type', textData.business_type);
+          params.append('language', 'cs'); // Explicitly request Czech suggestions
+
+          // Use the relative path for the API call within the same application
+          const suggestions = await fetchApi(`/api/products/suggestions?${params.toString()}`);
+
+          if (suggestions) {
+              // Replace existing values with suggestions. User can still edit.
+              if (suggestions.features?.length) setFeatures(suggestions.features);
+              if (suggestions.keywords?.length) setKeywords(suggestions.keywords);
+              if (suggestions.target_audience?.length) setTargetAudience(suggestions.target_audience);
+              // Optionally suggest a category if one wasn't provided or if suggestions exist
+              if (!textData.category && suggestions.categories?.length) {
+                  setTextData(prev => ({ ...prev, category: suggestions.categories[0] })); // Use the first suggested category
+              }
+              toast.success("AI suggestions applied!");
+          } else {
+               toast.warn("AI did not return any suggestions.");
+               setAiError("No suggestions received.");
+          }
+      } catch (error: any) {
+          console.error("Failed to fetch AI suggestions:", error);
+          const errorMsg = error?.detail || error.message || "Failed to get suggestions";
+          toast.error(`AI Error: ${errorMsg}`);
+          setAiError(errorMsg);
+      } finally {
+          setIsAiLoading(false);
+      }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -213,7 +247,13 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
 
     // Append image file if selected
     if (imageFile) {
-      submissionData.append('image_file', imageFile);
+      // Ensure it's webp before appending (redundant check if input accept works, but safe)
+      if (imageFile.type === 'image/webp') {
+        submissionData.append('image_file', imageFile);
+      } else {
+        toast.error("Invalid file type. Only WEBP images are allowed.");
+        return; // Stop submission if file type is wrong
+      }
     } else if (!imagePreview && product?.image_url) {
       // Signal to potentially remove the image if API supports it
       // submissionData.append('remove_image', 'true'); // Example, depends on API
@@ -223,9 +263,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4" data-intro="product-form"> {/* Added data-intro */}
       {/* Product Name & AI Button */}
-      <div>
+      <div data-intro="product-name-field"> {/* Added data-intro */}
         <label htmlFor="product_name" className="block text-sm font-medium text-gray-700">Product Name *</label>
         <div className="flex items-center space-x-2 mt-1">
             <input
@@ -234,29 +274,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
             />
             <button
                 type="button" onClick={handleGenerateSuggestions}
-                className="px-3 py-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 text-sm font-medium border border-gray-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={true} // Always disabled as backend endpoint is missing
-                title="AI Suggestions (Feature not available - requires backend update)"
+                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium border border-blue-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isAiLoading || !textData.product_name} // Disable if loading or no product name
+                title={!textData.product_name ? "Enter Product Name first" : "Generate AI Suggestions"}
              >
-                {isAiLoading ? <LoadingSpinner /> : <Sparkles size={16} />}
-                <span>AI</span>
+                {isAiLoading ? <LoadingSpinner /> : <Sparkles size={16} />} {/* Removed size prop */}
+                <span>Suggest</span>
              </button>
         </div>
+         {aiError && <p className="text-xs text-red-600 mt-1">Suggestion Error: {aiError}</p>}
       </div>
 
       {/* Description */}
-      <div>
+      <div data-intro="product-description-field"> {/* Added data-intro */}
         <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description *</label>
         <textarea name="description" id="description" rows={4} value={textData.description} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
       </div>
 
       {/* Category & Business Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
+        <div data-intro="product-category-field"> {/* Added data-intro */}
           <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category *</label>
           <input type="text" name="category" id="category" value={textData.category} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
         </div>
-        <div>
+        <div data-intro="product-businesstype-field"> {/* Added data-intro */}
           <label htmlFor="business_type" className="block text-sm font-medium text-gray-700">Business Type *</label>
           {isLoadingBusinessTypes ? <LoadingSpinner /> : (
             <select name="business_type" id="business_type" value={textData.business_type} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
@@ -268,10 +309,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
       </div>
 
       {/* Features (Tag Input) */}
-      <TagInput label="Features" tags={features} setTags={setFeatures} placeholder="Add feature..." helperText="Key product features." idSuffix="prod-features"/>
+      <div data-intro="product-features-field"> {/* Added data-intro */}
+        <TagInput label="Features" tags={features} setTags={setFeatures} placeholder="Add feature..." helperText="Key product features." idSuffix="prod-features"/>
+      </div>
 
       {/* Pricing */}
-       <fieldset className="border border-gray-300 p-3 rounded-md">
+       <fieldset className="border border-gray-300 p-3 rounded-md" data-intro="product-pricing-field"> {/* Added data-intro */}
          <legend className="text-sm font-medium text-gray-700 px-1">Pricing</legend>
          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
@@ -312,11 +355,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
       </div>
 
       {/* Image Upload */}
-      <div>
+      <div data-intro="product-image-field"> {/* Added data-intro */}
         <label htmlFor="image_file" className="block text-sm font-medium text-gray-700">Product Image</label>
         <div className="mt-1 flex items-center space-x-4">
             <input
-              type="file" name="image_file" id="image_file" accept="image/*" onChange={handleImageChange}
+              type="file" name="image_file" id="image_file" accept="image/webp" onChange={handleImageChange} // Changed accept to image/webp
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
             />
             {imagePreview && (
@@ -335,7 +378,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
         <button type="button" onClick={onCancel} disabled={isLoading} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium disabled:opacity-50">
           Cancel
         </button>
-        <button type="submit" disabled={isLoading || isLoadingBusinessTypes} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]">
+        <button type="submit" disabled={isLoading || isLoadingBusinessTypes} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]" data-intro="product-submit-button"> {/* Added data-intro */}
           {isLoading ? <LoadingSpinner /> : (
               <>
                 {product ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />}

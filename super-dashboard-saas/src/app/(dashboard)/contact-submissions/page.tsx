@@ -5,7 +5,7 @@ import { useSubscription } from '@/contexts/SubscriptionContext';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import Link from 'next/link';
 // Import the manager component we will create next
-// import ContactSubmissionsManager from '@/components/contact-submissions/ContactSubmissionsManager'; // Placeholder
+import ContactSubmissionsManager from '@/components/contact-submissions/ContactSubmissionsManager'; // Uncommented
 
 export default function ContactSubmissionsPage() {
   const { hasActiveSubscription, isLoading: isSubscriptionLoading } = useSubscription();
@@ -43,10 +43,10 @@ export default function ContactSubmissionsPage() {
       <p className="text-gray-600"> {/* Removed mb-4 */}
         View messages submitted through the contact form in the chat widget.
       </p>
-      {/* Render the placeholder inside the existing card */}
+      {/* Render the actual manager component */}
       <div className="bg-white p-6 rounded shadow">
-         {/* <ContactSubmissionsManager /> */}
-         <p className="text-center text-gray-500">Contact Submissions Component Placeholder</p>
+         <ContactSubmissionsManager /> {/* Uncommented */}
+         {/* <p className="text-center text-gray-500">Contact Submissions Component Placeholder</p> */}
       </div>
     </div>
   );

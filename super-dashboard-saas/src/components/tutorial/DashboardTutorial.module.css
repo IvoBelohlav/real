@@ -1,0 +1,189 @@
+/* DashboardTutorial.module.css - Enhanced Light Theme Version */
+
+@keyframes fadeInScaleUp {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Apply a custom class to the tooltip for easier targeting */
+.customTooltip {
+  background: #ffffff;
+  color: #1f2937;
+  border-radius: 12px; /* Slightly more rounded */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.07); /* Softer, layered shadow */
+  padding: 28px 32px; /* More padding */
+  font-family: inherit;
+  max-width: 420px; /* Wider */
+  border: 1px solid #f3f4f6; /* Very light border */
+  animation: fadeInScaleUp 0.3s ease-out forwards; /* Entry animation */
+}
+
+/* Style the text content */
+.customTooltip .introjs-tooltiptext {
+  font-size: 1.1rem; /* Larger text */
+  line-height: 1.8;
+  margin-bottom: 28px;
+  color: #374151;
+}
+
+/* General button styling */
+.customTooltip .introjs-button {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px 24px; /* Larger buttons */
+  font-size: 1rem;
+  font-weight: 600;
+  text-shadow: none;
+  transition: all 0.25s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: #374151;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.customTooltip .introjs-button:hover {
+  background-color: #f9fafb;
+  border-color: #adb5bd;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px); /* Subtle lift */
+}
+
+/* Primary button style (Next) */
+.customTooltip .introjs-nextbutton {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.customTooltip .introjs-nextbutton:hover {
+  background-color: #2563eb;
+  border-color: #1d4ed8; /* Slightly darker border */
+  box-shadow: 0 5px 10px rgba(59, 130, 246, 0.35);
+  transform: translateY(-2px); /* More lift */
+}
+
+/* Secondary button style (Back) */
+.customTooltip .introjs-prevbutton {
+  background-color: #ffffff;
+  color: #4b5563;
+  border-color: #d1d5db;
+}
+
+.customTooltip .introjs-prevbutton:hover {
+  background-color: #f9fafb;
+  border-color: #adb5bd;
+  color: #1f2937;
+}
+
+/* Done button style (Similar to Back, maybe slightly different?) */
+.customTooltip .introjs-donebutton {
+  background-color: #f9fafb; /* Slightly off-white */
+  color: #4b5563;
+  border-color: #d1d5db;
+}
+.customTooltip .introjs-donebutton:hover {
+  background-color: #f3f4f6; /* Lighter grey */
+  border-color: #adb5bd;
+  color: #1f2937;
+}
+
+
+/* Skip button style - More subtle */
+.customTooltip .introjs-skipbutton {
+  background-color: transparent;
+  color: #adb5bd; /* Lighter grey */
+  font-weight: 500;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  box-shadow: none;
+  border: none;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  transition: color 0.2s ease;
+}
+
+.customTooltip .introjs-skipbutton:hover {
+  color: #6b7280; /* Darker grey on hover */
+  background-color: transparent;
+}
+
+/* Button container adjustments */
+.customTooltip .introjs-tooltipbuttons {
+  border-top: 1px solid #f3f4f6; /* Lighter separator */
+  padding-top: 24px;
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  min-height: 50px;
+}
+
+/* Hide default bullets when progress bar is shown */
+.customTooltip .introjs-bullets {
+  display: none;
+}
+
+/* Progress bar styling */
+.customTooltip .introjs-progress {
+  background-color: #e5e7eb; /* Light grey background */
+  border-radius: 4px;
+  height: 8px; /* Thicker bar */
+  margin: 20px 0; /* Space around progress bar */
+  overflow: hidden; /* Ensure inner bar respects radius */
+}
+
+.customTooltip .introjs-progressbar {
+  background-color: #3b82f6; /* Primary blue */
+  height: 100%;
+  border-radius: 4px; /* Match outer radius */
+  transition: width 0.3s ease-out; /* Smooth transition */
+}
+
+
+/* Style the arrow */
+.customTooltip .introjs-arrow {
+  border: 7px solid transparent; /* Slightly larger arrow */
+}
+
+.customTooltip .introjs-arrow.top {
+  border-bottom-color: #ffffff;
+  top: -14px;
+}
+.customTooltip .introjs-arrow.bottom {
+  border-top-color: #ffffff;
+  bottom: -14px;
+}
+.customTooltip .introjs-arrow.left {
+  border-right-color: #ffffff;
+  left: -14px;
+}
+.customTooltip .introjs-arrow.right {
+  border-left-color: #ffffff;
+  right: -14px;
+}
+
+/* Hide step numbers */
+.customTooltip .introjs-helperNumberLayer {
+  display: none;
+}
+
+/* Custom class to attempt forcing highlight */
+.forceHighlight {
+  /* Add styles that are likely to override others, e.g., a prominent border */
+  box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.7) !important; /* Blue shadow, !important might be needed */
+  border: 2px solid #2563eb !important; /* Solid blue border */
+  background-color: rgba(59, 130, 246, 0.1) !important; /* Slight blue background */
+  border-radius: 6px; /* Match button radius if possible */
+}

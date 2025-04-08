@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect, FormEvent, KeyboardEvent } from 'react';
 import { BusinessType, BusinessTypeCreateUpdate } from '@/types';
+import { fetchApi } from '@/lib/api'; // Import fetchApi
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
-import { Tag, X, Sparkles, Plus } from 'lucide-react'; // Import icons
-import { toast } from 'react-toastify'; // Import toast for potential future use or error display
+import { Tag, X, Sparkles, Plus, Save } from 'lucide-react'; // Added Save icon
+import { toast } from 'react-toastify';
 
 interface BusinessTypeFormProps {
   businessType?: BusinessType | null; // Data for editing, null for adding
@@ -111,190 +112,99 @@ const TagInput: React.FC<{
 };
 
 
-// Main Form Component
+// Main Form Component - Simplified
 const BusinessTypeForm: React.FC<BusinessTypeFormProps> = ({ businessType, onSubmit, onCancel, isLoading }) => {
-  // --- State Initialization ---
+  // --- State Initialization (Simplified) ---
   const [typeName, setTypeName] = useState('');
-  const [queryPatterns, setQueryPatterns] = useState<string[]>([]);
-  // Comparison Config fields
   const [keyFeatures, setKeyFeatures] = useState<string[]>([]);
   const [comparisonMetrics, setComparisonMetrics] = useState<string[]>([]);
-  const [recommendationTemplate, setRecommendationTemplate] = useState('');
-  // Other fields remain as JSON strings for now
-  const [attributesJson, setAttributesJson] = useState('{}');
-  const [responseTemplatesJson, setResponseTemplatesJson] = useState('{}');
-  const [validationRulesJson, setValidationRulesJson] = useState('{}');
-  const [categoryConfigsJson, setCategoryConfigsJson] = useState('{}');
 
-  const [jsonErrors, setJsonErrors] = useState<Record<string, string | null>>({}); // Errors for JSON fields
-  const [isAiLoading, setIsAiLoading] = useState(false); // State for AI button loading
+  // Removed state for: queryPatterns, attributesJson, responseTemplatesJson, validationRulesJson, categoryConfigsJson, recommendationTemplate
+
+  const [jsonErrors, setJsonErrors] = useState<Record<string, string | null>>({}); // Keep for type name validation
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null); // State for AI errors
 
   // --- Effect to load data when editing ---
   useEffect(() => {
     setTypeName(businessType?.type || '');
-    setQueryPatterns(businessType?.query_patterns || []);
+    // Load directly from the simplified model structure
+    setKeyFeatures(businessType?.key_features || []);
+    setComparisonMetrics(businessType?.comparison_metrics || []);
 
-    // Parse comparison_config safely
-    const initialComparisonConfig = safeJsonParse(JSON.stringify(businessType?.comparison_config || {}), {});
-    setKeyFeatures(initialComparisonConfig?.key_features || []);
-    setComparisonMetrics(initialComparisonConfig?.comparison_metrics || []);
-    setRecommendationTemplate(initialComparisonConfig?.recommendation_template || '');
-
-    // Set other JSON fields, ensuring they are stringified objects
-    setAttributesJson(JSON.stringify(businessType?.attributes || {}, null, 2));
-    setResponseTemplatesJson(JSON.stringify(businessType?.response_templates || {}, null, 2));
-    setValidationRulesJson(JSON.stringify(businessType?.validation_rules || {}, null, 2));
-    setCategoryConfigsJson(JSON.stringify(businessType?.category_configs || {}, null, 2));
+    // Removed loading logic for deleted fields
 
     setJsonErrors({}); // Clear errors on load/reset
   }, [businessType]);
 
   // --- Handlers ---
-  const handleJsonChange = (setter: React.Dispatch<React.SetStateAction<string>>, fieldName: string) =>
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setter(e.target.value);
-      // Clear specific JSON error when user types
-      if (jsonErrors[fieldName]) {
-        setJsonErrors(prev => ({ ...prev, [fieldName]: null }));
-      }
-    };
+  // Removed handleJsonChange as there are no JSON text areas anymore
 
   const handleGenerateSuggestions = async () => {
-      // ** Functionality Disabled **
-      // This requires a backend endpoint like /api/business-types/suggestions/{typeName} which is not currently available.
-      setIsAiLoading(true); // Show loading state briefly for visual feedback
-      toast.info("AI Suggestion feature is not available (missing backend endpoint).", { autoClose: 4000 });
-      console.warn("Attempted to use AI suggestions, but the backend endpoint is missing.");
-      // Simulate loading for demo purposes
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setIsAiLoading(false);
+      if (!typeName.trim()) {
+          toast.warn("Zadejte prosím nejprve název typu firmy.");
+          return;
+      }
+      setIsAiLoading(true);
+      setAiError(null);
+      try {
+          const params = new URLSearchParams();
+          params.append('type_name', typeName.trim());
+          params.append('language', 'cs'); // Request Czech suggestions
 
-      // --- Original Logic Placeholder (requires backend changes) ---
-      // if (!typeName.trim()) {
-      //     setJsonErrors(prev => ({ ...prev, type: 'Please enter a Type Name first to generate suggestions' }));
-      //     return;
-      // }
-      // try {
-      //     setIsAiLoading(true);
-      //     // Replace with actual API call using fetchApi from '@/lib/api'
-      //     // const response = await fetchApi(`/api/business-types/suggestions/${encodeURIComponent(typeName)}`);
-      //     // const suggestions = response; // Assuming response structure { key_features: [], comparison_metrics: [] }
-      //
-      //     // Mock response for now:
-      //     await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-      //     const suggestions = {
-      //         key_features: ["Mock Feature 1", "Mock Feature 2"],
-      //         comparison_metrics: ["Mock Metric A", "Mock Metric B"]
-      //     };
-      //
-      //     // Merge suggestions (avoid duplicates)
-      //     setKeyFeatures(prev => [...new Set([...prev, ...(suggestions.key_features || [])])]);
-      //     setComparisonMetrics(prev => [...new Set([...prev, ...(suggestions.comparison_metrics || [])])]);
-      //
-      //     toast.success("AI suggestions added!");
-      //
-      // } catch (error: any) {
-      //     console.error('Error fetching suggestions:', error);
-      //     toast.error(`Failed to get AI suggestions: ${error.message}`);
-      // } finally {
-      //     setIsAiLoading(false);
-      // }
+          // Fetch suggestions for key_features and comparison_metrics
+          const suggestions = await fetchApi(`/api/business-types/suggestions?${params.toString()}`);
+
+          let suggestionsApplied = false;
+          if (suggestions && suggestions.key_features?.length) {
+              setKeyFeatures(suggestions.key_features);
+              suggestionsApplied = true;
+          }
+          if (suggestions && suggestions.comparison_metrics?.length) {
+              setComparisonMetrics(suggestions.comparison_metrics);
+              suggestionsApplied = true;
+          }
+
+          if (suggestionsApplied) {
+              toast.success("AI návrhy pro vlastnosti a metriky byly použity!");
+          } else {
+              toast.warn("AI nevrátila žádné návrhy pro vlastnosti nebo metriky.");
+              setAiError("Nebyly přijaty žádné návrhy."); // Keep generic error message
+          }
+      } catch (error: any) {
+          console.error("Failed to fetch AI suggestions for business type:", error);
+          const errorMsg = error?.detail || error.message || "Nepodařilo se získat návrhy";
+          toast.error(`Chyba AI: ${errorMsg}`);
+          setAiError(errorMsg);
+      } finally {
+          setIsAiLoading(false);
+      }
   };
 
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setJsonErrors({}); // Clear previous errors
-    let currentJsonErrors: Record<string, string | null> = {};
-    let hasError = false;
 
-    // Validate JSON fields before submitting
-    let parsedAttributes, parsedResponseTemplates, parsedValidationRules, parsedCategoryConfigs;
-
-    const tryParse = (jsonString: string, fieldName: string, label: string) => {
-        try {
-            // Allow empty string to represent empty object
-            if (jsonString.trim() === '') return {};
-            const parsed = JSON.parse(jsonString);
-            // Basic type check: ensure it's an object
-            if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-                 throw new Error("Must be a valid JSON object (e.g., {} or {\"key\": \"value\"}).");
-            }
-            return parsed;
-        } catch (err: any) {
-            currentJsonErrors[fieldName] = `Invalid JSON in ${label}: ${err.message}`;
-            hasError = true;
-            return null; // Return null on error
-        }
-    };
-
-    parsedAttributes = tryParse(attributesJson, 'attributes', 'Attributes');
-    parsedResponseTemplates = tryParse(responseTemplatesJson, 'responseTemplates', 'Response Templates');
-    parsedValidationRules = tryParse(validationRulesJson, 'validationRules', 'Validation Rules');
-    parsedCategoryConfigs = tryParse(categoryConfigsJson, 'categoryConfigs', 'Category Configs');
-
-    setJsonErrors(currentJsonErrors);
-
-    // Ensure required validation rules exist if validation_rules was successfully parsed (even if empty)
-    if (parsedValidationRules !== null) { // Check if parsing succeeded
-        if (!parsedValidationRules.hasOwnProperty('product_name')) {
-            parsedValidationRules.product_name = {}; // Add default if missing
-            console.log("Ensured 'product_name' exists in validation_rules");
-        }
-        if (!parsedValidationRules.hasOwnProperty('category')) {
-            parsedValidationRules.category = {}; // Add default if missing
-            console.log("Ensured 'category' exists in validation_rules");
-        }
-    }
-    // Note: If parsing failed (parsedValidationRules is null), hasError will be true, stopping submission below.
-
-    if (hasError || !typeName.trim()) {
-        // Add error for type name if empty
-        if (!typeName.trim()) {
-             setJsonErrors(prev => ({ ...prev, type: "Type Name is required." }));
-        }
-        return; // Stop submission if JSON is invalid or type name is missing
+    if (!typeName.trim()) {
+        setJsonErrors({ type: "Type Name is required." });
+        return; // Stop submission if type name is missing
     }
 
-    // Construct comparison_config object
-    const comparisonConfigData = {
-        key_features: keyFeatures,
-        comparison_metrics: comparisonMetrics,
-        recommendation_template: recommendationTemplate,
-    };
+    // Removed JSON parsing and validation logic for deleted fields
 
+    // Construct the simplified submission data
     const submissionData: BusinessTypeCreateUpdate = {
       type: typeName.trim(),
-      attributes: parsedAttributes,
-      query_patterns: queryPatterns,
-      response_templates: parsedResponseTemplates,
-      validation_rules: parsedValidationRules,
-      category_configs: parsedCategoryConfigs,
-      comparison_config: comparisonConfigData,
+      key_features: keyFeatures,
+      comparison_metrics: comparisonMetrics,
+      // Removed deleted fields: attributes, query_patterns, response_templates, validation_rules, category_configs, comparison_config (nested structure)
     };
 
     onSubmit(submissionData, businessType?.id);
   };
 
-  // Helper for JSON text areas
-  const JsonTextArea: React.FC<{ name: string; label: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; error: string | null; rows?: number; helperText?: string }> =
-    ({ name, label, value, onChange, error, rows = 3, helperText }) => ( // Reduced default rows
-    <div className="mb-4"> {/* Added margin bottom */}
-      <label htmlFor={name} className="block text-sm font-medium text-gray-700">{label} (JSON Object)</label>
-      <textarea
-        name={name}
-        id={name}
-        rows={rows}
-        value={value}
-        onChange={onChange}
-        className={`mt-1 block w-full px-3 py-2 border ${error ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm font-mono text-xs`}
-        spellCheck="false"
-        placeholder="{}" // Placeholder for empty object
-      />
-      {helperText && <p className="mt-1 text-xs text-gray-500">{helperText}</p>}
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-    </div>
-  );
+  // Removed JsonTextArea helper component
 
   // --- Render ---
   return (
@@ -316,34 +226,27 @@ const BusinessTypeForm: React.FC<BusinessTypeFormProps> = ({ businessType, onSub
               disabled={!!businessType} // Disable editing type name for existing types
               className={`block w-full px-3 py-2 border ${jsonErrors.type ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${businessType ? 'bg-gray-100 cursor-not-allowed' : ''}`}
             />
-            {/* AI Suggestion Button - Visually present but disabled */}
+            {/* AI Suggestion Button - Updated title */}
              <button
                 type="button"
                 onClick={handleGenerateSuggestions}
-                className="px-3 py-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 text-sm font-medium border border-gray-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={true} // Always disabled as backend endpoint is missing
-                title="AI Suggestions (Feature not available - requires backend update)"
+                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium border border-blue-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isAiLoading || !typeName.trim()} // Disable if loading or no type name
+                title={!typeName.trim() ? "Nejprve zadejte název typu" : "Navrhnout vlastnosti a metriky (AI)"} // Updated tooltip
              >
                 {isAiLoading ? <LoadingSpinner /> : <Sparkles size={16} />}
-                <span>AI</span>
+                <span>Navrhnout</span>
              </button>
          </div>
+         {aiError && <p className="mt-1 text-xs text-red-600">Chyba návrhu: {aiError}</p>}
          {jsonErrors.type && <p className="mt-1 text-xs text-red-600">{jsonErrors.type}</p>}
-         {businessType && <p className="mt-1 text-xs text-gray-500">Type name cannot be changed after creation.</p>}
+         {businessType && <p className="mt-1 text-xs text-gray-500">Název typu nelze po vytvoření změnit.</p>}
          {!businessType && <p className="mt-1 text-xs text-gray-500">Unique identifier (e.g., electronics, clothing). Cannot be changed later.</p>}
       </div>
 
-      {/* Query Patterns (Tag Input) */}
-      <TagInput
-        label="Query Patterns"
-        tags={queryPatterns}
-        setTags={setQueryPatterns}
-        placeholder="Add pattern..."
-        helperText="Typical user queries (e.g., 'find shoes', 'compare laptops')."
-        idSuffix="query-patterns"
-      />
+      {/* Removed Query Patterns TagInput */}
 
-      {/* --- Comparison Config Section --- */}
+      {/* --- Comparison Config Section (Simplified) --- */}
       <fieldset className="border border-gray-200 p-4 rounded-md space-y-4 mt-4"> {/* Adjusted border/margin */}
           <legend className="text-sm font-medium text-gray-700 px-1">Comparison Configuration</legend>
 
@@ -365,54 +268,14 @@ const BusinessTypeForm: React.FC<BusinessTypeFormProps> = ({ businessType, onSub
               idSuffix="comp-metrics"
           />
 
-          <div className="mb-4"> {/* Added margin bottom */}
-              <label htmlFor="recommendation_template" className="block text-sm font-medium text-gray-700">Recommendation Template</label>
-              <textarea
-                  id="recommendation_template"
-                  name="recommendation_template"
-                  rows={3}
-                  placeholder="Optional: Use {product_name}, {features}, etc."
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                  value={recommendationTemplate}
-                  onChange={(e) => setRecommendationTemplate(e.target.value)}
-              />
-              <p className="mt-1 text-xs text-gray-500">Customize recommendation text. Leave blank for default.</p>
-          </div>
+          {/* Removed Recommendation Template textarea */}
       </fieldset>
 
-      {/* --- Other JSON Fields --- */}
-      <JsonTextArea
-        name="attributes"
-        label="Attributes"
-        value={attributesJson}
-        onChange={handleJsonChange(setAttributesJson, 'attributes')}
-        error={jsonErrors.attributes}
-        helperText="General attributes (e.g., {'default_sort': 'price_asc'})."
-      />
-      <JsonTextArea
-        name="response_templates"
-        label="Response Templates"
-        value={responseTemplatesJson}
-        onChange={handleJsonChange(setResponseTemplatesJson, 'responseTemplates')}
-        error={jsonErrors.responseTemplates}
-        helperText="Bot responses (e.g., {'greeting': 'Welcome!'})."
-      />
-      <JsonTextArea
-        name="validation_rules"
-        label="Validation Rules"
-        value={validationRulesJson}
-        onChange={handleJsonChange(setValidationRulesJson, 'validationRules')}
-        error={jsonErrors.validationRules}
-        helperText="Input validation (e.g., {'zip_code': {'regex': '^\\\\d{5}$'}})."
-      />
-      <JsonTextArea
-        name="category_configs"
-        label="Category Configs"
-        value={categoryConfigsJson}
-        onChange={handleJsonChange(setCategoryConfigsJson, 'categoryConfigs')}
-        error={jsonErrors.categoryConfigs}
-        helperText="Specific configs for product categories."
-      />
+      {/* --- Removed Other JSON Fields --- */}
+      {/* Removed JsonTextArea for attributes */}
+      {/* Removed JsonTextArea for response_templates */}
+      {/* Removed JsonTextArea for validation_rules */}
+      {/* Removed JsonTextArea for category_configs */}
 
 
       {/* Action Buttons */}
@@ -432,7 +295,7 @@ const BusinessTypeForm: React.FC<BusinessTypeFormProps> = ({ businessType, onSub
         >
           {isLoading ? <LoadingSpinner /> : (
               <>
-                <Plus size={16} className="mr-1" /> {/* Add icon */}
+                {businessType ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />} {/* Use Save icon when editing */}
                 {businessType ? 'Update Type' : 'Create Type'}
               </>
           )}

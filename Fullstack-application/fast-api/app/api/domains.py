@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from typing import List, Dict, Optional
+from urllib.parse import unquote # Import unquote
 
 from app.utils.dependencies import get_current_user
 from app.utils.mongo import get_user_collection
@@ -130,7 +131,8 @@ async def add_authorized_domain(
     return response_data
 
 # Return type changed to List[DomainResponseItem]
-@router.delete("/{domain_name}", response_model=List[DomainResponseItem])
+# Use :path converter to allow slashes in the domain name
+@router.delete("/{domain_name:path}", response_model=List[DomainResponseItem])
 async def remove_authorized_domain(
     domain_name: str, # Domain from path
     current_user: Dict = Depends(get_current_user)
@@ -139,32 +141,65 @@ async def remove_authorized_domain(
     Remove an authorized domain for the current user.
     """
     user_id = current_user.get("id")
-    domain_to_remove = domain_name.strip().lower() # Normalize
+    # Manually decode the domain name received from the path parameter
+    decoded_domain_name = unquote(domain_name)
+    domain_to_remove = decoded_domain_name.strip().lower() # Normalize
 
     if not domain_to_remove:
          raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid domain name provided")
 
     user_collection = await get_user_collection()
 
-    # Remove domain using $pull
+    # Fetch the user document first to handle potential scheme mismatches
+    user_doc = await user_collection.find_one({"id": user_id})
+    if not user_doc:
+        # Should not happen if dependency works
+        logger.error(f"User {user_id} authenticated but not found in DB for domain removal.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    current_domains_list = user_doc.get("domain_whitelist", [])
+    original_length = len(current_domains_list)
+
+    # Filter the list in Python to remove variations (with/without scheme)
+    # Create variations to check against
+    domain_variations = {
+        domain_to_remove,
+        domain_to_remove.replace("http://", ""),
+        domain_to_remove.replace("https://", "")
+    }
+    # Also add variations with http/https if the input didn't have them
+    if not domain_to_remove.startswith(("http://", "https://")):
+        domain_variations.add(f"http://{domain_to_remove}")
+        domain_variations.add(f"https://{domain_to_remove}")
+
+    # Filter out any matching variations (case-insensitive check just in case)
+    filtered_domains = [
+        domain for domain in current_domains_list
+        if domain.strip().lower() not in {v.strip().lower() for v in domain_variations}
+    ]
+
+    new_length = len(filtered_domains)
+
+    if new_length == original_length:
+        logger.warning(f"Domain variations related to '{domain_to_remove}' not found for user {user_id}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Domain not found in authorized list")
+
+    # Update the document with the filtered list
     update_result = await user_collection.update_one(
         {"id": user_id},
-        {"$pull": {"domain_whitelist": domain_to_remove}}
+        {"$set": {"domain_whitelist": filtered_domains}}
     )
 
-    if update_result.modified_count == 0:
-         logger.warning(f"Domain '{domain_to_remove}' not found or already removed for user {user_id}")
-         # Check if user exists at all, just in case
-         user_doc = await user_collection.find_one({"id": user_id})
-         if not user_doc:
-             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-         # If user exists but domain wasn't pulled, it wasn't there
-         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Domain not found in authorized list")
+    # Check if update was acknowledged (optional, but good practice)
+    if not update_result.acknowledged:
+         logger.error(f"Failed to acknowledge domain list update for user {user_id}")
+         # Decide if this should be a 500 error or just a warning
+         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update domain list")
 
-    logger.info(f"Removed domain '{domain_to_remove}' for user {user_id}")
-    # Fetch the updated list to return
-    updated_user_doc = await user_collection.find_one({"id": user_id})
-    updated_domains_list = updated_user_doc.get("domain_whitelist", []) if updated_user_doc else []
+    logger.info(f"Removed domain variations related to '{domain_to_remove}' for user {user_id}")
+    # Fetch the updated list to return (or just use filtered_domains)
+    # updated_user_doc = await user_collection.find_one({"id": user_id}) # Re-fetch if needed
+    updated_domains_list = filtered_domains # Use the list we just created
 
     # Return updated list in the new format
     response_data = [{"id": domain, "domain_name": domain} for domain in updated_domains_list]

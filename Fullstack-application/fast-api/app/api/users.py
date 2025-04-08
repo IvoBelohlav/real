@@ -25,8 +25,12 @@ async def get_current_user_profile(current_user=Depends(get_current_user)):
         tier_str = current_user.get("subscription_tier")
         end_date = current_user.get("subscription_current_period_end") # Use correct field name
 
-        # Convert Price ID string to SubscriptionTier enum
-        subscription_tier_enum = get_tier_from_price_id(tier_str) if tier_str else SubscriptionTier.FREE
+        # Convert Price ID string (or legacy name) to SubscriptionTier enum
+        subscription_tier_enum = get_tier_from_price_id(tier_str)
+
+        # Get the user-friendly display name (e.g., "Basic", "Premium", "Free")
+        # Capitalize the enum value
+        subscription_tier_name = subscription_tier_enum.value.capitalize()
 
         # Create the UserProfile model instance
         user_profile = UserProfile(
@@ -35,6 +39,7 @@ async def get_current_user_profile(current_user=Depends(get_current_user)):
             email=current_user.get("email"),
             company_name=current_user.get("company_name"),
             subscription_tier=subscription_tier_enum, # Pass the enum value
+            subscription_tier_name=subscription_tier_name, # Pass the display name
             subscription_status=current_user.get("subscription_status"),
             subscription_end_date=end_date, # Pass the correct end date
             api_key=current_user.get("api_key"),

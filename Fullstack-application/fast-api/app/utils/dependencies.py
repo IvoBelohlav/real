@@ -396,17 +396,20 @@ async def verify_widget_origin(
         # netloc contains 'hostname:port', we only want hostname
         request_hostname = parsed_origin.hostname
         if not request_hostname:
-             # Handle cases like 'Origin: null' or invalid URLs
-             logger.warning(f"Could not parse hostname from Origin header: '{origin_header}' for API key: {x_api_key[:5]}...")
-             raise domain_forbidden_exception # Treat unparseable origins as forbidden
+            # Handle cases like 'Origin: null' or invalid URLs
+            logger.warning(f"Could not parse hostname from Origin header: '{origin_header}' for API key: {x_api_key[:5]}...")
+            raise domain_forbidden_exception # Treat unparseable origins as forbidden
     except Exception as e:
         logger.error(f"Error parsing Origin header '{origin_header}': {e}", exc_info=True)
         raise domain_forbidden_exception # Treat parsing errors as forbidden
 
-    # --- 5. Check Against Whitelist ---
-    # --- REMOVED TEMPORARY LOCAL TESTING FIX ---
+    # --- 5. Check Against Whitelist (with localhost bypass) ---
+    # Allow requests from localhost/127.0.0.1 (common for local dashboards) without checking whitelist
+    if request_hostname in ["localhost", "127.0.0.1"]:
+        logger.debug(f"Origin '{origin_header}' is localhost/127.0.0.1, bypassing domain whitelist check for user {user.get('id')}.")
+        return user # Allow local development access
 
-    # --- Whitelist Check ---
+    # --- Whitelist Check (for non-localhost origins) ---
     authorized_domains = user.get("domain_whitelist", [])
 
     # If whitelist is empty, NO domains are allowed (stricter than previous logic)

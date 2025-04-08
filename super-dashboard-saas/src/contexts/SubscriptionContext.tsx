@@ -55,17 +55,25 @@ export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ childr
     } finally {
       setIsLoading(false);
     }
-  }, [user]); // Dependency on user object
+  }, []); // Remove user dependency, fetch is triggered by useEffect below
 
   useEffect(() => {
-    // Fetch only when auth loading is complete
-    if (!isAuthLoading) {
+    // Fetch only when auth loading is complete and we have a user
+    if (!isAuthLoading && user) { // Check for user existence here
       fetchSubscriptionStatus();
+    } else if (!isAuthLoading && !user) {
+      // If auth is done and there's no user, clear subscription state
+      setSubscription(null);
+      setIsLoading(false);
+      setError(null);
     }
-  }, [user, isAuthLoading, fetchSubscriptionStatus]); // Re-fetch if user changes or auth finishes loading
+    // Intentionally keep fetchSubscriptionStatus out of dependency array
+    // We only want to trigger based on auth state and user presence changes
+  }, [user, isAuthLoading]);
 
   const refetchSubscription = () => {
-    if (!isAuthLoading) {
+    // Refetch only if not loading and user exists
+    if (!isLoading && user) {
         fetchSubscriptionStatus();
     }
   };

@@ -77,11 +77,12 @@ async def update_widget_config(
         new_config_dict = new_config.model_dump(exclude_unset=True, exclude_none=True) 
         logger.debug(f"Data for update/upsert: {new_config_dict}")
 
-        await config_collection.update_one(
+        update_result = await config_collection.update_one( # Capture the result
             {"user_id": user_id},
             {"$set": new_config_dict},
             upsert=True
         )
+        # Log the captured result
         logger.debug(f"Update result: acknowledged={update_result.acknowledged}, matched={update_result.matched_count}, modified={update_result.modified_count}, upserted_id={update_result.upserted_id}")
         
         logger.info(f"Widget configuration updated/upserted for user {user_id}")

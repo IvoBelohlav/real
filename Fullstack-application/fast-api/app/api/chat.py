@@ -58,7 +58,16 @@ async def handle_message(
         user_id = current_user["id"]
         user_collection = await get_user_collection() # Get user collection
 
+        # Ensure we have a valid conversation context before checking limits or accessing attributes
+        if request.context is None:
+            request.context = EnhancedConversationContext()
+        elif isinstance(request.context, dict):
+            # Convert dict to the Pydantic model instance
+            request.context = EnhancedConversationContext(**request.context)
+        # Now request.context is guaranteed to be None or an EnhancedConversationContext object
+
         # --- Check and Update Monthly Conversation Limit ---
+        # Access conversation_id safely now
         is_new_conversation = request.context is None or request.context.conversation_id is None
         if is_new_conversation:
             now = datetime.now(timezone.utc)
@@ -68,6 +77,10 @@ async def handle_message(
             if usage_start is None:
                 needs_reset = True
             else:
+                # Make usage_start timezone-aware (assuming it's UTC)
+                if usage_start.tzinfo is None:
+                    usage_start = usage_start.replace(tzinfo=timezone.utc)
+
                 # Check if more than ~30 days have passed
                 if now > usage_start + timedelta(days=30): # Approximation for a month
                     needs_reset = True
@@ -111,13 +124,6 @@ async def handle_message(
             )
             logger.info(f"Incremented monthly conversation count for user {user_id} (New count: {current_convo_count + 1})")
         # --- End Limit Check ---
-
-
-        # Ensure we have a valid conversation context
-        if request.context is None:
-            request.context = EnhancedConversationContext()
-        elif isinstance(request.context, dict):
-            request.context = EnhancedConversationContext(**request.context)
 
         # Correct language code if needed
         if request.language == "cze":

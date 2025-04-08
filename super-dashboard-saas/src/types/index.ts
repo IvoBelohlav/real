@@ -5,7 +5,8 @@ export interface User {
   email: string;
   is_active?: boolean; // Optional fields based on your backend model
   is_verified?: boolean;
-  subscription_tier?: string; // Added subscription tier
+  subscription_tier?: string; // Raw identifier (Price ID or legacy name)
+  subscription_tier_name?: string; // User-friendly display name (e.g., "Basic")
   subscription_status?: string; // Added subscription status
   is_super_admin?: boolean; // Added for super admin check
   company_name?: string | null; // Added based on UserProfile
@@ -20,7 +21,8 @@ export interface UserProfile {
   username: string;
   email: string;
   company_name?: string | null;
-  subscription_tier: string; // Reflects the plan level (e.g., 'free', 'basic')
+  subscription_tier: string; // Raw identifier (Price ID or legacy name)
+  subscription_tier_name: string; // User-friendly display name (e.g., "Basic")
   subscription_status: string; // Reflects the activity status (e.g., 'active', 'inactive')
   subscription_end_date?: string | null; // ISO date string
   api_key?: string | null;
@@ -129,9 +131,14 @@ export interface GuidedChatOption {
   id: string; // UUID string
   text: string;
   icon: string; // Emoji or icon identifier
-  next_flow?: string | null; // ID of the flow to transition to
   order: number;
   bot_response?: BotResponse | string | null; // Can be simple string or structured response
+
+  // Action definition - mutually exclusive with next_flow?
+  action?: 'next_flow' | 'submit_contact_request' | null; // Type of action this option triggers
+  next_flow?: string | null; // ID of the flow to transition to (used if action is 'next_flow' or null/undefined)
+  request_type?: string | null; // Identifier like 'order_status', 'item_return' (used if action is 'submit_contact_request')
+  input_fields?: ('email' | 'phone' | 'message' | 'order_number')[]; // Fields to prompt user for (used if action is 'submit_contact_request')
 }
 
 export interface GuidedChatFlow {
@@ -275,21 +282,21 @@ export interface ShopInfo {
 // For updating shop info (all fields optional)
 export type ShopInfoUpdate = Partial<Omit<ShopInfo, 'id' | 'created_at' | 'updated_at' | 'user_id'>>;
 
-// Matches the backend Pydantic model in Fullstack-application/fast-api/app/models/business.py
+// Matches the simplified backend Pydantic model in Fullstack-application/fast-api/app/models/business.py
 export interface BusinessType {
-  id?: string; // Assuming MongoDB _id will be added and converted
+  id?: string; // MongoDB ObjectId as string (from backend serialization)
   type: string;
-  attributes?: Record<string, any>; // Generic object for flexibility
-  query_patterns?: string[];
-  response_templates?: Record<string, string>;
-  validation_rules?: Record<string, any>; // Generic object for validation rules
-  category_configs?: Record<string, Record<string, any>>; // Nested config objects
-  comparison_config?: Record<string, any> | null;
+  key_features?: string[]; // Changed from comparison_config.key_features
+  comparison_metrics?: string[]; // Changed from comparison_config.comparison_metrics
   user_id?: string; // Added by backend
 }
 
-// For creating/updating Business Types (simplified for now, might need refinement)
-export type BusinessTypeCreateUpdate = Omit<BusinessType, 'id' | 'user_id'>;
+// For creating/updating Business Types (matches the simplified structure)
+export interface BusinessTypeCreateUpdate {
+  type: string;
+  key_features?: string[];
+  comparison_metrics?: string[];
+}
 
 // Matches the backend Pydantic model in Fullstack-application/fast-api/app/models/contact_admin_models.py
 export interface ContactSubmission {
@@ -331,6 +338,7 @@ export interface ConversationsResponse {
 
 // Matches the backend Pydantic model InvoiceItem in Fullstack-application/fast-api/app/api/payments.py
 export interface Invoice {
+  number: string;
   id: string;
   created: string; // ISO date string (converted from timestamp in backend)
   amount_due: number; // Amount in the primary currency unit (e.g., dollars)

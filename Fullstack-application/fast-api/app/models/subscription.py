@@ -32,6 +32,7 @@ class SubscriptionDetails(BaseModel):
     status: SubscriptionStatus
     current_period_end: datetime
     tier: SubscriptionTier
+    planId: Optional[str] = None # Add the Stripe Price ID field
     cancel_at_period_end: bool
     created_at: datetime
     payment_method: Optional[str] = None
@@ -52,4 +53,4 @@ class EmbedSnippet(BaseModel):
     instructions: str
 
 class ApiKeyResponse(BaseModel):
-    api_key: str 
+    api_key: str

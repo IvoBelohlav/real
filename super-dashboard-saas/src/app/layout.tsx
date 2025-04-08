@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { AuthProvider } from "@/contexts/AuthContext"; // Import AuthProvider
-import { Toaster } from 'sonner'; // Import Toaster
+import { AuthProvider } from "@/contexts/AuthContext";
+import { SubscriptionProvider } from "@/contexts/SubscriptionContext"; // Import SubscriptionProvider
+import { Toaster } from 'sonner';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,9 +28,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <AuthProvider> {/* Wrap children with AuthProvider */}
-          {children}
-          <Toaster position="top-right" richColors /> {/* Add Toaster here */}
+        <AuthProvider> {/* AuthProvider wraps SubscriptionProvider */}
+          <SubscriptionProvider> {/* Wrap children with SubscriptionProvider */}
+            {children}
+            <Toaster position="top-right" richColors />
+          </SubscriptionProvider>
         </AuthProvider>
       </body>
     </html>

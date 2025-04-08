@@ -167,21 +167,21 @@ const ProductManager: React.FC = () => {
   // --- Render Logic ---
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-intro="product-manager-container"> {/* Added data-intro */}
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
         <div>
           <h2 className="text-xl font-semibold text-gray-800">Products</h2>
           <p className="text-sm text-gray-500 mt-1">Manage your product catalog.</p>
         </div>
-        <div className="flex items-center space-x-2 flex-shrink-0">
+        <div className="flex items-center space-x-2 flex-shrink-0" data-intro="add-product-area"> {/* Moved data-intro here */}
           <button onClick={handleRefresh} className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 inline-flex items-center" disabled={isLoading} title="Refresh Products">
             <RefreshCw size={16} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
           </button>
-          <button onClick={handleOpenAddModal} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium inline-flex items-center shadow-sm">
+          <button onClick={handleOpenAddModal} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium inline-flex items-center shadow-sm"> {/* Removed data-intro */}
             <PlusCircle size={16} className="mr-1" /> Add New Product
           </button>
-        </div>
+        </div> {/* Added missing closing div tag */}
       </div>
 
       {/* Search and Filters */}
@@ -194,7 +194,7 @@ const ProductManager: React.FC = () => {
             <input
               type="text"
               placeholder="Search products by name..."
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-black focus:outline-none focus:placeholder-black focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
               value={searchTerm}
               onChange={handleSearchChange}
             />
@@ -248,12 +248,14 @@ const ProductManager: React.FC = () => {
         <div className="text-red-600 bg-red-100 p-4 rounded">Error loading products: {error?.message}</div>
       ) : (
         <>
-          <ProductList
-             products={data?.products || []} // Access data.products
-             onEdit={handleOpenEditModal}
-             onDelete={handleDeleteProduct}
-             isLoadingDelete={deleteProductMutation.isPending}
-          />
+          <div data-intro="product-list-area"> {/* Added wrapper div with data-intro */}
+            <ProductList
+               products={data?.products || []} // Access data.products
+               onEdit={handleOpenEditModal}
+               onDelete={handleDeleteProduct}
+               isLoadingDelete={deleteProductMutation.isPending}
+            />
+          </div>
           {/* Pagination Controls */}
           {data && data.totalCount > 0 && ( // Check data.totalCount
             <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4 rounded-b-lg shadow-md">
@@ -294,7 +296,7 @@ const ProductManager: React.FC = () => {
       )}
 
       {/* Add/Edit Product Modal */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingProduct ? 'Edit Product' : 'Add New Product'}>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={editingProduct ? 'Edit Product' : 'Add New Product'} data-intro="product-modal"> {/* Added data-intro */}
          <ProductForm
             product={editingProduct}
             onSubmit={handleFormSubmit}

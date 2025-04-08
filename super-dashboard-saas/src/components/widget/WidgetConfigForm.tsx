@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
@@ -241,7 +239,7 @@ const WidgetConfigForm = () => {
   // Helper Render Functions (using Tailwind classes)
   const renderInputField = (id: keyof WidgetConfig, label: string, type: string = 'text', options?: { placeholder?: string, className?: string, step?: number, min?: number }) => (
     <div className={options?.className ?? 'sm:col-span-3'}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
         {label}
       </label>
       <input
@@ -253,14 +251,14 @@ const WidgetConfigForm = () => {
         placeholder={options?.placeholder}
         step={options?.step}
         min={options?.min}
-        className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md ${type === 'color' ? 'h-10 p-1 cursor-pointer' : 'px-3 py-2 border'}`}
+        className={`mt-1 shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md ${type === 'color' ? 'h-10 p-1 cursor-pointer border' : 'px-3 py-2 border'}`} 
       />
     </div>
   );
 
   const renderSelectField = (id: keyof WidgetConfig, label: string, options: { value: string; label: string }[], divClassName?: string) => (
     <div className={divClassName ?? 'sm:col-span-3'}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
         {label}
       </label>
       <select
@@ -268,7 +266,7 @@ const WidgetConfigForm = () => {
         name={id}
         value={(formData as any)[id] ?? ''}
         onChange={handleChange}
-        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 border"
+        className="mt-1 shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 border" 
       >
         {options.map(opt => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -279,7 +277,7 @@ const WidgetConfigForm = () => {
 
   const renderTextareaField = (id: keyof WidgetConfig, label: string, rows: number = 4, options?: { placeholder?: string, className?: string }) => (
     <div className={options?.className ?? 'sm:col-span-6'}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
         {label}
       </label>
       <textarea
@@ -289,21 +287,21 @@ const WidgetConfigForm = () => {
         value={(formData as any)[id] ?? ''}
         onChange={handleChange}
         placeholder={options?.placeholder}
-        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md px-3 py-2"
+        className="mt-1 shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md px-3 py-2" 
       />
     </div>
   );
 
   const renderFileUpload = (id: keyof WidgetConfig, label: string, currentPreview: string | null | undefined) => (
      <div className="sm:col-span-3">
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
             {label} (.webp only)
         </label>
         <div className="mt-1 flex items-center space-x-4">
             {currentPreview ? (
-                <img src={currentPreview} alt="Logo Preview" className="h-10 w-auto border border-gray-300 rounded" />
+                <img src={currentPreview} alt="Logo Preview" className="h-10 w-auto border border-gray-200 rounded" /> /* Adjusted border */
             ) : (
-                <div className="h-10 w-16 border border-dashed border-gray-300 rounded flex items-center justify-center text-xs text-gray-400">No Logo</div>
+                <div className="h-10 w-16 bg-gray-50 border border-gray-200 rounded flex items-center justify-center text-xs text-gray-400">Preview</div> /* Simplified placeholder */
             )}
             <input
                 type="file"
@@ -311,7 +309,7 @@ const WidgetConfigForm = () => {
                 name={id}
                 accept=".webp"
                 onChange={(e) => handleFileChange(e, id)}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border file:border-gray-300 file:text-sm file:font-medium file:bg-white file:text-gray-700 hover:file:bg-gray-50" /* Simplified file input button */
             />
         </div>
      </div>
@@ -381,8 +379,8 @@ const WidgetConfigForm = () => {
    ];
 
   return (
-    <div className="bg-white shadow sm:rounded-lg">
-      <div className="px-4 py-5 sm:p-6">
+    <div className="bg-white"> {/* Removed shadow and rounding */}
+      <div className="p-6 sm:p-8"> {/* Increased padding */}
         {/* Theme Preset Selector */}
         <div className="mb-6 pb-4 border-b border-gray-200">
           <h3 className="text-base font-semibold leading-6 text-gray-900 mb-2">Theme Preset</h3>
@@ -393,8 +391,8 @@ const WidgetConfigForm = () => {
                 className={cn(
                     'px-3 py-1 text-sm rounded-md border',
                     selectedThemePreset === 'default'
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        ? 'bg-indigo-600 text-white border-indigo-600' // Active state
+                        : 'bg-white text-gray-700 border-gray-300' // Default state (removed hover)
                 )}
                 onClick={() => handleThemePresetChange('default')}
             >
@@ -407,8 +405,8 @@ const WidgetConfigForm = () => {
                 className={cn(
                   'px-3 py-1 text-sm rounded-md border capitalize',
                   selectedThemePreset === themeKey
-                    ? 'bg-indigo-600 text-white border-indigo-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    ? 'bg-indigo-600 text-white border-indigo-600' // Active state
+                    : 'bg-white text-gray-700 border-gray-300' // Default state (removed hover)
                 )}
                 onClick={() => handleThemePresetChange(themeKey)}
               >
@@ -422,8 +420,8 @@ const WidgetConfigForm = () => {
                 className={cn(
                     'px-3 py-1 text-sm rounded-md border capitalize',
                     selectedThemePreset === 'custom'
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed'
+                        ? 'bg-indigo-600 text-white border-indigo-600' // Active state
+                        : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' // Disabled state
                 )}
             >
                 Custom
@@ -432,7 +430,7 @@ const WidgetConfigForm = () => {
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-6">
+        <div className="border-b border-gray-200 mb-8"> {/* Increased margin-bottom */}
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             {['general', 'lightColors', 'darkColors', 'typography', 'spacing', 'borders', 'advanced'].map((tab) => (
               <button
@@ -441,9 +439,9 @@ const WidgetConfigForm = () => {
                 onClick={() => setActiveTab(tab)}
                 className={cn(
                   tab === activeTab
-                    ? 'border-indigo-500 text-indigo-600'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                  'whitespace-nowrap border-b-2 py-3 px-1 text-sm font-medium capitalize'
+                    ? 'border-indigo-600 text-indigo-600 font-semibold' // Adjusted active state
+                    : 'border-transparent text-gray-500 hover:text-gray-700', // Default state
+                  'whitespace-nowrap border-b-2 py-2 px-1 text-sm font-medium capitalize' // Adjusted padding
                 )}
                 aria-current={tab === activeTab ? 'page' : undefined}
               >
@@ -457,17 +455,17 @@ const WidgetConfigForm = () => {
         <form onSubmit={handleSubmit}>
           {/* General Settings Tab */}
           {activeTab === 'general' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">General Settings</h3>
+            <div className="space-y-6"> {/* Adjusted vertical spacing */}
+              <h3 className="text-base font-semibold leading-6 text-gray-900">General Settings</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                {renderInputField('main_title', 'Main Title', 'text', { className: 'sm:col-span-6' })}
+                {renderInputField('main_title', 'Main Title', 'text', { className: 'sm:col-span-6 max-w-xl' })}
                 {renderFileUpload('logo_light_mode', 'Logo (Light Mode)', formData.logo_light_mode)}
                 {renderFileUpload('logo_dark_mode', 'Logo (Dark Mode)', formData.logo_dark_mode)}
-                {renderTextareaField('greeting_message', 'Greeting Message', 3, { className: 'sm:col-span-6' })}
+                {renderTextareaField('greeting_message', 'Greeting Message', 3, { className: 'sm:col-span-6 max-w-xl' })}
                 {renderInputField('widget_button_text', 'Widget Button Text', 'text', { className: 'sm:col-span-3' })}
                 {renderInputField('widget_help_text', 'Widget Help Text', 'text', { className: 'sm:col-span-3' })}
-                 {/* isEnabled Toggle - Assuming it's part of the config */}
-                 <div className="sm:col-span-6 flex items-center">
+                 {/* isEnabled Toggle */}
+                 <div className="sm:col-span-6 flex items-center pt-2"> {/* Added padding-top */}
                     <input
                         id="isEnabled"
                         name="isEnabled"
@@ -476,7 +474,7 @@ const WidgetConfigForm = () => {
                         onChange={handleChange}
                         className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
                     />
-                    <label htmlFor="isEnabled" className="ml-3 block text-sm font-medium text-gray-700">
+                    <label htmlFor="isEnabled" className="ml-2 block text-sm font-medium text-gray-700"> {/* Adjusted margin */}
                         Enable Chat Widget
                     </label>
                  </div>
@@ -486,8 +484,8 @@ const WidgetConfigForm = () => {
 
           {/* Light Mode Colors Tab */}
           {activeTab === 'lightColors' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Light Mode Colors</h3>
+            <div className="space-y-6"> {/* Adjusted vertical spacing */}
+              <h3 className="text-base font-semibold leading-6 text-gray-900">Light Mode Colors</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
                 {renderInputField('primary_color_light', 'Primary', 'color', { className: 'sm:col-span-2' })}
                 {renderInputField('secondary_color_light', 'Secondary', 'color', { className: 'sm:col-span-2' })}
@@ -505,8 +503,8 @@ const WidgetConfigForm = () => {
 
           {/* Dark Mode Colors Tab */}
           {activeTab === 'darkColors' && (
-             <div className="space-y-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Dark Mode Colors</h3>
+             <div className="space-y-6"> {/* Adjusted vertical spacing */}
+              <h3 className="text-base font-semibold leading-6 text-gray-900">Dark Mode Colors</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
                 {renderInputField('primary_color_dark', 'Primary', 'color', { className: 'sm:col-span-2' })}
                 {renderInputField('secondary_color_dark', 'Secondary', 'color', { className: 'sm:col-span-2' })}
@@ -524,8 +522,8 @@ const WidgetConfigForm = () => {
 
           {/* Typography Tab */}
           {activeTab === 'typography' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Typography</h3>
+            <div className="space-y-6"> {/* Adjusted vertical spacing */}
+              <h3 className="text-base font-semibold leading-6 text-gray-900">Typography</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                 {renderSelectField('font_family', 'Font Family', fontOptions, 'sm:col-span-6')}
                 {renderSelectField('base_font_size', 'Base Font Size', sizeOptions, 'sm:col-span-2')}
@@ -538,8 +536,8 @@ const WidgetConfigForm = () => {
 
           {/* Spacing Tab */}
           {activeTab === 'spacing' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Spacing</h3>
+            <div className="space-y-6"> {/* Adjusted vertical spacing */}
+              <h3 className="text-base font-semibold leading-6 text-gray-900">Spacing</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                 {renderInputField('widget_padding', 'Widget Padding', 'text', { placeholder: 'e.g., 1rem', className: 'sm:col-span-2' })}
                 {renderInputField('message_spacing', 'Message Spacing', 'text', { placeholder: 'e.g., 0.5rem', className: 'sm:col-span-2' })}
@@ -550,63 +548,80 @@ const WidgetConfigForm = () => {
 
            {/* Borders Tab */}
           {activeTab === 'borders' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Borders</h3>
-              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                 {/* Widget Borders */}
-                 <h4 className="sm:col-span-6 text-sm font-medium text-gray-500 pt-2">Widget</h4>
-                 {renderSelectField('widget_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                 {renderSelectField('widget_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                 {renderSelectField('widget_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+            <div className="space-y-6"> {/* Adjusted vertical spacing */}
+              <h3 className="text-base font-semibold leading-6 text-gray-900">Borders</h3> {/* Adjusted heading style */}
+              {/* Simplified Grouping for Borders */}
+              <div className="space-y-6">
+                {/* Widget Borders Group */}
+                <div> {/* Removed border/padding */}
+                  <h4 className="text-sm font-medium text-gray-600 mb-4">Widget</h4> {/* Added margin */}
+                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    {renderSelectField('widget_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                    {renderSelectField('widget_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                    {renderSelectField('widget_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                  </div>
+                </div>
 
-                 {/* Message Bubble Borders */}
-                 <h4 className="sm:col-span-6 text-sm font-medium text-gray-500 pt-4">Message Bubbles</h4>
-                 {renderSelectField('message_bubble_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                 {renderSelectField('message_bubble_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                 {renderSelectField('message_bubble_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                {/* Message Bubble Borders Group */}
+                <div> {/* Removed border/padding */}
+                  <h4 className="text-sm font-medium text-gray-600 mb-4">Message Bubbles</h4> {/* Added margin */}
+                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    {renderSelectField('message_bubble_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                    {renderSelectField('message_bubble_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                    {renderSelectField('message_bubble_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                  </div>
+                </div>
 
-                 {/* Input Field Borders */}
-                 <h4 className="sm:col-span-6 text-sm font-medium text-gray-500 pt-4">Input Field</h4>
-                 {renderSelectField('input_field_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                 {renderSelectField('input_field_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                 {renderSelectField('input_field_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                {/* Input Field Borders Group */}
+                <div> {/* Removed border/padding */}
+                  <h4 className="text-sm font-medium text-gray-600 mb-4">Input Field</h4> {/* Added margin */}
+                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    {renderSelectField('input_field_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                    {renderSelectField('input_field_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                    {renderSelectField('input_field_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                  </div>
+                </div>
 
-                 {/* Button Borders */}
-                 <h4 className="sm:col-span-6 text-sm font-medium text-gray-500 pt-4">Buttons</h4>
-                 {renderSelectField('button_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                 {renderSelectField('button_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                 {renderSelectField('button_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                {/* Button Borders Group */}
+                <div> {/* Removed border/padding */}
+                  <h4 className="text-sm font-medium text-gray-600 mb-4">Buttons</h4> {/* Added margin */}
+                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                    {renderSelectField('button_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                    {renderSelectField('button_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                    {renderSelectField('button_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
           {/* Advanced Tab */}
           {activeTab === 'advanced' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Advanced</h3>
+            <div className="space-y-6"> {/* Adjusted vertical spacing */}
+              <h3 className="text-base font-semibold leading-6 text-gray-900">Advanced</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                 {renderSelectField('widget_shadow', 'Widget Shadow', shadowOptions, 'sm:col-span-6')}
                 {renderTextareaField('custom_css', 'Custom CSS', 8, {
                   placeholder: '/* Add custom CSS rules here */\n.widget-container {\n  /* Example */\n}',
-                  className: 'sm:col-span-6'
+                  className: 'sm:col-span-6 max-w-xl'
                 })}
               </div>
             </div>
           )}
 
           {/* Action Buttons */}
-          <div className="pt-8 flex justify-end space-x-3">
+          <div className="pt-6 mt-6 border-t border-gray-200 flex justify-end space-x-3"> {/* Adjusted padding/margin */}
             <button
               type="button"
               onClick={handleReset}
-              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" /* Removed shadow */
             >
               Reset to Default
             </button>
             <button
               type="submit"
               disabled={updateConfigMutation.isPending}
-              className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50" /* Removed shadow */
             >
               {updateConfigMutation.isPending ? <LoadingSpinner /> : 'Save Configuration'}
             </button>

@@ -52,25 +52,51 @@ class CreateCheckoutSessionRequest(BaseModel):
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
 # --- Helper ---
-def get_tier_from_price_id(priceId: Optional[str]) -> SubscriptionTier:
-    # Directly use the known Price IDs provided by the user
-    BASIC_PRICE_ID = "price_1RAIdCR4qkxDUOaXTJ7tN1HU"
-    PREMIUM_PRICE_ID = "price_1RAIdbR4qkxDUOaXOszn1Fs2"
-    ENTERPRISE_PRICE_ID = "price_1RAIeIR4qkxDUOaXS39pud7M"
+def get_tier_from_price_id(tier_identifier: Optional[str]) -> SubscriptionTier:
+    """
+    Determines the SubscriptionTier based on a Stripe Price ID or a tier name string.
+    Handles potential legacy data where tier names might be stored.
+    """
+    # Directly use the known Price IDs provided by the user (or fetch from env/config)
+    # Ensure these match your Stripe setup EXACTLY
+    BASIC_PRICE_ID = os.getenv("STRIPE_BASIC_PRICE_ID", "price_1RAIdCR4qkxDUOaXTJ7tN1HU") # Example fallback
+    PREMIUM_PRICE_ID = os.getenv("STRIPE_PREMIUM_PRICE_ID", "price_1RAIdbR4qkxDUOaXOszn1Fs2") # Example fallback
+    ENTERPRISE_PRICE_ID = os.getenv("STRIPE_ENTERPRISE_PRICE_ID", "price_1RAIeIR4qkxDUOaXS39pud7M") # Example fallback
 
-    logger.debug(f"[getTierFromPriceId] Determining tier for priceId: {priceId}")
-    if priceId == BASIC_PRICE_ID:
-        logger.debug(f"Matched BASIC tier for priceId: {priceId}")
+    logger.debug(f"[getTierFromPriceId] Determining tier for identifier: '{tier_identifier}'")
+
+    if not tier_identifier:
+        logger.debug("Identifier is None or empty, defaulting to FREE.")
+        return SubscriptionTier.FREE
+
+    # 1. Check if the identifier matches a known Price ID
+    if tier_identifier == BASIC_PRICE_ID:
+        logger.debug(f"Identifier matched BASIC Price ID: {tier_identifier}")
         return SubscriptionTier.BASIC
-    if priceId == PREMIUM_PRICE_ID:
-        logger.debug(f"Matched PREMIUM tier for priceId: {priceId}")
+    if tier_identifier == PREMIUM_PRICE_ID:
+        logger.debug(f"Identifier matched PREMIUM Price ID: {tier_identifier}")
         return SubscriptionTier.PREMIUM
-    if priceId == ENTERPRISE_PRICE_ID:
-        logger.debug(f"Matched ENTERPRISE tier for priceId: {priceId}")
+    if tier_identifier == ENTERPRISE_PRICE_ID:
+        logger.debug(f"Identifier matched ENTERPRISE Price ID: {tier_identifier}")
         return SubscriptionTier.ENTERPRISE
 
-    # Fallback if no match (or if priceId is None)
-    logger.warning(f"[getTierFromPriceId] Price ID '{priceId}' did not match known tiers. Defaulting to 'free'.")
+    # 2. Check if the identifier matches a known tier name (case-insensitive fallback for legacy data)
+    tier_name_lower = tier_identifier.lower()
+    if tier_name_lower == "basic":
+        logger.warning(f"Identifier '{tier_identifier}' matched tier name 'basic'. Using BASIC tier. (Consider updating DB to store Price ID)")
+        return SubscriptionTier.BASIC
+    if tier_name_lower == "premium":
+        logger.warning(f"Identifier '{tier_identifier}' matched tier name 'premium'. Using PREMIUM tier. (Consider updating DB to store Price ID)")
+        return SubscriptionTier.PREMIUM
+    if tier_name_lower == "enterprise":
+        logger.warning(f"Identifier '{tier_identifier}' matched tier name 'enterprise'. Using ENTERPRISE tier. (Consider updating DB to store Price ID)")
+        return SubscriptionTier.ENTERPRISE
+    if tier_name_lower == "free":
+         logger.debug(f"Identifier matched tier name 'free'. Using FREE tier.")
+         return SubscriptionTier.FREE
+
+    # 3. Fallback if no match
+    logger.warning(f"[getTierFromPriceId] Identifier '{tier_identifier}' did not match known Price IDs or tier names. Defaulting to FREE.")
     return SubscriptionTier.FREE
 
 # --- API Endpoints ---
@@ -148,7 +174,7 @@ async def get_current_subscription_status(current_user: Dict = Depends(get_curre
     """
     user_id = current_user.get("id")
     db_status_str = current_user.get("subscription_status")
-    db_tier_str = current_user.get("subscription_tier") # This is the Stripe Price ID
+    db_tier_identifier = current_user.get("subscription_tier") # This could be Price ID or legacy tier name
     db_end_date = current_user.get("subscription_current_period_end") # Correct field name
     subscription_id = current_user.get("stripe_subscription_id")
     stripe_customer_id = current_user.get("stripe_customer_id")
@@ -159,25 +185,27 @@ async def get_current_subscription_status(current_user: Dict = Depends(get_curre
 
     try:
         db_status = SubscriptionStatus(db_status_str) if db_status_str else SubscriptionStatus.INACTIVE
-        # Use the helper function to convert Price ID string to SubscriptionTier enum
-        db_tier = get_tier_from_price_id(db_tier_str) if db_tier_str else SubscriptionTier.FREE
+        # Use the updated helper function to convert identifier (Price ID or name) to SubscriptionTier enum
+        db_tier_enum = get_tier_from_price_id(db_tier_identifier)
     except ValueError:
-        # This should ideally not happen now with the helper, but keep for safety
+        # Handle potential errors converting status string to enum
         logger.error(f"Invalid status enum value found in DB for user {user_id}: status='{db_status_str}'")
         db_status = SubscriptionStatus.INACTIVE # Default to inactive on error
-        db_tier = SubscriptionTier.FREE # Default to free on error
+        db_tier_enum = SubscriptionTier.FREE # Default to free on error
 
-    if db_status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING] and db_tier and db_end_date:
-         logger.info(f"Returning subscription status from DB for user {user_id}: Status={db_status}, Tier={db_tier}")
+    # Return details only if the status is active/trialing and we have an end date
+    if db_status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING] and db_end_date:
+         logger.info(f"Returning subscription status from DB for user {user_id}: Status={db_status.value}, TierEnum={db_tier_enum.value}, Identifier='{db_tier_identifier}'")
          return SubscriptionDetails(
-            id=subscription_id or "db_managed",
-            customer_id=stripe_customer_id or "",
-            status=db_status.value,
-            current_period_end=db_end_date,
-            tier=db_tier,
-            cancel_at_period_end=cancel_at_period_end,
-            created_at=created_at or datetime.now(timezone.utc),
-            payment_method=""
+            id=subscription_id or "db_managed", # Use subscription ID if available
+             customer_id=stripe_customer_id or "",
+             status=db_status.value, # Return the string value of the enum
+             current_period_end=db_end_date,
+             tier=db_tier_enum, # Return the SubscriptionTier enum value
+             planId=db_tier_identifier, # Return the actual identifier stored in the DB (Price ID or name)
+             cancel_at_period_end=cancel_at_period_end,
+             created_at=created_at or datetime.now(timezone.utc), # Provide a default if missing
+             payment_method="" # Placeholder, fetch if needed
         )
     else:
         logger.info(f"No active/trialing subscription found in DB for user {user_id}. Status: {db_status}")

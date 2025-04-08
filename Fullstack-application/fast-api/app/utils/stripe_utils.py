@@ -210,14 +210,19 @@ async def handle_checkout_session_completed(event: stripe.Event, user_collection
             logger.info(f"[Webhook Checkout Completed] Stripe Plan ID: '{plan_id}', Mapped Tier: '{subscription_tier_enum.value}' for User: {user_id}") # Detailed Log
             # --- End Tier Mapping ---
 
+            # Ensure plan_id is fetched correctly before this block
+            plan_id = subscription.plan.id if subscription.plan else None
+            logger.info(f"Webhook: plan_id determined as: {plan_id}") # Add logging
+
             update_data = {
                 "stripe_customer_id": customer_id,
                 "stripe_subscription_id": subscription_id,
                 "subscription_status": internal_status.value,
-                "subscription_tier": subscription_tier_enum.value, # Use the mapped enum value
+                "subscription_tier": plan_id, # Ensure this uses the plan_id variable
                 "subscription_current_period_end": current_period_end_dt,
                 "updated_at": datetime.now(timezone.utc)
             }
+            logger.info(f"Webhook: update_data prepared: {update_data}") # Add logging
             
             result = await user_collection.update_one(
                 {"id": user_id},
@@ -281,7 +286,7 @@ async def handle_customer_subscription_updated(event: stripe.Event, user_collect
 
     update_data = {
         "subscription_status": internal_status.value,
-        "subscription_tier": subscription_tier_enum.value, # Use the mapped enum value
+        "subscription_tier": plan_id, # Save the actual Stripe Price ID
         "subscription_current_period_end": current_period_end_dt,
         "updated_at": datetime.now(timezone.utc)
     }
