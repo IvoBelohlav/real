@@ -47,6 +47,100 @@ class Statistics(BaseModel):
     averageResponseTime: float
     dailyStats: List[DailyStats]
     monthlyUsers: List[MonthlyUsers]
+
+# --- Order Tracking Models ---
+
+class OrderItem(BaseModel):
+    product_id: Optional[str] = None
+    sku: Optional[str] = None
+    name: str
+    quantity: int
+    price: float
+    currency: str = "CZK" # Default currency
+
+class Order(BaseModel):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    user_id: str = Field(...) # Link to the user in your system
+    source_platform: str = Field(...) # e.g., "shopify", "shoptet", "manual"
+    platform_order_id: str = Field(...) # The order ID from the source platform
+    order_number: Optional[str] = None # Display order number, might be same as platform_order_id
+    status: str = Field(...) # e.g., "Pending", "Processing", "Shipped", "Delivered", "Cancelled", "Refunded"
+    items: List[OrderItem] = Field(default_factory=list)
+    total_amount: float
+    currency: str = "CZK"
+    customer_email: Optional[str] = None # Important for linking
+    customer_name: Optional[str] = None
+    shipping_address: Optional[Dict[str, Any]] = None
+    billing_address: Optional[Dict[str, Any]] = None
+    tracking_number: Optional[str] = None
+    carrier: Optional[str] = None
+    estimated_delivery_date: Optional[datetime] = None
+    order_date: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    notes: Optional[str] = None # Internal notes
+    raw_webhook_data: Optional[Dict[str, Any]] = None # Store raw payload for debugging if needed
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        arbitrary_types_allowed=True,
+        json_encoders={ObjectId: str, datetime: lambda dt: dt.isoformat()},
+        json_schema_extra={
+            "example": {
+                "id": "60d5ec49f7e4e3a3e4d8f6a1",
+                "user_id": "user_abc_123",
+                "source_platform": "shoptet",
+                "platform_order_id": "ORD-2024-9876",
+                "order_number": "9876",
+                "status": "Shipped",
+                "items": [
+                    {"product_id": "prod_1", "sku": "SKU001", "name": "Product A", "quantity": 1, "price": 100.0, "currency": "CZK"},
+                    {"product_id": "prod_2", "sku": "SKU002", "name": "Product B", "quantity": 2, "price": 50.0, "currency": "CZK"}
+                ],
+                "total_amount": 200.0,
+                "currency": "CZK",
+                "customer_email": "customer@example.com",
+                "customer_name": "Jan Novak",
+                "tracking_number": "TRACK123456XYZ",
+                "carrier": "PPL",
+                "estimated_delivery_date": "2024-08-26T00:00:00Z",
+                "order_date": "2024-08-25T10:30:00Z",
+                "created_at": "2024-08-25T10:31:00Z",
+                "updated_at": "2024-08-25T15:00:00Z",
+            }
+        }
+    )
+
+class OrderCreate(BaseModel):
+    # Subset of Order fields needed for creation (e.g., via webhook)
+    user_id: str
+    source_platform: str
+    platform_order_id: str
+    status: str
+    items: List[OrderItem]
+    total_amount: float
+    currency: Optional[str] = "CZK"
+    customer_email: Optional[str] = None
+    customer_name: Optional[str] = None
+    tracking_number: Optional[str] = None
+    carrier: Optional[str] = None
+    estimated_delivery_date: Optional[datetime] = None
+    order_date: Optional[datetime] = None
+    raw_webhook_data: Optional[Dict[str, Any]] = None
+
+class OrderUpdate(BaseModel):
+    # Fields that can be updated
+    status: Optional[str] = None
+    tracking_number: Optional[str] = None
+    carrier: Optional[str] = None
+    estimated_delivery_date: Optional[datetime] = None
+    notes: Optional[str] = None
+    raw_webhook_data: Optional[Dict[str, Any]] = None # Allow updating raw data if needed
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# --- End Order Tracking Models ---
+
+from typing import Optional # Ensure Optional is imported at the top if it isn't already
 from typing import Optional # Ensure Optional is imported at the top if it isn't already
 
 class HumanChatSession(BaseModel):
@@ -217,6 +311,7 @@ class ChatResponse(BaseModel):
         default_factory=list,
         description="Context-aware product recommendations with explanations, image URLs, and product URLs" # <---- UPDATED DESCRIPTION
     )
+    order_details: Optional[Order] = None # Add field for structured order data
 
 # Moved ConversationEntry here:
 

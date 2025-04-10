@@ -6,9 +6,10 @@ import {
   // Package, DollarSign, ShoppingCart, Image,
   ChevronLeft, ChevronRight // Icons used for carousel arrows
 } from "lucide-react";
-import { themes } from "../../themes"; // Assuming themes are defined elsewhere
+import { themes } from "../../themes";
 import ProductCard from "./ProductCard";
-import AccessoryCard from "./AccessoryCard"; // Assuming AccessoryCard component exists
+import AccessoryCard from "./AccessoryCard";
+import OrderStatusCard from "./OrderStatusCard"; // Import the new OrderStatusCard
 // Removed useQuery/api imports as fetching is expected in the parent
 import styles from "./ChatMessage.module.css";
 
@@ -538,9 +539,16 @@ const ChatMessage = ({
         </div>
       )}
 
+      {/* NEW: Render Order Status Card if details are present */}
+      {isBot && message.order_details && (
+         <OrderStatusCard order={message.order_details} />
+      )}
+      {/* END NEW */}
+
+
       {/* 2. Product Carousel Section (if products exist) */}
       {hasProducts && (
-        <div className={styles.recommendationSection} style={{ 
+        <div className={styles.recommendationSection} style={{
           width: '100%', 
           textAlign: 'left',
           alignItems: 'flex-start',

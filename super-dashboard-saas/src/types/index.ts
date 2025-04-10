@@ -83,6 +83,13 @@ export interface WidgetConfig {
   button_border_width?: string | null;
   widget_shadow?: string | null;
   custom_css?: string | null;
+
+  // New fields matching backend model
+  collapsed_button_style?: 'wide' | 'circular' | null;
+  second_button_enabled?: boolean | null;
+  second_button_text?: string | null;
+  second_button_link?: string | null; // Pydantic HttpUrl becomes string
+
   // Note: Frontend form had nested 'appearance' and 'behavior'.
   // Backend model is flat. We'll adapt the form to use the flat structure.
   // Note: Frontend form had nested 'appearance' and 'behavior'.
@@ -347,5 +354,44 @@ export interface Invoice {
   invoice_pdf?: string | null; // URL to download the invoice PDF
   hosted_invoice_url?: string | null; // URL to view the invoice online
 }
+
+// --- Order Tracking Types ---
+
+// Matches backend OrderItem model
+export interface OrderItem {
+  product_id?: string | null;
+  sku?: string | null;
+  name: string;
+  quantity: number;
+  price: number;
+  currency?: string; // Default 'CZK' in backend
+}
+
+// Matches backend Order model (adjust based on fields returned by API)
+export interface Order {
+  id: string; // MongoDB ObjectId as string
+  user_id: string;
+  source_platform: string;
+  platform_order_id: string;
+  order_number?: string | null;
+  status: string;
+  items: OrderItem[];
+  total_amount: number;
+  currency: string;
+  customer_email?: string | null;
+  customer_name?: string | null;
+  shipping_address?: Record<string, any> | null; // Use Record<string, any> for generic object
+  billing_address?: Record<string, any> | null;
+  tracking_number?: string | null;
+  carrier?: string | null;
+  estimated_delivery_date?: string | null; // ISO date string
+  order_date: string; // ISO date string
+  created_at: string; // ISO date string
+  updated_at: string; // ISO date string
+  notes?: string | null;
+  // raw_webhook_data is likely backend-only, not usually sent to frontend
+}
+
+// --- End Order Tracking Types ---
 
 // Add other shared interfaces here later, e.g., for Subscription, Domain, etc.

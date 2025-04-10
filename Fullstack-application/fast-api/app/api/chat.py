@@ -1,7 +1,7 @@
 # app/api/chat.py
 import logging
 from typing import Dict, List, Optional, Any
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, status # Added status here
 from datetime import datetime, timezone
 import uuid
 from app.utils.mongo import serialize_mongo_doc, get_db, get_conversations_collection, get_human_chat_collection
@@ -9,13 +9,15 @@ from app.models.models import ConversationEntry, ChatRequest, ChatResponse, Huma
 from app.utils.context import EnhancedConversationContext
 from motor.motor_asyncio import AsyncIOMotorClient
 from app.utils.logging_config import get_module_logger
+import re # Import regex for extracting order number/email
 from app.services.knowledge_base import KnowledgeBase
 from app.services.ai_service import AIService
 # Use verify_widget_origin for auth/origin check
 from app.utils.dependencies import verify_widget_origin
 # Import user model and mongo utils for limit checking
 from app.models.user import SubscriptionTier
-from app.utils.mongo import get_user_collection
+# Import get_user_collection and get_orders_collection
+from app.utils.mongo import get_user_collection, get_orders_collection, serialize_mongo_doc
 from datetime import timedelta # Import timedelta for month check
 
 router = APIRouter()
@@ -47,28 +49,122 @@ async def handle_message(
     request: ChatRequest,
     background_tasks: BackgroundTasks,
     # Use the new dependency for authentication and origin check
-    current_user: Dict = Depends(verify_widget_origin),
-    db = Depends(get_conversations_collection),
+    current_user: Dict = Depends(verify_widget_origin), # User associated with the API Key
+    conversations_db = Depends(get_conversations_collection),
+    orders_collection = Depends(get_orders_collection), # Inject orders collection
     ai_service = Depends(get_ai_service)
 ) -> ChatResponse:
     """
-    Process chat messages with enhanced AI understanding and product recommendations.
+    Process chat messages, including handling order status requests.
     """
     try:
-        user_id = current_user["id"]
+        # user_id associated with the API Key (website owner)
+        owner_user_id = current_user["id"]
         user_collection = await get_user_collection() # Get user collection
 
+        # --- Order Status Intent Check ---
+        query_lower = request.query.lower()
+        order_keywords = ["order", "objednávk", "tracking", "track", "zásilk", "balik", "package", "delivery", "doručení"]
+        is_order_query = any(keyword in query_lower for keyword in order_keywords)
+
+        # Simple extraction (can be improved with NLP/regex)
+        order_number_match = re.search(r'#?([a-zA-Z0-9\-]+)', query_lower) # Look for order number like patterns
+        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', query_lower) # Basic email regex
+
+        extracted_order_number = order_number_match.group(1) if order_number_match else None
+        extracted_email = email_match.group(0) if email_match else None
+
+        logger.debug(f"Order Query Check: is_order_query={is_order_query}, order#={extracted_order_number}, email={extracted_email}")
+
+        if is_order_query:
+            if extracted_order_number and extracted_email:
+                logger.info(f"Handling order status query for order '{extracted_order_number}' and email '{extracted_email}' for owner {owner_user_id}")
+                # Query the database using owner_user_id, customer_email, and platform_order_id
+                order = await orders_collection.find_one({
+                    "user_id": owner_user_id, # Filter by the website owner
+                    "customer_email": extracted_email.lower(), # Filter by customer email
+                    "$or": [ # Match either platform_order_id or order_number
+                         {"platform_order_id": extracted_order_number},
+                         {"order_number": extracted_order_number}
+                    ]
+                })
+
+                if order:
+                    order_data = serialize_mongo_doc(order)
+                    order_status = order_data.get("status", "unknown") # Renamed local variable
+                    tracking = order_data.get("tracking_number")
+                    carrier = order_data.get("carrier")
+                    est_delivery = order_data.get("estimated_delivery_date")
+                    platform_order_id = order_data.get("platform_order_id", "N/A")
+
+                    response_text = f"Order #{platform_order_id}: Status is '{order_status}'." # Use renamed variable
+                    if tracking:
+                        response_text += f" Tracking: {tracking}"
+                        if carrier:
+                            response_text += f" (Carrier: {carrier})"
+                        response_text += "."
+                    if est_delivery:
+                        try:
+                            # Format date nicely
+                            est_delivery_dt = datetime.fromisoformat(est_delivery.replace('Z', '+00:00'))
+                            response_text += f" Estimated delivery: {est_delivery_dt.strftime('%d.%m.%Y')}."
+                        except:
+                            response_text += f" Estimated delivery: {est_delivery}." # Fallback
+
+                    # Populate order_details with the found order data
+                    # The reply can be a simpler confirmation message now
+                    return ChatResponse(
+                        reply=f"Here's the status for order #{platform_order_id}:", # Simpler text reply
+                        source="order_status_lookup",
+                        confidence_score=1.0, # High confidence as it's a direct lookup
+                        conversation_id=request.context.conversation_id if request.context else str(uuid.uuid4()),
+                        followup_questions=[],
+                        metadata={},
+                        personalized_recommendations=[],
+                        order_details=Order(**order_data) # Pass the structured order data
+                    )
+                else:
+                    logger.warning(f"Order not found for owner {owner_user_id}, email {extracted_email}, order# {extracted_order_number}")
+                    response_text = "I couldn't find an order matching that email and order number. Please double-check the details."
+                    return ChatResponse(
+                        reply=response_text,
+                        source="order_status_not_found",
+                        confidence_score=1.0,
+                        conversation_id=request.context.conversation_id if request.context else str(uuid.uuid4()),
+                        followup_questions=["Would you like to try a different order number or email?"],
+                        metadata={},
+                        personalized_recommendations=[]
+                    )
+            else:
+                # Ask for missing details
+                missing = []
+                if not extracted_email: missing.append("your email address")
+                if not extracted_order_number: missing.append("your order number")
+                response_text = f"To check your order status, please provide {' and '.join(missing)}."
+                return ChatResponse(
+                    reply=response_text,
+                    source="order_status_clarification",
+                    confidence_score=1.0,
+                    conversation_id=request.context.conversation_id if request.context else str(uuid.uuid4()),
+                    followup_questions=[],
+                    metadata={},
+                    personalized_recommendations=[]
+                )
+        # --- End Order Status Intent Check ---
+
+        # --- Proceed with normal AI processing if not an order query ---
+        logger.debug("Not an order query, proceeding with standard AI processing.")
+
         # Ensure we have a valid conversation context before checking limits or accessing attributes
-        if request.context is None:
-            request.context = EnhancedConversationContext()
-        elif isinstance(request.context, dict):
-            # Convert dict to the Pydantic model instance
+        # Convert dict to the Pydantic model instance if necessary
+        if isinstance(request.context, dict):
             request.context = EnhancedConversationContext(**request.context)
-        # Now request.context is guaranteed to be None or an EnhancedConversationContext object
+        elif request.context is None:
+             request.context = EnhancedConversationContext()
+        # Now request.context is guaranteed to be an EnhancedConversationContext object
 
         # --- Check and Update Monthly Conversation Limit ---
-        # Access conversation_id safely now
-        is_new_conversation = request.context is None or request.context.conversation_id is None
+        is_new_conversation = not request.context.conversation_id
         if is_new_conversation:
             now = datetime.now(timezone.utc)
             usage_start = current_user.get("usage_period_start_date")
@@ -87,22 +183,35 @@ async def handle_message(
 
             if needs_reset:
                 await user_collection.update_one(
-                    {"id": user_id},
+                    {"id": owner_user_id},
                     {"$set": {"conversation_count_current_month": 0, "usage_period_start_date": now}}
                 )
                 current_user["conversation_count_current_month"] = 0 # Update local copy
                 current_user["usage_period_start_date"] = now
-                logger.info(f"Reset monthly conversation count for user {user_id}")
+                logger.info(f"Reset monthly conversation count for user {owner_user_id}")
 
             # Check limit before incrementing
             tier_str = current_user.get("subscription_tier", "free")
+
+            # --- Temporary Fix: Map known Price ID to tier name ---
+            # Ideally, the webhook should store the tier name directly.
+            price_id_to_tier_map = {
+                "price_1RAIdbr4qkX0uO0aXoszn1Fs2": "basic"
+                # Add other Price IDs and their corresponding tier names here if needed
+            }
+            if tier_str in price_id_to_tier_map:
+                tier_str = price_id_to_tier_map[tier_str]
+                logger.debug(f"Mapped Price ID {current_user.get('subscription_tier')} to tier '{tier_str}' for limit check.")
+            # --- End Temporary Fix ---
+
             try:
                 tier = SubscriptionTier(tier_str)
             except ValueError:
+                logger.warning(f"Invalid or unrecognized subscription_tier value '{tier_str}' for user {owner_user_id}. Defaulting to FREE.")
                 tier = SubscriptionTier.FREE
 
             limits = {
-                SubscriptionTier.FREE: 0, # No conversations for free tier? Or a small number? Let's assume 0 for now.
+                SubscriptionTier.FREE: 0, # Limit for free tier
                 SubscriptionTier.BASIC: 500,
                 SubscriptionTier.PREMIUM: 1500,
                 SubscriptionTier.ENTERPRISE: float('inf') # Unlimited
@@ -111,7 +220,7 @@ async def handle_message(
             current_convo_count = current_user.get("conversation_count_current_month", 0)
 
             if current_convo_count >= max_convos:
-                logger.warning(f"User {user_id} (Tier: {tier.value}) tried to start new conversation but reached monthly limit ({max_convos})")
+                logger.warning(f"User {owner_user_id} (Tier: {tier.value}) tried to start new conversation but reached monthly limit ({max_convos})")
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail=f"Monthly conversation limit ({max_convos}) reached for your '{tier.value}' plan."
@@ -119,10 +228,10 @@ async def handle_message(
 
             # Increment count for the new conversation
             await user_collection.update_one(
-                {"id": user_id},
+                {"id": owner_user_id},
                 {"$inc": {"conversation_count_current_month": 1}}
             )
-            logger.info(f"Incremented monthly conversation count for user {user_id} (New count: {current_convo_count + 1})")
+            logger.info(f"Incremented monthly conversation count for user {owner_user_id} (New count: {current_convo_count + 1})")
         # --- End Limit Check ---
 
         # Correct language code if needed
@@ -133,15 +242,15 @@ async def handle_message(
         if request.context.conversation_id is None:
             request.context.conversation_id = str(uuid.uuid4())
 
-        request.context.user_id = user_id
-        request.user_id = user_id
+        request.context.user_id = owner_user_id
+        request.user_id = owner_user_id
 
         # Generate enhanced response with AI service
         response_data = await ai_service.generate_response(
             query=request.query,
             context=request.context,
             language=request.language,
-            user_id=user_id
+            user_id=owner_user_id
         )
 
         # Update conversation context with new information
@@ -159,14 +268,15 @@ async def handle_message(
         # Only use the fallback method if no questions were generated by the AI service
         if not followup_questions:
             try:
-                # Try to generate follow-up questions using the AI service if they weren't already included
+                # Try to generate follow-up questions using the AI service
                 logger.info("Generating follow-up questions with enhanced AI service")
                 # Ensure query is included in metadata for context analysis
-                if response_data.get("metadata") and not response_data["metadata"].get("query"):
-                    response_data["metadata"]["query"] = request.query
-                
+                current_metadata = response_data.get("metadata", {})
+                if not current_metadata.get("query"):
+                    current_metadata["query"] = request.query
+
                 followup_questions = await ai_service._generate_relevant_followup_questions(
-                    analysis=response_data.get("metadata", {"query": request.query}),
+                    analysis=current_metadata,
                     response_data=response_data,
                     language=request.language
                 )
@@ -174,20 +284,21 @@ async def handle_message(
                 # If AI service fails, fall back to simple question generation
                 logger.warning(f"Enhanced follow-up question generation failed: {str(e)}. Using fallback method.")
                 followup_questions = _generate_followup_questions(
-                    response_data["metadata"].get("query_type", "general_question"),
-                    response_data["metadata"].get("entities", {}),
+                    response_data.get("metadata", {}).get("query_type", "general_question"),
+                    response_data.get("metadata", {}).get("entities", {}),
                     request.language
                 )
 
-        # Create conversation entry
+        # Create conversation entry (ensure conversation_id is set)
+        conv_id = request.context.conversation_id or str(uuid.uuid4()) # Ensure ID exists
         conversation_entry = ConversationEntry(
-            conversation_id=request.context.conversation_id,
+            conversation_id=conv_id,
             timestamp=datetime.now(timezone.utc),
             query=request.query,
             response=response_data["reply"],
             source=response_data["source"],
             language=request.language,
-            user_id=user_id,
+            user_id=owner_user_id, # Log against the owner user ID
             confidence_score=response_data["confidence_score"],
             metadata={
                 **response_data.get("metadata", {}),
@@ -196,13 +307,13 @@ async def handle_message(
         )
 
         # Save conversation in background
-        background_tasks.add_task(save_conversation_entry, db, conversation_entry)
+        background_tasks.add_task(save_conversation_entry, conversations_db, conversation_entry)
         
         # Process metadata for personalized recommendations
         metadata = response_data.get("metadata", {})
         
         # Check if human chat should be available for this conversation
-        human_chat_available = await is_human_chat_available(request.context.conversation_id, user_id)
+        human_chat_available = await is_human_chat_available(conv_id, owner_user_id)
         
         # Generate personalized recommendations based on response source
         personalized_recommendations = []
@@ -321,7 +432,7 @@ async def handle_message(
             metadata={
                 **serialize_mongo_doc(metadata),
                 "human_chat_available": human_chat_available,
-                "client_context": serialize_mongo_doc(request.context.model_dump()) if request.context else {}
+                "client_context": serialize_mongo_doc(request.context.model_dump()) # Context is guaranteed to exist here
             },
             personalized_recommendations=personalized_recommendations
         )
@@ -482,26 +593,22 @@ def _generate_recommendation_explanation(product: Dict[str, Any], score_componen
     return "Doporučujeme, protože " + " a ".join(explanation_parts)
 
 def _generate_comparison_explanation(product: Dict[str, Any], comparison_data: Dict[str, Any]) -> str:
-    """Generate an explanation for a product in comparison context."""
+    """Generate an explanation for why a product stands out in comparison."""
     product_name = product.get("product_name", "")
     
-    # Extract unique features for this product
-    unique_features = []
+    # Get unique features if available
     for key, data in comparison_data.items():
         if "unique_features" in data and product_name in data["unique_features"]:
             unique_features = data["unique_features"][product_name]
-            break
-    
-    if unique_features:
-        unique_features_text = ", ".join(unique_features[:2])  # Just mention top 2
-        return f"Vyniká v: {unique_features_text}"
-    
-    # Get price comparison if available
-    for key, data in comparison_data.items():
+            if unique_features:
+                unique_features_text = ", ".join(unique_features[:2])  # Just mention top 2
+                return f"Vyniká v: {unique_features_text}"
+        
+        # Get price comparison if available
         if "price_comparison" in data and product_name in data["price_comparison"]:
             return data["price_comparison"]
     
-    return "Porovnávaný produkt"
+    return "Porovnávaný produkt"  # Default return if no specific comparison point found
 
 def _generate_accessory_explanation(accessory: Dict[str, Any], main_product: Optional[Dict[str, Any]]) -> str:
     """Generate an explanation for an accessory recommendation."""

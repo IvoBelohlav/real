@@ -1,0 +1,94 @@
+.card {
+  background-color: var(--lermo-widget-background-color, #ffffff); /* Use theme variable or default */
+  border: 1px solid var(--lermo-widget-border-color, #e0e0e0);
+  border-radius: 8px;
+  padding: 12px 15px;
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: var(--lermo-widget-text-color, #333);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  max-width: 90%; /* Prevent card from taking full width */
+}
+
+.title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--lermo-widget-primary-color, #333); /* Use primary color or default */
+  font-size: 0.95rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.label {
+  font-weight: 500;
+  color: var(--lermo-widget-secondary-text-color, #555); /* Slightly lighter text */
+  margin-right: 8px;
+}
+
+.value {
+  text-align: right;
+}
+
+.statusBadge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  display: inline-block; /* Ensure badge takes only needed width */
+}
+
+/* Status colors - match dashboard if possible */
+.statusShipped {
+  background-color: #e0f2fe; /* light blue */
+  color: #0c4a6e; /* dark blue */
+}
+.statusDelivered {
+  background-color: #dcfce7; /* light green */
+  color: #166534; /* dark green */
+}
+.statusCancelled {
+  background-color: #fee2e2; /* light red */
+  color: #991b1b; /* dark red */
+}
+.statusProcessing {
+  background-color: #fef9c3; /* light yellow */
+  color: #854d0e; /* dark yellow */
+}
+
+.trackingLink {
+  color: var(--lermo-widget-link-color, #007bff); /* Use theme variable or default blue */
+  text-decoration: none;
+}
+.trackingLink:hover {
+  text-decoration: underline;
+}
+
+.itemsSection {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--lermo-widget-border-color, #eee);
+}
+
+.itemList {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 4px;
+}
+
+.item {
+    font-size: 0.85rem;
+    color: var(--lermo-widget-secondary-text-color, #555);
+    margin-bottom: 2px;
+}
+
+.itemMore {
+    font-size: 0.8rem;
+    color: #888;
+    font-style: italic;
+}

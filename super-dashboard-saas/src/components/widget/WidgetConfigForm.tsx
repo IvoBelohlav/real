@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
-import { fetchApi } from '@/lib/api'; // Assuming fetchApi handles auth etc.
+import { fetchApi, api } from '@/lib/api'; // Ensure api is imported correctly
 import { useAuth } from '@/contexts/AuthContext'; // Import useAuth
 import { themes } from '@/lib/themes';
 import { widgetThemePresets } from '@/lib/widgetThemePresets';
@@ -50,6 +50,12 @@ const getDefaultFormData = (): WidgetConfig => {
     greeting_message: '👋 Hey there! How can I assist you today?',
     widget_button_text: 'We are here!',
     widget_help_text: 'Need help? Chat now',
+
+    // New fields defaults
+    collapsed_button_style: 'wide',
+    second_button_enabled: false,
+    second_button_text: '',
+    second_button_link: '',
 
     widget_padding: '1rem',
     message_spacing: '0.75rem',
@@ -122,14 +128,15 @@ const WidgetConfigForm = () => {
   }, [config]);
 
   // Mutation for updating config
-  const updateConfigMutation = useMutation<WidgetConfig, Error, WidgetConfig>({
-    mutationFn: (updatedConfig) => fetchApi('/api/widget-config', {
-      method: 'PUT',
-      body: JSON.stringify(updatedConfig),
-    }),
-    onSuccess: (data) => {
-      queryClient.setQueryData(['widgetConfig'], data); // Update cache immediately
-      queryClient.invalidateQueries({ queryKey: ['widgetConfig'] }); // Optional: refetch to confirm
+  // TData = { data: WidgetConfig } (type returned by api.put)
+  // TError = Error
+  // TVariables = WidgetConfig (type passed to mutate, matching backend expectation)
+  const updateConfigMutation = useMutation<{ data: WidgetConfig }, Error, WidgetConfig>({
+    mutationFn: (updatedConfig: WidgetConfig) => api.put<WidgetConfig>('/api/widget-config', updatedConfig), // api.put handles stringify
+    onSuccess: (response) => { // response is of type { data: WidgetConfig }
+      // Access the actual config data via response.data
+      queryClient.setQueryData(['widgetConfig'], response.data); // Update cache with the returned config
+      queryClient.invalidateQueries({ queryKey: ['widgetConfig'] }); // Refetch to confirm
       toast.success('Widget configuration updated successfully!');
     },
     onError: (error) => {
@@ -172,10 +179,22 @@ const WidgetConfigForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Remove potential temporary fields or ensure only valid fields are sent
+
+    // Create a clean copy to modify before sending
     const configToSend = { ...formData };
-    // delete configToSend.someTemporaryField; // Example if needed
-    updateConfigMutation.mutate(configToSend);
+
+    // 1. Handle second_button_link: Set to null if disabled or empty/whitespace when enabled
+    if (!configToSend.second_button_enabled || (configToSend.second_button_enabled && (!configToSend.second_button_link || String(configToSend.second_button_link).trim() === ''))) {
+      configToSend.second_button_link = null;
+    }
+    // Otherwise, keep the potentially valid URL string for Pydantic HttpUrl validation
+
+    // 2. Backend expects a WidgetConfig object, but derives user_id/business_id from token.
+    //    Do not delete fields from the frontend payload.
+
+    console.log("Sending config payload:", configToSend); // Log the final payload
+
+    updateConfigMutation.mutate(configToSend); // Mutate with the object containing the null link if needed
   };
 
   const handleReset = () => {
@@ -375,7 +394,12 @@ const WidgetConfigForm = () => {
       { value: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)', label: 'Small' },
       { value: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', label: 'Medium' },
       { value: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', label: 'Large' },
-      { value: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)', label: 'X-Large' },
+    { value: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)', label: 'X-Large' },
+   ];
+
+   const collapsedButtonStyleOptions = [
+     { value: 'wide', label: 'Wide (Text + Icon)' },
+     { value: 'circular', label: 'Circular (Icon Only)' },
    ];
 
   return (
@@ -454,7 +478,7 @@ const WidgetConfigForm = () => {
         {/* Form Content */}
         <form onSubmit={handleSubmit}>
           {/* General Settings Tab */}
-          {activeTab === 'general' && (
+          {activeTab === 'general' && ( // Opening parenthesis for general tab content
             <div className="space-y-6"> {/* Adjusted vertical spacing */}
               <h3 className="text-base font-semibold leading-6 text-gray-900">General Settings</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -464,9 +488,38 @@ const WidgetConfigForm = () => {
                 {renderTextareaField('greeting_message', 'Greeting Message', 3, { className: 'sm:col-span-6 max-w-xl' })}
                 {renderInputField('widget_button_text', 'Widget Button Text', 'text', { className: 'sm:col-span-3' })}
                 {renderInputField('widget_help_text', 'Widget Help Text', 'text', { className: 'sm:col-span-3' })}
-                 {/* isEnabled Toggle */}
-                 <div className="sm:col-span-6 flex items-center pt-2"> {/* Added padding-top */}
-                    <input
+
+                {/* --- New Fields --- */}
+                {renderSelectField('collapsed_button_style', 'Collapsed Button Style', collapsedButtonStyleOptions, 'sm:col-span-3')}
+
+                <div className="sm:col-span-6 border-t border-gray-200 pt-6 mt-4"> {/* Separator */}
+                  <h4 className="text-sm font-medium text-gray-600 mb-2">Second Action Button (Expanded Chat)</h4>
+                  <div className="flex items-center mb-4">
+                      <input
+                          id="second_button_enabled"
+                          name="second_button_enabled"
+                          type="checkbox"
+                          checked={formData.second_button_enabled ?? false}
+                          onChange={handleChange}
+                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                      />
+                      <label htmlFor="second_button_enabled" className="ml-2 block text-sm font-medium text-gray-700">
+                          Enable Second Action Button
+                      </label>
+                  </div>
+                  {formData.second_button_enabled && (
+                      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6 pl-6 border-l-2 border-indigo-100"> {/* Indent conditional fields */}
+                          {renderInputField('second_button_text', 'Second Button Text', 'text', { className: 'sm:col-span-3' })}
+                          {renderInputField('second_button_link', 'Second Button Link (URL)', 'url', { placeholder: 'https://example.com', className: 'sm:col-span-3' })}
+                      </div>
+                  )}
+                </div>
+
+                <div className="sm:col-span-6 border-t border-gray-200 pt-6 mt-4"> {/* Separator */}
+                   <h4 className="text-sm font-medium text-gray-600 mb-2">Widget Status</h4>
+                   {/* isEnabled Toggle */}
+                   <div className="flex items-center"> {/* Removed sm:col-span-6 and pt-2 */}
+                      <input
                         id="isEnabled"
                         name="isEnabled"
                         type="checkbox"
@@ -477,13 +530,14 @@ const WidgetConfigForm = () => {
                     <label htmlFor="isEnabled" className="ml-2 block text-sm font-medium text-gray-700"> {/* Adjusted margin */}
                         Enable Chat Widget
                     </label>
-                 </div>
-              </div>
-            </div>
-          )}
+                 </div> {/* Closing div for Widget Status flex container */}
+              </div> {/* Closing div for Widget Status section */}
+            </div> {/* Closing div for grid */}
+          </div> // Closing div for general tab's outer div
+          )} {/* Correct closing for general tab conditional rendering */}
 
           {/* Light Mode Colors Tab */}
-          {activeTab === 'lightColors' && (
+          {activeTab === 'lightColors' && ( // Opening parenthesis for lightColors tab content
             <div className="space-y-6"> {/* Adjusted vertical spacing */}
               <h3 className="text-base font-semibold leading-6 text-gray-900">Light Mode Colors</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
@@ -497,12 +551,12 @@ const WidgetConfigForm = () => {
                 {renderInputField('button_text_color_light', 'Button Text', 'color', { className: 'sm:col-span-2' })}
                 {renderInputField('icon_background_color_light', 'Icon BG', 'color', { className: 'sm:col-span-2' })}
                 {renderInputField('mode_toggle_background_light', 'Mode Toggle BG', 'color', { className: 'sm:col-span-2' })}
-              </div>
-            </div>
-          )}
+              </div> {/* Closing div for grid */}
+            </div> // Closing div for lightColors tab's outer div
+          )} {/* Correct closing for lightColors tab conditional rendering */}
 
           {/* Dark Mode Colors Tab */}
-          {activeTab === 'darkColors' && (
+          {activeTab === 'darkColors' && ( // Opening parenthesis for darkColors tab content
              <div className="space-y-6"> {/* Adjusted vertical spacing */}
               <h3 className="text-base font-semibold leading-6 text-gray-900">Dark Mode Colors</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
@@ -516,12 +570,12 @@ const WidgetConfigForm = () => {
                 {renderInputField('button_text_color_dark', 'Button Text', 'color', { className: 'sm:col-span-2' })}
                 {renderInputField('icon_background_color_dark', 'Icon BG', 'color', { className: 'sm:col-span-2' })}
                 {renderInputField('mode_toggle_background_dark', 'Mode Toggle BG', 'color', { className: 'sm:col-span-2' })}
-              </div>
-            </div>
-          )}
+              </div> {/* Closing div for grid */}
+            </div> // Closing div for darkColors tab's outer div
+          )} {/* Correct closing for darkColors tab conditional rendering */}
 
           {/* Typography Tab */}
-          {activeTab === 'typography' && (
+          {activeTab === 'typography' && ( // Opening parenthesis for typography tab content
             <div className="space-y-6"> {/* Adjusted vertical spacing */}
               <h3 className="text-base font-semibold leading-6 text-gray-900">Typography</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -530,24 +584,24 @@ const WidgetConfigForm = () => {
                 {renderSelectField('header_font_weight', 'Header Weight', weightOptions, 'sm:col-span-2')}
                 {renderSelectField('message_font_weight', 'Message Weight', weightOptions, 'sm:col-span-2')}
                 {renderSelectField('button_font_weight', 'Button Weight', weightOptions, 'sm:col-span-2')}
-              </div>
-            </div>
-          )}
+              </div> {/* Closing div for grid */}
+            </div> // Closing div for typography tab's outer div
+          )} {/* Correct closing for typography tab conditional rendering */}
 
           {/* Spacing Tab */}
-          {activeTab === 'spacing' && (
+          {activeTab === 'spacing' && ( // Opening parenthesis for spacing tab content
             <div className="space-y-6"> {/* Adjusted vertical spacing */}
               <h3 className="text-base font-semibold leading-6 text-gray-900">Spacing</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                 {renderInputField('widget_padding', 'Widget Padding', 'text', { placeholder: 'e.g., 1rem', className: 'sm:col-span-2' })}
                 {renderInputField('message_spacing', 'Message Spacing', 'text', { placeholder: 'e.g., 0.5rem', className: 'sm:col-span-2' })}
                 {renderInputField('input_field_padding', 'Input Field Padding', 'text', { placeholder: 'e.g., 0.5rem', className: 'sm:col-span-2' })}
-              </div>
-            </div>
-          )}
+              </div> {/* Closing div for grid */}
+            </div> // Closing div for spacing tab's outer div
+          )} {/* Correct closing for spacing tab conditional rendering */}
 
            {/* Borders Tab */}
-          {activeTab === 'borders' && (
+          {activeTab === 'borders' && ( // Opening parenthesis for borders tab content
             <div className="space-y-6"> {/* Adjusted vertical spacing */}
               <h3 className="text-base font-semibold leading-6 text-gray-900">Borders</h3> {/* Adjusted heading style */}
               {/* Simplified Grouping for Borders */}
@@ -589,14 +643,14 @@ const WidgetConfigForm = () => {
                     {renderSelectField('button_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
                     {renderSelectField('button_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
                     {renderSelectField('button_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+                  </div> {/* Closing div for grid */}
+                </div> {/* Closing div for Button Borders Group */}
+              </div> {/* Closing div for Simplified Grouping */}
+            </div> // Closing div for borders tab's outer div
+          )} {/* Correct closing for borders tab conditional rendering */}
 
           {/* Advanced Tab */}
-          {activeTab === 'advanced' && (
+          {activeTab === 'advanced' && ( // Opening parenthesis for advanced tab content
             <div className="space-y-6"> {/* Adjusted vertical spacing */}
               <h3 className="text-base font-semibold leading-6 text-gray-900">Advanced</h3> {/* Adjusted heading style */}
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -605,9 +659,9 @@ const WidgetConfigForm = () => {
                   placeholder: '/* Add custom CSS rules here */\n.widget-container {\n  /* Example */\n}',
                   className: 'sm:col-span-6 max-w-xl'
                 })}
-              </div>
-            </div>
-          )}
+              </div> {/* Closing div for grid */}
+            </div> // Closing div for advanced tab's outer div
+          )} {/* Correct closing for advanced tab conditional rendering */}
 
           {/* Action Buttons */}
           <div className="pt-6 mt-6 border-t border-gray-200 flex justify-end space-x-3"> {/* Adjusted padding/margin */}
@@ -626,10 +680,10 @@ const WidgetConfigForm = () => {
               {updateConfigMutation.isPending ? <LoadingSpinner /> : 'Save Configuration'}
             </button>
           </div>
-        </form>
-      </div>
-    </div>
-  );
-};
+        </form> 
+      </div> 
+    </div> // Closing div for bg-white
+  ); // Closing parenthesis for return statement
+}; // Closing brace for component function
 
 export default WidgetConfigForm;

@@ -408,8 +408,7 @@ Vrať výsledek v přesném JSON formátu:
   "query_type": "<type>",
   "sentiment": "<sentiment>",
   "priority": "<priority>",
-  "requires_followup": false,
-  "suggested_products": []
+  "requires_followup": false
 }}
 
 Možné hodnoty intent: product_recommendation, product_comparison, technical_explanation, accessory_recommendation, store_navigation, shipping_payment, customer_service, general_question
@@ -446,8 +445,7 @@ Return the result in exact JSON format:
   "query_type": "<type>",
   "sentiment": "<sentiment>",
   "priority": "<priority>",
-  "requires_followup": false,
-  "suggested_products": []
+  "requires_followup": false
 }
 
 Possible intent values: product_recommendation, product_comparison, technical_explanation, accessory_recommendation, store_navigation, shipping_payment, customer_service, general_question
@@ -571,7 +569,7 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                             context: Optional[EnhancedConversationContext] = None,
                             language: str = "cs", 
                             user_id: Optional[str] = None
-                           ) -> Dict[str, Any]:
+                        ) -> Dict[str, Any]:
         """
         Generate an intelligent response with product recommendations,
         comparisons, and personalized information using Gemini API.
@@ -580,7 +578,7 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             query: The user's query text
             context: Optional conversation context
             language: The language code (default: "cs" for Czech)
-            user_id: Optional user ID
+            user_id: Optional user ID to filter products by tenant
             
         Returns:
             Dictionary with enriched response data
@@ -589,28 +587,29 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             # Step 1: Analyze the query with enhanced analysis
             analysis = await self.analyze_query(query, language, context)
             
-            # Step 2: Retrieve relevant knowledge based on intent
-            knowledge = await self._retrieve_specialized_knowledge(analysis, context)
+            # Step 2: Retrieve relevant knowledge based on intent - PASS USER_ID HERE
+            knowledge = await self._retrieve_specialized_knowledge(analysis, context, user_id)
             
             # Step 3: Handle specialized query types
             response_data = {}
             intent = analysis.get("intent", "general_question")
             
+            # Pass user_id to handler methods
             if intent == "product_comparison":
-                response_data = await self._handle_product_comparison(query, analysis, knowledge, context, language)
+                response_data = await self._handle_product_comparison(query, analysis, knowledge, context, language, user_id)
             elif intent == "product_recommendation":
-                response_data = await self._handle_product_recommendation(query, analysis, knowledge, context, language)
+                response_data = await self._handle_product_recommendation(query, analysis, knowledge, context, language, user_id)
             elif intent == "technical_explanation":
-                response_data = await self._handle_technical_explanation(query, analysis, knowledge, context, language)
+                response_data = await self._handle_technical_explanation(query, analysis, knowledge, context, language, user_id)
             elif intent == "accessory_recommendation":
-                response_data = await self._handle_accessory_recommendation(query, analysis, knowledge, context, language)
+                response_data = await self._handle_accessory_recommendation(query, analysis, knowledge, context, language, user_id)
             elif intent == "shipping_payment" or intent == "customer_service":
-                response_data = await self._handle_customer_service(query, analysis, knowledge, context, language)
+                response_data = await self._handle_customer_service(query, analysis, knowledge, context, language, user_id) # Pass user_id if QA becomes tenant-specific
             elif intent == "store_navigation":
-                response_data = await self._handle_navigation(query, analysis, knowledge, context, language)
+                response_data = await self._handle_navigation(query, analysis, knowledge, context, language, user_id) # Pass user_id if navigation depends on tenant data
             else:
                 # General questions and fallback
-                response_data = await self._generate_general_response(query, analysis, knowledge, context, language)
+                response_data = await self._generate_general_response(query, analysis, knowledge, context, language, user_id) # Pass user_id if general response needs tenant data
             
             # Step 4: Add follow-up questions for better engagement
             followup_questions = await self._generate_relevant_followup_questions(analysis, response_data, language)
@@ -625,7 +624,7 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                     "query_type": analysis.get("query_type"),
                     "entities": analysis.get("entities"),
                     "knowledge": knowledge,
-                    "user_id": user_id,
+                    "user_id": user_id,  # Include user_id in metadata
                     "followup_questions": followup_questions,
                     "requires_followup": analysis.get("requires_followup", False),
                     "products": response_data.get("products", []),
@@ -633,8 +632,7 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                     "priority": analysis.get("priority", "medium")
                 }
             }
-            self.logger.debug(f"Full AI Response JSON: {json_safe_dumps(final_response)}")
-
+            
             # Add any recommended products to the response
             if "recommended_products" in response_data:
                 final_response["metadata"]["recommended_products"] = response_data["recommended_products"]
@@ -668,8 +666,9 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             }
     
     async def _retrieve_specialized_knowledge(self, 
-                                         analysis: Dict[str, Any],
-                                         context: Optional[EnhancedConversationContext] = None
+                                        analysis: Dict[str, Any],
+                                        context: Optional[EnhancedConversationContext] = None,
+                                        user_id: Optional[str] = None  # Add user_id parameter
                                         ) -> Dict[str, Any]:
         """
         Retrieve relevant knowledge specialized by intent type.
@@ -677,6 +676,7 @@ Possible query_type values: direct_product, category_browse, comparison, feature
         Args:
             analysis: The query analysis result
             context: Optional conversation context
+            user_id: Optional user ID to filter products by tenant
             
         Returns:
             Dictionary with specialized knowledge
@@ -697,10 +697,25 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             # Get products by name from entities
             product_names = entities.get("products", [])
             for product_name in product_names:
-                products = await self.knowledge_base.find_products_by_name(product_name)
+                # Pass user_id to filter by tenant
+                products = await self.knowledge_base.find_products_by_name(product_name, user_id=user_id)
                 if products:
                     knowledge["products"].extend(products)
-            
+
+            # Add this right after getting products by name
+            if not knowledge["products"] and "kola" in product_names:
+                # If "kola" was identified as a product but no products found, try it as a category
+                self.logger.info(f"No products found for 'kola' as product name, trying as category")
+                category_products = await self.knowledge_base.find_products_by_category("kola", user_id=user_id, limit=5)
+                knowledge["products"].extend(category_products)
+
+                # Also try variations like "Horská kola", "Silniční kola" etc.
+                for category_type in ["Horská", "Silniční", "Městská"]:
+                    full_category = f"{category_type} kola"
+                    self.logger.info(f"Trying category: {full_category}")
+                    category_products = await self.knowledge_base.find_products_by_category(full_category, user_id=user_id, limit=2)
+                    knowledge["products"].extend(category_products)
+
             # If no specific products were identified, check categories and features
             if not knowledge["products"]:
                 # Use categories from entities or context
@@ -734,14 +749,14 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                     if price_filter:
                         search_query["price"] = price_filter
                 
-                # Get products by advanced search
+                # Get products by advanced search - pass user_id
                 if search_query:
-                    category_products = await self.knowledge_base.find_products_by_query(search_query, limit=5)
+                    category_products = await self.knowledge_base.find_products_by_query(search_query, user_id=user_id, limit=5)
                     knowledge["products"].extend(category_products)
                 elif categories:
-                    # Fallback to simple category search
+                    # Fallback to simple category search - pass user_id
                     for category in categories:
-                        category_products = await self.knowledge_base.find_products_by_category(category, limit=5)
+                        category_products = await self.knowledge_base.find_products_by_category(category, user_id=user_id, limit=5)
                         knowledge["products"].extend(category_products)
         
         # Handle accessory recommendations
@@ -751,7 +766,8 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             main_products = []
             
             for product_name in product_names:
-                products = await self.knowledge_base.find_products_by_name(product_name)
+                # Pass user_id to filter by tenant
+                products = await self.knowledge_base.find_products_by_name(product_name, user_id=user_id)
                 if products:
                     main_products.extend(products)
             
@@ -763,7 +779,8 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                 if product.get("compatible_accessories"):
                     accessory_ids = product.get("compatible_accessories")
                     for accessory_id in accessory_ids:
-                        accessory = await self.knowledge_base.find_product_by_id(accessory_id)
+                        # Pass user_id for accessory lookup too
+                        accessory = await self.knowledge_base.find_product_by_id(accessory_id, user_id=user_id)
                         if accessory:
                             knowledge["accessories"] = knowledge.get("accessories", [])
                             knowledge["accessories"].append(accessory)
@@ -780,9 +797,9 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             elif intent == "store_navigation":
                 query_terms = ["find", "where", "category", "section", "page", "website"]
             
-            # Get QA items that match these terms
+            # Get QA items that match these terms - pass user_id if QA items are tenant-specific
             for term in query_terms:
-                qa_items = await self.knowledge_base.find_qa_items_by_keyword(term)
+                qa_items = await self.knowledge_base.find_qa_items_by_keyword(term, user_id=user_id)
                 if qa_items:
                     knowledge["qa_items"].extend(qa_items)
         
@@ -800,12 +817,13 @@ Possible query_type values: direct_product, category_browse, comparison, feature
         
         return knowledge
     
-    async def _handle_product_comparison(self,
+    async def _handle_product_comparison(self, # Added user_id parameter
                                  query: str,
                                  analysis: Dict[str, Any],
                                  knowledge: Dict[str, Any],
                                  context: Optional[EnhancedConversationContext] = None,
-                                 language: str = "cs"
+                                 language: str = "cs",
+                                 user_id: Optional[str] = None 
                                 ) -> Dict[str, Any]:
         """
         Handle product comparison queries with detailed feature comparison.
@@ -831,14 +849,16 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             
             if categories:
                 for category in categories:
-                    more_products = await self.knowledge_base.find_products_by_category(category, limit=5)
+                    # Pass user_id here
+                    more_products = await self.knowledge_base.find_products_by_category(category, user_id=user_id, limit=5)
                     for product in more_products:
                         if product not in products:
                             products.append(product)
             
-            # If still not enough, get recommended products
+            # If still not enough, get recommended products for the specific user
             if len(products) < 2:
-                recommended_products = await self.knowledge_base.get_recommended_products(limit=2)
+                # Pass user_id here
+                recommended_products = await self.knowledge_base.get_recommended_products(user_id=user_id, limit=2)
                 for product in recommended_products:
                     if product not in products:
                         products.append(product)
@@ -858,9 +878,11 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                 product2_id = str(product2.get("_id")) if product2.get("_id") else None
                 
                 if product1_id and product2_id:
+                    # Pass user_id here
                     product_comparison = await self.knowledge_base.get_product_comparison(
                         product1_id, 
-                        product2_id
+                        product2_id,
+                        user_id=user_id
                     )
                     
                     key = f"{product1.get('product_name')} vs {product2.get('product_name')}"
@@ -984,8 +1006,9 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                                         analysis: Dict[str, Any],
                                         knowledge: Dict[str, Any],
                                         context: Optional[EnhancedConversationContext] = None,
-                                        language: str = "cs"
-                                       ) -> Dict[str, Any]:
+                                        language: str = "cs",
+                                        user_id: Optional[str] = None  # Add user_id parameter
+                                    ) -> Dict[str, Any]:
         """
         Handle product recommendation queries with personalized suggestions.
         
@@ -995,6 +1018,7 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             knowledge: Retrieved knowledge
             context: Optional conversation context
             language: Language code
+            user_id: Optional user ID to filter by tenant
             
         Returns:
             Recommendation response data
@@ -1012,12 +1036,14 @@ Possible query_type values: direct_product, category_browse, comparison, feature
             # Get products from categories
             if categories:
                 for category in categories:
-                    more_products = await self.knowledge_base.find_products_by_category(category, limit=5)
+                    # Pass user_id to filter by tenant
+                    more_products = await self.knowledge_base.find_products_by_category(category, user_id=user_id, limit=5)
                     products.extend(more_products)
             
             # If still no products, get recommended products
             if not products:
-                products = await self.knowledge_base.get_recommended_products(limit=5)
+                # Pass user_id to filter by tenant
+                products = await self.knowledge_base.get_recommended_products(user_id=user_id, limit=5)
         
         # Score and rank products based on user preferences and requirements
         scored_products = await self._score_products_for_recommendation(
@@ -1054,24 +1080,24 @@ Possible query_type values: direct_product, category_browse, comparison, feature
         
         system_prompt = await self._get_system_prompt(language)
         recommendation_instructions = """
-Vytvoř personalizované doporučení produktů. Zaměř se na:
-1. Jak doporučené produkty odpovídají požadavkům zákazníka
-2. Klíčové vlastnosti, které činí produkt vhodným
-3. Proč by si zákazník měl vybrat právě tyto produkty
-4. Stručné vysvětlení výhod jednotlivých produktů
+    Vytvoř personalizované doporučení produktů. Zaměř se na:
+    1. Jak doporučené produkty odpovídají požadavkům zákazníka
+    2. Klíčové vlastnosti, které činí produkt vhodným
+    3. Proč by si zákazník měl vybrat právě tyto produkty
+    4. Stručné vysvětlení výhod jednotlivých produktů
 
-Buď upřímný, užitečný a zdůrazni to, co je pro zákazníka důležité.
-Nepřehlcuj informacemi, zaměř se na klíčové body.
-""" if language == "cs" else """
-Create personalized product recommendations. Focus on:
-1. How the recommended products meet the customer's requirements
-2. Key features that make the product suitable
-3. Why the customer should choose these products
-4. Brief explanation of the benefits of each product
+    Buď upřímný, užitečný a zdůrazni to, co je pro zákazníka důležité.
+    Nepřehlcuj informacemi, zaměř se na klíčové body.
+    """ if language == "cs" else """
+    Create personalized product recommendations. Focus on:
+    1. How the recommended products meet the customer's requirements
+    2. Key features that make the product suitable
+    3. Why the customer should choose these products
+    4. Brief explanation of the benefits of each product
 
-Be honest, helpful, and emphasize what's important to the customer.
-Don't overwhelm with information, focus on key points.
-"""
+    Be honest, helpful, and emphasize what's important to the customer.
+    Don't overwhelm with information, focus on key points.
+    """
         
         try:
             # Create a prompt for Gemini
@@ -1815,11 +1841,12 @@ Be specific but also flexible so the customer can easily follow the navigation t
             }
     
     async def _generate_general_response(self,
-                                     query: str,
-                                     analysis: Dict[str, Any],
-                                     knowledge: Dict[str, Any],
-                                     context: Optional[EnhancedConversationContext] = None,
-                                     language: str = "cs"
+                                    query: str,
+                                    analysis: Dict[str, Any],
+                                    knowledge: Dict[str, Any],
+                                    context: Optional[EnhancedConversationContext] = None,
+                                    language: str = "cs",
+                                    user_id: Optional[str] = None  # Add user_id parameter
                                     ) -> Dict[str, Any]:
         """
         Generate a general response for queries that don't fit specialized categories.
@@ -1830,6 +1857,7 @@ Be specific but also flexible so the customer can easily follow the navigation t
             knowledge: Retrieved knowledge
             context: Optional conversation context
             language: Language code
+            user_id: Optional user ID to filter by tenant
             
         Returns:
             General response data
@@ -1870,24 +1898,24 @@ Be specific but also flexible so the customer can easily follow the navigation t
         
         system_prompt = await self._get_system_prompt(language)
         general_instructions = """
-Odpověz na obecný dotaz zákazníka. Zaměř se na:
-1. Poskytnutí užitečných informací, které přímo odpovídají na dotaz
-2. Stručnost a jasnost
-3. Přátelský, ale profesionální tón
-4. Pokud je to relevantní, zmínku o produktech
+    Odpověz na obecný dotaz zákazníka. Zaměř se na:
+    1. Poskytnutí užitečných informací, které přímo odpovídají na dotaz
+    2. Stručnost a jasnost
+    3. Přátelský, ale profesionální tón
+    4. Pokud je to relevantní, zmínku o produktech
 
-Odpověď má být informativní, ale ne příliš dlouhá.
-Pokud nemáš přesné informace, nabídni alternativní odpověď nebo způsob, jak se k informaci dostat.
-""" if language == "cs" else """
-Respond to a general customer query. Focus on:
-1. Providing useful information that directly answers the query
-2. Brevity and clarity
-3. Friendly but professional tone
-4. If relevant, mention of products
+    Odpověď má být informativní, ale ne příliš dlouhá.
+    Pokud nemáš přesné informace, nabídni alternativní odpověď nebo způsob, jak se k informaci dostat.
+    """ if language == "cs" else """
+    Respond to a general customer query. Focus on:
+    1. Providing useful information that directly answers the query
+    2. Brevity and clarity
+    3. Friendly but professional tone
+    4. If relevant, mention of products
 
-The response should be informative but not too long.
-If you don't have accurate information, offer an alternative answer or way to get the information.
-"""
+    The response should be informative but not too long.
+    If you don't have accurate information, offer an alternative answer or way to get the information.
+    """
         
         try:
             # Create a prompt for Gemini

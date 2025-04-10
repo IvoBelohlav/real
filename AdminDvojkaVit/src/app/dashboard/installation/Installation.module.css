@@ -1,0 +1,136 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.description {
+  margin-bottom: 2rem;
+  color: var(--gray-600);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
+.error {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: var(--error-color);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+}
+
+.section {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.info {
+  margin-bottom: 1.5rem;
+  color: var(--gray-600);
+}
+
+.codeContainer {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.code {
+  background-color: var(--gray-100);
+  padding: 1.5rem;
+  border-radius: var(--border-radius);
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--dark-gray);
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.copyButton {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background-color: var(--gray-200);
+  color: var(--text-color);
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.copyButton:hover {
+  background-color: var(--gray-300);
+}
+
+.steps {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.step {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.step:before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--primary-color);
+}
+
+.link {
+  color: var(--primary-color);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.link:hover {
+  border-bottom-color: var(--primary-color);
+}
+
+.help {
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .copyButton {
+    position: static;
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .section {
+    padding: 1rem;
+  }
+} 

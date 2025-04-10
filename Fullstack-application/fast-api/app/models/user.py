@@ -39,6 +39,7 @@ class User(BaseModel):
     verification_token: Optional[str] = None
     reset_password_token: Optional[str] = None
     reset_password_expires: Optional[datetime] = None
+    business_id: Optional[str] = None # Added for multi-tenancy
     is_super_admin: bool = False # Added flag for super admins
 
     # Fields for monthly usage tracking (e.g., conversations)

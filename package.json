@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@auth/core": "^0.34.2",
+    "bcryptjs": "^3.0.2",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.487.0",
+    "next-auth": "^4.24.11",
+    "react-hot-toast": "^2.5.2",
+    "stripe": "^17.7.0"
+  }
+}

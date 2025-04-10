@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://lermoplus.s3.eu-north-1.amazonaws.com/static/css/main.7448fe63.css">
+</head>
+<body>
+  <div id="widget-parent">
+      <div id="lermo-widget-container">
+      </div>
+  </div>
+
+  <script src="https://lermoplus.s3.eu-north-1.amazonaws.com/static/js/main.d69c8370.js" defer></script>
+
+  <script>
+    function initializeWidget() {
+        if (window.LermoWidget && typeof window.LermoWidget.init === 'function') {
+            try {
+                window.LermoWidget.init({
+                    apiKey: "HsP9ADSFWtkGZIY6k3KhqsFWYG36q",
+                    containerId: 'lermo-widget-container'
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    }
+    window.setTimeout(initializeWidget, 300);
+  </script>
+</body>
+</html>

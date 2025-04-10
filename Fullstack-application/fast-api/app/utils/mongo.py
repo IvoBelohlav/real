@@ -51,6 +51,7 @@ CONTACT_SUBMISSIONS_COLLECTION_NAME = "contact_submissions"
 FAQ_WIDGET_COLLECTION_NAME = "widget_faqs"
 HUMAN_CHAT_COLLECTION_NAME = "human_chat_sessions"
 SHOP_INFO_COLLECTION_NAME = "shop_info"  # New collection for shop info
+ORDERS_COLLECTION_NAME = "orders" # Collection for order tracking
 
 class MongoJSONEncoder(json.JSONEncoder):
     """
@@ -222,6 +223,11 @@ async def get_shop_info_collection():
     """Returns the shop info collection."""
     db = await get_db()
     return db.get_collection(SHOP_INFO_COLLECTION_NAME)
+
+async def get_orders_collection():
+    """Returns the orders collection."""
+    db = await get_db()
+    return db.get_collection(ORDERS_COLLECTION_NAME)
 
 async def get_comparison_config(category: str, user_id: str = None) -> Dict:
     """
@@ -735,12 +741,14 @@ async def create_indexes():
         
         # Widget Config Collection Indexes
         widget_config_collection = await get_widget_config_collection()
-        try:
-            await widget_config_collection.create_index("business_id", unique=True)
-        except Exception as e:
-            logger.warning(f"Widget config business_id index error (continuing): {e}")
+        # Removed the attempt to create the unique index on business_id
+        # try:
+        #     await widget_config_collection.create_index("business_id", unique=True)
+        # except Exception as e:
+        #     logger.warning(f"Widget config business_id index error (continuing): {e}")
         
-        await widget_config_collection.create_index("user_id")  # For multi-tenancy filtering
+        # Ensure the user_id index is unique for multi-tenancy
+        await widget_config_collection.create_index("user_id", unique=True) 
         
         # FAQ Collection Indexes
         faq_collection = await get_widget_faq_collection()
@@ -768,6 +776,13 @@ async def create_indexes():
             logger.warning(f"Human chat session_id index error (continuing): {e}")
         
         await human_chat_collection.create_index("user_id")  # For multi-tenancy filtering
+
+        # Order Collection Indexes
+        orders_collection = await get_orders_collection()
+        await orders_collection.create_index("user_id") # For filtering by user
+        # Compound index for unique order per user per platform
+        await orders_collection.create_index([("user_id", ASCENDING), ("platform_order_id", ASCENDING)], name="user_platform_order_unique", unique=True)
+        await orders_collection.create_index("customer_email") # For potential lookups by email
 
         # Shop Info Collection Indexes
         shop_info_collection = await get_shop_info_collection()

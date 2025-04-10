@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Load CSS from local build -->
+  <link rel="stylesheet" href="https://lermoplus.s3.eu-north-1.amazonaws.com/static/css/main.0135319e.css">
+</head>
+<body>
+  <div id="widget-parent">
+      <div id="lermo-widget-container">
+      </div>
+  </div>
+
+  <!-- Load JS from S3 (Updated by user) -->
+  <script src="https://lermoplus.s3.eu-north-1.amazonaws.com/static/js/main.08afd653.js" defer></script>
+
+  <script>
+    function initializeWidget() {
+        if (window.LermoWidget && typeof window.LermoWidget.init === 'function') {
+            try {
+                window.LermoWidget.init({
+                    // Use the correct API key from the installation page
+                    apiKey: "oRlxJK4zbhfakaO3r8PSSmC5gKw7WPoD",
+                    containerId: 'lermo-widget-container'
+                });
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    }
+    window.setTimeout(initializeWidget, 300);
+  </script>
+</body>
+</html>

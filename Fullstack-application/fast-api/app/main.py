@@ -18,6 +18,7 @@ from fastapi import (
 from app.api import logs, widget_faq_api, payments
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import shop_info
+from app.api.orders import router as orders_router
 
 from app.api.chat import router as chat_router, get_knowledge_base, get_ai_service
 from app.api.admin import router as admin_router
@@ -147,6 +148,7 @@ app.include_router(knowledge_base_router, prefix="/api", tags=["Knowledge Base"]
 app.include_router(dashboard_router, prefix="/api", tags=["Dashboard"])
 app.include_router(domains_router, prefix="/api", tags=["Domains"]) # Include domains router
 app.include_router(super_admin_router, prefix="/api") # Include super_admin router
+app.include_router(orders_router, prefix="/api", tags=["Orders"])
 
 # Serve static files - must be after other routes
 app.mount("/static", StaticFiles(directory="static"), name="static")

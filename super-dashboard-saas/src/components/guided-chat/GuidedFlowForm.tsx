@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, FormEvent, useCallback } from 'react';
-import { GuidedChatFlow, GuidedChatOption, BotResponse } from '@/types'; // Ensure BotResponse is imported if it's a separate type
+import React, { useState, useEffect, FormEvent, useCallback, ChangeEvent } from 'react'; // Added ChangeEvent
+import { GuidedChatFlow, GuidedChatOption, BotResponse } from '@/types';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
-import { PlusCircle, Save, X, ChevronDown, ChevronUp, Trash2, ArrowRight } from 'lucide-react';
+import { PlusCircle, Save, X, ChevronDown, ChevronUp, Trash2, ArrowRight, Send } from 'lucide-react'; // Added Send icon
 import { toast } from 'react-toastify';
-import clsx from 'clsx'; // Import clsx for conditional styling
+import clsx from 'clsx';
 
 interface GuidedFlowFormProps {
   flow: GuidedChatFlow; // The flow being edited
@@ -25,10 +25,24 @@ const createDefaultOption = (flowName: string, order: number): GuidedChatOption 
     text: "New Option",
     icon: "💬",
     order,
-    next_flow: "", // Default to empty string
+    action: 'next_flow', // Default action
+    next_flow: "",
+    request_type: null,
+    input_fields: ['email', 'message'], // Default required fields for contact request
     bot_response: { text: "", followUp: "" }
   };
 };
+
+// Define the available request types
+const requestTypeOptions = [
+  { value: 'order_status', label: 'Order Status Inquiry' },
+  { value: 'item_return', label: 'Item Return Request' },
+  { value: 'general_question', label: 'General Question' },
+  // Add more types here if needed
+];
+
+// Define the available input fields for contact requests
+const availableInputFields: GuidedChatOption['input_fields'] = ['email', 'phone', 'message', 'order_number'];
 
 const GuidedFlowForm: React.FC<GuidedFlowFormProps> = ({ flow, allFlows, onSave, onCancel, isLoading }) => {
   const [flowName, setFlowName] = useState(flow.name);
@@ -84,13 +98,57 @@ const GuidedFlowForm: React.FC<GuidedFlowFormProps> = ({ flow, allFlows, onSave,
               : { text: '', followUp: '' }; // Initialize if not object
             updatedOpt.bot_response = { ...currentBotResponse, [botField]: value };
           } else {
-            // Directly update other fields like text, icon, next_flow
-            (updatedOpt as any)[field] = value;
-          }
-          return updatedOpt;
+             // Directly update other fields like text, icon, next_flow, action, request_type
+             // The 'input_fields' case is now handled exclusively by handleInputFieldChange
+             (updatedOpt as any)[field] = value;
+                // If action changes, reset the other action's fields
+                if (field === 'action') {
+                    if (value === 'submit_contact_request') {
+                        updatedOpt.next_flow = null; // Clear next_flow if switching to submit action
+                        // Set default request_type if not already set
+                        if (!updatedOpt.request_type) {
+                            updatedOpt.request_type = requestTypeOptions[0]?.value || null;
+                        }
+                         // Ensure default input fields if empty
+                        if (!updatedOpt.input_fields || updatedOpt.input_fields.length === 0) {
+                            updatedOpt.input_fields = ['email', 'message'];
+                        }
+                    } else { // action is 'next_flow' or null
+                        updatedOpt.request_type = null; // Clear request_type
+                        updatedOpt.input_fields = []; // Clear input fields
+                    }
+                }
+            }
+            return updatedOpt;
         }
         return opt;
-      })
+        })
+    );
+    setHasUnsavedChanges(true);
+  };
+
+  // Specific handler for input_fields checkboxes
+  const handleInputFieldChange = (optionId: string, fieldName: 'email' | 'phone' | 'message' | 'order_number', event: ChangeEvent<HTMLInputElement>) => {
+    setOptions(prevOptions =>
+        prevOptions.map(opt => {
+            if (opt.id === optionId) {
+                const updatedOpt = { ...opt };
+                const currentFields = Array.isArray(updatedOpt.input_fields) ? updatedOpt.input_fields : [];
+                const isChecked = event.target.checked;
+
+                if (isChecked) {
+                    // Add field if checked and not already present
+                    if (!currentFields.includes(fieldName)) {
+                        updatedOpt.input_fields = [...currentFields, fieldName];
+                    }
+                } else {
+                    // Remove field if unchecked
+                    updatedOpt.input_fields = currentFields.filter(f => f !== fieldName);
+                }
+                return updatedOpt;
+            }
+            return opt;
+        })
     );
     setHasUnsavedChanges(true);
   };
@@ -201,8 +259,12 @@ const GuidedFlowForm: React.FC<GuidedFlowFormProps> = ({ flow, allFlows, onSave,
             text: opt.text.trim(),
             icon: opt.icon.trim(),
             order: index,
-            next_flow: opt.next_flow || null,
+            next_flow: opt.action === 'submit_contact_request' ? null : (opt.next_flow || null),
             bot_response: cleanBotResponse,
+            // Include new action-related fields
+            action: opt.action || 'next_flow', // Default to next_flow if null/undefined
+            request_type: opt.action === 'submit_contact_request' ? (opt.request_type || null) : null,
+            input_fields: opt.action === 'submit_contact_request' ? (opt.input_fields || []) : [],
         };
     });
 
@@ -227,8 +289,10 @@ const GuidedFlowForm: React.FC<GuidedFlowFormProps> = ({ flow, allFlows, onSave,
       if (hasUnsavedChanges && !window.confirm("Discard unsaved changes?")) {
           return;
       }
-      onCancel();
-  }
+    setHasUnsavedChanges(false);
+  };
+
+ 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -277,13 +341,22 @@ const GuidedFlowForm: React.FC<GuidedFlowFormProps> = ({ flow, allFlows, onSave,
               <div className="flex items-center space-x-3 flex-grow min-w-0">
                  <span className="text-xl flex-shrink-0 w-6 text-center">{option.icon || '💬'}</span>
                  <span className="text-sm font-medium text-gray-900 truncate flex-grow">{option.text || `Option ${index + 1}`}</span>
-                 {option.next_flow && (
+                 {/* Show indicator for action type */}
+                 {option.action === 'submit_contact_request' ? (
+                    <span className="flex-shrink-0 flex items-center text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full ml-2 font-medium">
+                      <Send size={12} className="mr-1"/> Submit Request
+                    </span>
+                 ) : option.next_flow ? (
                     <span className="flex-shrink-0 flex items-center text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full ml-2 font-medium">
                       <ArrowRight size={12} className="mr-1"/> {option.next_flow}
                     </span>
-                  )}
+                 ) : (
+                    <span className="flex-shrink-0 flex items-center text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full ml-2 font-medium">
+                      End
+                    </span>
+                 )}
               </div>
-              <div className="flex items-center space-x-1 flex-shrink-0 ml-3"> {/* Increased margin */}
+              <div className="flex items-center space-x-1 flex-shrink-0 ml-3">
                  {/* Reorder Buttons - Slightly larger */}
                  <button type="button" onClick={(e) => { e.stopPropagation(); handleMoveOption(index, 'up'); }} disabled={index === 0} className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded disabled:opacity-30 disabled:cursor-not-allowed"> <ChevronUp size={18}/> </button>
                  <button type="button" onClick={(e) => { e.stopPropagation(); handleMoveOption(index, 'down'); }} disabled={index === options.length - 1} className="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded disabled:opacity-30 disabled:cursor-not-allowed"> <ChevronDown size={18}/> </button>
@@ -328,16 +401,67 @@ const GuidedFlowForm: React.FC<GuidedFlowFormProps> = ({ flow, allFlows, onSave,
                   <label htmlFor={`option-bot-followup-${option.id}`} className="block text-sm font-medium text-gray-700 mb-1">Follow-up Message (Optional)</label>
                   <input id={`option-bot-followup-${option.id}`} type="text" value={(typeof option.bot_response === 'object' && option.bot_response?.followUp) || ''} onChange={(e) => handleOptionChange(option.id, "bot_response.followUp", e.target.value)} className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
                 </div>
-                {/* Next Flow */}
-                <div>
-                  <label htmlFor={`option-next-flow-${option.id}`} className="block text-sm font-medium text-gray-700 mb-1">Next Flow (Optional)</label>
-                  <select id={`option-next-flow-${option.id}`} value={option.next_flow || ""} onChange={(e) => handleOptionChange(option.id, "next_flow", e.target.value)} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option value="">-- End Conversation --</option>
-                    {otherFlowNames.map(name => <option key={name} value={name}>{name}</option>)}
-                  </select>
+
+                {/* Action Type Selection */}
+                <div className="border-t pt-4 mt-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Option Action</label>
+                    <div className="flex space-x-4">
+                        <label className="flex items-center">
+                            <input type="radio" name={`action-type-${option.id}`} value="next_flow" checked={!option.action || option.action === 'next_flow'} onChange={(e) => handleOptionChange(option.id, "action", e.target.value)} className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"/>
+                            <span className="ml-2 text-sm text-gray-700">Go to another flow / End</span>
+                        </label>
+                        <label className="flex items-center">
+                            <input type="radio" name={`action-type-${option.id}`} value="submit_contact_request" checked={option.action === 'submit_contact_request'} onChange={(e) => handleOptionChange(option.id, "action", e.target.value)} className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"/>
+                            <span className="ml-2 text-sm text-gray-700">Submit Contact Request</span>
+                        </label>
+                    </div>
                 </div>
-                {/* Delete Button - Improved Styling */}
-                <div className="flex justify-end pt-3">
+
+                {/* Conditional Fields based on Action */}
+                {(!option.action || option.action === 'next_flow') && (
+                    <div>
+                        <label htmlFor={`option-next-flow-${option.id}`} className="block text-sm font-medium text-gray-700 mb-1">Next Flow (Optional)</label>
+                        <select id={`option-next-flow-${option.id}`} value={option.next_flow || ""} onChange={(e) => handleOptionChange(option.id, "next_flow", e.target.value)} className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            <option value="">-- End Conversation --</option>
+                            {otherFlowNames.map(name => <option key={name} value={name}>{name}</option>)}
+                        </select>
+                    </div>
+                )}
+
+                {option.action === 'submit_contact_request' && (
+                    <div className="space-y-4 p-4 border border-green-200 bg-green-50 rounded-md">
+                        <h4 className="text-sm font-semibold text-green-800">Contact Request Settings</h4>
+                        {/* Request Type */}
+                        <div>
+                            <label htmlFor={`option-request-type-${option.id}`} className="block text-sm font-medium text-gray-700 mb-1">Request Type *</label>
+                            <select id={`option-request-type-${option.id}`} value={option.request_type || ""} onChange={(e) => handleOptionChange(option.id, "request_type", e.target.value)} required className="block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <option value="" disabled>-- Select Type --</option>
+                                {requestTypeOptions.map(rt => <option key={rt.value} value={rt.value}>{rt.label}</option>)}
+                            </select>
+                        </div>
+                        {/* Required Input Fields */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Required Input Fields</label>
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                {availableInputFields.map(field => (
+                                    <label key={field} className="flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={option.input_fields?.includes(field) || false}
+                                            onChange={(e) => handleInputFieldChange(option.id, field, e)}
+                                            className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700 capitalize">{field.replace('_', ' ')}</span>
+                                    </label>
+                                ))}
+                            </div>
+                             <p className="text-xs text-gray-500 mt-1">Select fields the user must provide for this request.</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Delete Button */}
+                <div className="flex justify-end pt-3 border-t mt-4">
                     <button type="button" onClick={() => handleDeleteOption(option.id)} className="text-red-600 hover:text-red-800 text-sm font-medium inline-flex items-center px-3 py-1.5 rounded-md hover:bg-red-50 transition-colors duration-150">
                         <Trash2 size={16} className="mr-1.5"/> Delete Option
                     </button>

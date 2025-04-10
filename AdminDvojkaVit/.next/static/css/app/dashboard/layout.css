@@ -1,0 +1,347 @@
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./src/components/shared/LoadingSpinner.module.css ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************/
+.LoadingSpinner_spinner___uYAT {
+  display: inline-block;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #0070F3;
+  animation: LoadingSpinner_spin__6h9Vz 1s ease-in-out infinite;
+}
+
+.LoadingSpinner_small__SKElt {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.LoadingSpinner_medium__BTYnM {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+.LoadingSpinner_large__Kzovt {
+  width: 60px;
+  height: 60px;
+  border-width: 4px;
+}
+
+.LoadingSpinner_visuallyHidden__wkUxW {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@keyframes LoadingSpinner_spin__6h9Vz {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+/*!********************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./src/components/layout/DashboardLayout.module.css ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************************/
+.DashboardLayout_container__gRPei {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb;
+}
+
+.DashboardLayout_sidebar__SJ5Un {
+  width: 280px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.DashboardLayout_sidebarHeader__0hu2u {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.DashboardLayout_sidebarTitle__vv1Zh {
+  color: #3b82f6;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.DashboardLayout_logoText__e5DoK {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.DashboardLayout_closeButton__1DD83 {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #4b5563;
+}
+
+.DashboardLayout_userInfo__9ORtx {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f8fafc;
+}
+
+.DashboardLayout_userAvatar__NT0bz {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.DashboardLayout_userData__qNmnd {
+  overflow: hidden;
+}
+
+.DashboardLayout_userName__Itfqh {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.DashboardLayout_userEmail__BM_3G {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.DashboardLayout_navigation__7X_QR {
+  flex: 1 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+}
+
+.DashboardLayout_navItem__XTTCp {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  color: #4b5563;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+  margin: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.DashboardLayout_navItem__XTTCp:hover {
+  background-color: #f3f4f6;
+  color: #2563eb;
+}
+
+.DashboardLayout_navItem__XTTCp.DashboardLayout_active__UdtLu {
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.DashboardLayout_navIcon__G9HYb {
+  margin-right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.DashboardLayout_navItem__XTTCp:hover .DashboardLayout_navIcon__G9HYb,
+.DashboardLayout_navItem__XTTCp.DashboardLayout_active__UdtLu .DashboardLayout_navIcon__G9HYb {
+  color: #2563eb;
+}
+
+.DashboardLayout_navContent__yFFUO {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1;
+  min-width: 0;
+}
+
+.DashboardLayout_navLabel__FDn2A {
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.DashboardLayout_navDescription__1ANvY {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.DashboardLayout_navArrow__mG95M {
+  opacity: 0;
+  transition: all 0.2s ease;
+  color: #9ca3af;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
+}
+
+.DashboardLayout_navItem__XTTCp:hover .DashboardLayout_navArrow__mG95M {
+  opacity: 1;
+  color: #2563eb;
+  transform: translateX(2px);
+}
+
+.DashboardLayout_sidebarFooter__lxx6v {
+  padding: 1.25rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.DashboardLayout_logoutButton__5_aZX {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #f3f4f6;
+  color: #4b5563;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.DashboardLayout_logoutButton__5_aZX:hover {
+  background-color: #ef4444;
+  color: white;
+}
+
+.DashboardLayout_logoutIcon__obpH3 {
+  margin-right: 0.5rem;
+}
+
+.DashboardLayout_main__STo3t {
+  flex: 1 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.DashboardLayout_header__CUzhZ {
+  padding: 1rem 2rem;
+  background-color: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.DashboardLayout_menuButton__xs6IE {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-right: 1rem;
+  color: #4b5563;
+}
+
+.DashboardLayout_headerContent__mOOX5 {
+  flex: 1 1;
+}
+
+.DashboardLayout_content__3scIU {
+  flex: 1 1;
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+}
+
+.DashboardLayout_footer___lyZZ {
+  padding: 1rem 2rem;
+  background-color: white;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.DashboardLayout_loading__mheb6 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1rem;
+  color: #3b82f6;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .DashboardLayout_sidebar__SJ5Un {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    transition: left 0.3s ease;
+    z-index: 50;
+  }
+
+  .DashboardLayout_sidebarOpen__YZ4fV {
+    left: 0;
+  }
+
+  .DashboardLayout_closeButton__1DD83 {
+    display: block;
+  }
+
+  .DashboardLayout_menuButton__xs6IE {
+    display: block;
+  }
+
+  .DashboardLayout_header__CUzhZ {
+    padding: 0.75rem 1rem;
+  }
+
+  .DashboardLayout_content__3scIU {
+    padding: 1rem;
+  }
+
+  .DashboardLayout_footer___lyZZ {
+    padding: 0.75rem 1rem;
+  }
+} 

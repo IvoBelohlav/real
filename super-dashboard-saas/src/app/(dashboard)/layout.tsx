@@ -39,6 +39,7 @@ export default function DashboardLayout({
     { href: '/products', label: 'Products', icon: FiBox },
     { href: '/shop-info', label: 'Shop Info', icon: FiInfo },
     { href: '/business-types', label: 'Business Types', icon: FiBriefcase },
+    { href: '/orders', label: 'Orders', icon: FiBox },
     { href: '/contact-submissions', label: 'Contact Submissions', icon: FiMail },
     { href: '/conversations', label: 'Conversations', icon: FiBarChart2 }, // Example icon
     { href: '/installation', label: 'Installation', icon: FiCode },

@@ -654,9 +654,9 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                 setModeToggleBgLight(currentConfig.mode_toggle_background_light);
                 setModeToggleBgDark(currentConfig.mode_toggle_background_dark);
             }
-        }
-    }, [currentThemeProp, isPreview, currentConfig]);
-    
+    }
+  }, [currentThemeProp, isPreview, currentConfig]);
+
     // When in preview mode, always show as expanded
     useEffect(() => {
         if (isPreview) {
@@ -664,10 +664,65 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
         }
     }, [isPreview]);
 
+    // --- Collapsed State Rendering ---
     if (!isExpanded) {
+        const buttonStyle = currentConfig?.collapsed_button_style || 'wide'; // Default to wide
+
+        // Circular Button Style
+        if (buttonStyle === 'circular') {
+            return (
+                <motion.div
+                    className={`${styles.widget} ${styles.collapsedCircular}`} // Use a new class for circular styling
+                    style={{ fontFamily: brandTheme.fonts }}
+                    initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 15, stiffness: 300 } }}
+                    whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
+                >
+                    <motion.button
+                        className={styles.chatButtonCircular} // New class for circular button
+                        onClick={() => setIsExpanded(true)}
+                        aria-label="Open chat widget"
+                        style={{
+                            backgroundColor: currentTheme === 'light' ? brandTheme.primaryColor : brandTheme.primaryColor,
+                            color: brandTheme.buttonText,
+                            borderRadius: '50%', // Make it circular
+                            width: '50px', // Adjust size as needed
+                            height: '50px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: brandTheme.widgetShadow,
+                        }}
+                        whileTap={{ scale: 0.9 }}
+                        animate={{
+                            boxShadow: [
+                                brandTheme.widgetShadow,
+                                `0 6px 16px rgba(0, 0, 0, 0.15)`,
+                                brandTheme.widgetShadow
+                            ],
+                            y: [0, -3, 0]
+                        }}
+                        transition={{
+                            duration: 3,
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                            ease: "easeInOut"
+                        }}
+                    >
+                        <MessageCircle
+                            size={24}
+                            color="currentColor"
+                            className={styles.chatIcon} // Reuse existing icon class if suitable
+                        />
+                    </motion.button>
+                </motion.div>
+            );
+        }
+
+        // Default Wide Button Style
         return (
-            <motion.div 
-                className={`${styles.widget} ${styles.collapsed}`}
+            <motion.div
+                className={`${styles.widget} ${styles.collapsed}`} // Existing class for wide style
                 style={{
                     fontFamily: brandTheme.fonts,
                 }}
@@ -1401,6 +1456,46 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                 <MessageCircle className={styles['dvojkavit-message-icon']} />
                                 Kontaktujte nás!
                             </motion.button>
+
+                            {/* --- Second Action Button (Desktop) --- */}
+                            {currentConfig?.second_button_enabled && currentConfig?.second_button_link && (
+                                <motion.a
+                                    href={currentConfig.second_button_link}
+                                    target="_blank" // Open in new tab
+                                    rel="noopener noreferrer" // Security best practice
+                                    className={styles['dvojkavit-second-action-button']} // Add specific class for styling
+                                    style={{
+                                        background: brandTheme.secondaryColor, // Example styling, adjust as needed
+                                        color: '#FFFFFF',
+                                        borderRadius: brandTheme.buttonBorderRadius || "1.5rem",
+                                        padding: brandTheme.buttonPadding,
+                                        fontWeight: "600",
+                                        fontSize: brandTheme.baseFontSize,
+                                        minHeight: "48px",
+                                        letterSpacing: "0.02em",
+                                        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.07)",
+                                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                                        display: 'inline-flex', // Align items
+                                        alignItems: 'center', // Center vertically
+                                        justifyContent: 'center', // Center horizontally
+                                        textDecoration: 'none', // Remove underline from link
+                                        marginLeft: '0.5rem', // Add some space
+                                    }}
+                                    whileHover={{
+                                        filter: "brightness(1.1)",
+                                        boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+                                        transition: { duration: 0.3, ease: "easeInOut" }
+                                    }}
+                                    whileTap={{ scale: 0.98 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                    aria-label={currentConfig.second_button_text || 'Action'}
+                                >
+                                    {/* Optionally add an icon here */}
+                                    {currentConfig.second_button_text || 'Action'}
+                                </motion.a>
+                            )}
+                            {/* --- End Second Action Button --- */}
+
                             <MessageInput
                                 onSend={handleSendMessage}
                                 disabled={loading || !isOnline}
@@ -2017,6 +2112,41 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                 <MessageCircle className={styles['dvojkavit-mobile-message-icon']} />
                                 Kontaktujte nás!
                             </motion.button>
+
+                             {/* --- Second Action Button (Mobile) --- */}
+                             {currentConfig?.second_button_enabled && currentConfig?.second_button_link && (
+                                <motion.a
+                                    href={currentConfig.second_button_link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={styles['dvojkavit-mobile-second-action-button']} // Add specific class for styling
+                                    style={{
+                                        background: brandTheme.secondaryColor, // Example styling
+                                        color: '#FFFFFF',
+                                        borderRadius: brandTheme.buttonBorderRadius || "1.5rem",
+                                        padding: brandTheme.buttonPadding,
+                                        fontWeight: "600",
+                                        fontSize: brandTheme.baseFontSize,
+                                        minHeight: "48px",
+                                        letterSpacing: "0.02em",
+                                        boxShadow: "0 2px 5px rgba(0, 0, 0, 0.07)",
+                                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        textDecoration: 'none',
+                                        marginLeft: '0.5rem',
+                                    }}
+                                    whileHover={{ filter: "brightness(1.1)", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)" }}
+                                    whileTap={{ scale: 0.98 }}
+                                    transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                                    aria-label={currentConfig.second_button_text || 'Action'}
+                                >
+                                    {currentConfig.second_button_text || 'Action'}
+                                </motion.a>
+                            )}
+                            {/* --- End Second Action Button --- */}
+
                             <MessageInput
                                 onSend={handleSendMessage}
                                 disabled={loading || !isOnline}

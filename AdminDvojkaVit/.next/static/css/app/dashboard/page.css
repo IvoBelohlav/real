@@ -1,0 +1,463 @@
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./src/components/shared/LoadingSpinner.module.css ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************/
+.LoadingSpinner_spinner___uYAT {
+  display: inline-block;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: #0070F3;
+  animation: LoadingSpinner_spin__6h9Vz 1s ease-in-out infinite;
+}
+
+.LoadingSpinner_small__SKElt {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.LoadingSpinner_medium__BTYnM {
+  width: 40px;
+  height: 40px;
+  border-width: 3px;
+}
+
+.LoadingSpinner_large__Kzovt {
+  width: 60px;
+  height: 60px;
+  border-width: 4px;
+}
+
+.LoadingSpinner_visuallyHidden__wkUxW {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@keyframes LoadingSpinner_spin__6h9Vz {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+/*!**********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[7].use[3]!./src/app/dashboard/Dashboard.module.css ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************/
+.Dashboard_container__xgTDz {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.Dashboard_loadingContainer__HU2kF {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+}
+
+.Dashboard_loadingSpinner__bs7xv {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(59, 130, 246, 0.2);
+  border-radius: 50%;
+  border-left-color: #3b82f6;
+  animation: Dashboard_spin__S2HYh 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes Dashboard_spin__S2HYh {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.Dashboard_welcomeBar__JDB1j {
+  background-color: #3b82f6;
+  border-radius: 10px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.Dashboard_welcomeTitle__as3vb {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.Dashboard_welcomeSubtitle__GVt5a {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.Dashboard_statsGrid__WSxIc {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-gap: 1.5rem;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.Dashboard_statsCard__kF3T3 {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s;
+}
+
+.Dashboard_statsCard__kF3T3:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.Dashboard_statsHeader__S2q0S {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.Dashboard_statsIcon__nKotQ {
+  font-size: 1.5rem;
+  margin-right: 0.75rem;
+}
+
+.Dashboard_statsTitle__q1OiV {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0;
+}
+
+.Dashboard_statsValue___5sc2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.Dashboard_active__ZcFVH {
+  color: #10b981;
+}
+
+.Dashboard_inactive__nDjoz {
+  color: #ef4444;
+}
+
+.Dashboard_statsDetail__E3UKs {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.Dashboard_statsLink__yD0CE, .Dashboard_subscribeButton__zdtK8 {
+  margin-top: auto;
+  padding: 0.5rem 0;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.Dashboard_statsLink__yD0CE {
+  color: #3b82f6;
+}
+
+.Dashboard_statsLink__yD0CE:hover {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.Dashboard_subscribeButton__zdtK8 {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
+
+.Dashboard_subscribeButton__zdtK8:hover {
+  background-color: #2563eb;
+}
+
+.Dashboard_sectionTitle__T_eTh {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #1e293b;
+}
+
+.Dashboard_widgetInstallSection__JbeQP {
+  margin-bottom: 2.5rem;
+}
+
+.Dashboard_widgetConfigCard__nHeky {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s;
+}
+
+.Dashboard_widgetConfigCard__nHeky:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.Dashboard_widgetConfigTitle__uTeka {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.Dashboard_widgetConfigDesc__maZ56 {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.Dashboard_widgetConfigArrow__vFFlT {
+  font-size: 1.5rem;
+  color: #3b82f6;
+}
+
+.Dashboard_subscriptionRequired__OXQge {
+  background-color: white;
+  border-radius: 10px;
+  padding: 2.5rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.Dashboard_lockIcon__aZlHn {
+  font-size: 2.5rem;
+  width: 70px;
+  height: 70px;
+  background-color: #f8fafc;
+  color: #64748b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.Dashboard_lockedTitle__TKicS {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.Dashboard_lockedDesc__yZSA_ {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 1.5rem 0;
+  max-width: 500px;
+}
+
+.Dashboard_upgradeButton__kzhs1 {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-decoration: none;
+}
+
+.Dashboard_upgradeButton__kzhs1:hover {
+  background-color: #2563eb;
+}
+
+.Dashboard_quickLinksSection__r6gxA {
+  margin-bottom: 2.5rem;
+}
+
+.Dashboard_quickLinksGrid__vcGmY {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-gap: 1.5rem;
+  gap: 1.5rem;
+}
+
+.Dashboard_quickLinkCard__8sb7D {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s;
+}
+
+.Dashboard_quickLinkCard__8sb7D:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.Dashboard_quickLinkIcon__99_yS {
+  font-size: 1.5rem;
+  margin-right: 1rem;
+}
+
+.Dashboard_quickLinkTitle___vIQZ {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.Dashboard_quickLinkDesc__dVera {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.Dashboard_refreshButton__yYK4p {
+  margin-top: 1rem;
+  padding: 0.5rem 0.75rem;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  color: #64748b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.Dashboard_refreshButton__yYK4p:hover {
+  background-color: #e2e8f0;
+  color: #1e293b;
+}
+
+.Dashboard_refreshButton__yYK4p:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .Dashboard_container__xgTDz {
+    padding: 1rem;
+  }
+  
+  .Dashboard_welcomeBar__JDB1j {
+    padding: 1.5rem;
+  }
+  
+  .Dashboard_welcomeTitle__as3vb {
+    font-size: 1.5rem;
+  }
+  
+  .Dashboard_statsGrid__WSxIc, .Dashboard_quickLinksGrid__vcGmY {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Add these new styles for the updated subscription card */
+
+.Dashboard_card__2QKZy {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+.Dashboard_cardTitle__Ibxqu {
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.Dashboard_icon__MCNTC {
+  margin-right: 8px;
+}
+
+.Dashboard_subscriptionStatus__wu_eN {
+  display: flex;
+  flex-direction: column;
+}
+
+.Dashboard_statusBadge__LfwX0 {
+  display: inline-flex;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.Dashboard_statusActive__lrnp4 {
+  background-color: #e6f7e6;
+  color: #2e7d32;
+}
+
+.Dashboard_statusInactive__dVal_ {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.Dashboard_planText__vKWXl {
+  font-size: 1rem;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.Dashboard_subscribeButton__zdtK8 {
+  display: block;
+  background-color: #4caf50;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: 500;
+  margin-bottom: 10px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.Dashboard_subscribeButton__zdtK8:hover {
+  background-color: #3b8a3f;
+}
+
+.Dashboard_manageBillingLink__kKTxV {
+  display: block;
+  text-align: center;
+  color: #2196f3;
+  margin-bottom: 15px;
+  text-decoration: none;
+}
+
+.Dashboard_manageBillingLink__kKTxV:hover {
+  text-decoration: underline;
+} 

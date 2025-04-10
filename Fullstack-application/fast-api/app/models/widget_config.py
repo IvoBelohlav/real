@@ -1,10 +1,11 @@
-from pydantic import BaseModel, Field, HttpUrl, validator
-from typing import Optional, Dict
+from pydantic import BaseModel, Field, HttpUrl, field_validator, ValidationError
+from typing import Optional, Dict, Literal, Any # Added Literal, Any
 import base64
 
 class WidgetConfig(BaseModel):
-    user_id: Optional[str] = Field(None, description="The ID of the user this config belongs to")
-    id: int = 1 # This might need adjustment depending on how IDs are managed (e.g., if it's DB generated)
+    user_id: str = Field(..., description="The ID of the user this config belongs to") # Changed to required
+    # business_id: str = Field(..., description="The ID of the business this config belongs to") # Removed business_id
+    # id: int = 1 # Removed hardcoded id field, rely on MongoDB's _id
     logo_light_mode: Optional[str] = Field(
         None,
         description="URL or Base64 encoded string of the logo for light mode"
@@ -123,11 +124,34 @@ class WidgetConfig(BaseModel):
     widget_shadow: Optional[str] = Field("0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", description="Widget shadow (CSS box-shadow)")
     custom_css: Optional[str] = Field(None, description="Custom CSS to override widget styles")
 
+    # New fields for collapsed button style and second action button
+    collapsed_button_style: Optional[Literal['wide', 'circular']] = Field(
+        "wide",
+        description="Style of the collapsed button ('wide' or 'circular')"
+    )
+    second_button_enabled: Optional[bool] = Field(
+        False,
+        description="Whether the second action button is enabled in the expanded chat view"
+    )
+    second_button_text: Optional[str] = Field(
+        "",
+        description="Text for the second action button"
+    )
+    # Reverted type back to Optional[HttpUrl]
+    second_button_link: Optional[HttpUrl] = Field(
+        None,
+        description="URL link for the second action button (must be a valid URL if provided and enabled)"
+    )
+
+    # Removed custom validator, rely on Pydantic's default Optional[HttpUrl] handling
+
     class Config:
+        # Ensure that arbitrary types (like HttpUrl result from validator) are allowed
+        arbitrary_types_allowed = True
         json_schema_extra = {
             "example": {
-                "_id": {"$oid": "67a0f76f78563d543211d971"},
-                "id": 1,
+                # Removed "id": 1 from example as well
+                "_id": {"$oid": "67a0f76f78563d543211d971"}, 
                 "background_color": "#000000",
                 "button_text_color": "#FFFFFF",
                 "company_description": "Need assistance? We are here to help!",

@@ -771,6 +771,18 @@
   margin-bottom: 8px;
 }
 
+/* --- New Styles for Second Action Button --- */
+.dvojkavit-second-action-button {
+  /* Base styles - padding, border-radius etc. are set inline */
+  transition: filter 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.dvojkavit-mobile-second-action-button {
+   /* Base styles - padding, border-radius etc. are set inline */
+  transition: filter 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+/* --- End New Styles --- */
+
 .dvojkavit-message-icon {
   height: 20px;
   width: 20px;
@@ -1655,6 +1667,27 @@ html body .dvojkavit-widget-container .dvojkavit-mobile-welcome-text {
   flex-direction: column;
   align-items: flex-end;
 }
+
+/* --- New Styles for Circular Collapsed Button --- */
+.collapsedCircular {
+  /* Adjust positioning if needed, might be same as .widget */
+}
+
+.chatButtonCircular {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  outline: none;
+  /* Width, height, border-radius, background, color set via inline styles */
+}
+
+.chatButtonCircular:hover {
+  transform: scale(1.05); /* Slight grow on hover */
+}
+/* --- End New Styles --- */
 
 .chatButton {
   border: none;

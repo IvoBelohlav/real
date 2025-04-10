@@ -1,0 +1,105 @@
+// Default themes for the widget
+const themes = {
+  light: {
+    name: 'Light',
+    colors: {
+      primary: '#3b82f6',
+      secondary: '#f1f5f9',
+      background: '#ffffff',
+      text: '#1e293b',
+      accent: '#60a5fa',
+      border: '#e2e8f0',
+      error: '#ef4444',
+      success: '#10b981',
+      warning: '#f59e0b',
+    },
+    fonts: {
+      primary: 'Inter, sans-serif',
+      secondary: 'system-ui, sans-serif',
+    },
+    borderRadius: '0.5rem',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+  },
+  dark: {
+    name: 'Dark',
+    colors: {
+      primary: '#60a5fa',
+      secondary: '#334155',
+      background: '#1e293b',
+      text: '#f1f5f9',
+      accent: '#3b82f6',
+      border: '#475569',
+      error: '#f87171',
+      success: '#34d399',
+      warning: '#fbbf24',
+    },
+    fonts: {
+      primary: 'Inter, sans-serif',
+      secondary: 'system-ui, sans-serif',
+    },
+    borderRadius: '0.5rem',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+  },
+  blue: {
+    name: 'Blue',
+    colors: {
+      primary: '#2563eb',
+      secondary: '#e0e7ff',
+      background: '#ffffff',
+      text: '#1e40af',
+      accent: '#3b82f6',
+      border: '#c7d2fe',
+      error: '#ef4444',
+      success: '#10b981',
+      warning: '#f59e0b',
+    },
+    fonts: {
+      primary: 'Inter, sans-serif',
+      secondary: 'system-ui, sans-serif',
+    },
+    borderRadius: '0.5rem',
+    boxShadow: '0 4px 12px rgba(37, 99, 235, 0.1)',
+  },
+  green: {
+    name: 'Green',
+    colors: {
+      primary: '#059669',
+      secondary: '#ecfdf5',
+      background: '#ffffff',
+      text: '#064e3b',
+      accent: '#10b981',
+      border: '#d1fae5',
+      error: '#ef4444',
+      success: '#10b981',
+      warning: '#f59e0b',
+    },
+    fonts: {
+      primary: 'Inter, sans-serif',
+      secondary: 'system-ui, sans-serif',
+    },
+    borderRadius: '0.5rem',
+    boxShadow: '0 4px 12px rgba(5, 150, 105, 0.1)',
+  },
+  purple: {
+    name: 'Purple',
+    colors: {
+      primary: '#7c3aed',
+      secondary: '#f3f4f6',
+      background: '#ffffff',
+      text: '#4c1d95',
+      accent: '#8b5cf6',
+      border: '#e5e7eb',
+      error: '#ef4444',
+      success: '#10b981',
+      warning: '#f59e0b',
+    },
+    fonts: {
+      primary: 'Inter, sans-serif',
+      secondary: 'system-ui, sans-serif',
+    },
+    borderRadius: '0.5rem',
+    boxShadow: '0 4px 12px rgba(124, 58, 237, 0.1)',
+  },
+};
+
+export default themes; 

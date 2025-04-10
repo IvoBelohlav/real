@@ -1,0 +1,189 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.description {
+  color: var(--gray-500);
+  margin-bottom: 2rem;
+}
+
+.error {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: var(--error-color);
+  padding: 0.75rem;
+  border-radius: var(--border-radius);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
+.noInvoices {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--gray-500);
+  margin-bottom: 2rem;
+}
+
+.invoicesTable {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1fr 1.5fr;
+  padding: 1rem 1.5rem;
+  background-color: var(--gray-100);
+  font-weight: 600;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.headerCell {
+  color: var(--gray-500);
+  font-size: 0.9rem;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr 1fr 1.5fr;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+  align-items: center;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background-color: var(--gray-100);
+}
+
+.cell {
+  color: var(--text-color);
+}
+
+.status {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.paid {
+  background-color: rgba(0, 200, 83, 0.1);
+  color: var(--success-color);
+}
+
+.open {
+  background-color: rgba(234, 179, 8, 0.1);
+  color: #b45309;
+}
+
+.void, .uncollectible {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: var(--error-color);
+}
+
+.draft {
+  background-color: rgba(107, 114, 128, 0.1);
+  color: #4b5563;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.actionButton {
+  padding: 0.4rem 0.75rem;
+  background-color: var(--gray-100);
+  color: var(--text-color);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.actionButton:first-child {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.actionButton:first-child:hover {
+  background-color: var(--secondary-color);
+}
+
+.actionButton:last-child:hover {
+  background-color: var(--gray-200);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.subscriptionLink {
+  margin-top: 1rem;
+}
+
+.link {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .tableHeader {
+    display: none;
+  }
+  
+  .tableRow {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+  
+  .cell {
+    display: flex;
+    padding: 0.25rem 0;
+  }
+  
+  .cell:before {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 0.5rem;
+    min-width: 100px;
+  }
+  
+  .actions {
+    margin-top: 0.5rem;
+  }
+} 
