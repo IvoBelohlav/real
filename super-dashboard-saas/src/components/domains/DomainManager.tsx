@@ -95,56 +95,68 @@ export default function DomainManager() {
   };
 
   return (
-    <div className="space-y-8">
-      {error && <p className="text-red-500 bg-red-100 p-3 rounded">{error}</p>}
+    // Use card background and foreground text color
+    <div className="space-y-8 bg-card text-foreground p-6 rounded-lg shadow">
+      {/* Error styling adjusted for dark theme */}
+      {error && <p className="text-red-500 bg-red-900/20 border border-red-500/50 p-3 rounded-md">{error}</p>}
 
       {/* Add Domain Form */}
       <form onSubmit={handleAddDomain} className="flex items-end space-x-4">
         <div className="flex-grow">
-          <label htmlFor="new-domain" className="block text-sm font-medium text-gray-700">
+          {/* Label styling for dark theme */}
+          <label htmlFor="new-domain" className="block text-sm font-medium text-muted-foreground">
             Add New Domain
           </label>
+          {/* Input styling for dark theme */}
           <input
             type="text"
             id="new-domain"
             value={newDomain}
             onChange={(e) => setNewDomain(e.target.value)}
             placeholder="example.com"
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            className="mt-1 block w-full px-3 py-2 border border-border bg-input text-foreground rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-primary sm:text-sm"
             disabled={isLoading}
           />
         </div>
+        {/* Button styling for dark theme (primary action) */}
         <button
           type="submit"
           disabled={isLoading || !newDomain.trim()}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50"
         >
+          {/* Use a smaller spinner variant if available or adjust size */}
           {isLoading ? <LoadingSpinner /> : 'Add Domain'}
         </button>
       </form>
 
-      {/* Domain List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul role="list" className="divide-y divide-gray-200">
+      {/* Domain List - Use card styling */}
+      <div className="bg-background border border-border shadow overflow-hidden sm:rounded-md">
+        {/* List styling for dark theme */}
+        <ul role="list" className="divide-y divide-border">
           {isFetching ? (
-            <li className="px-6 py-4 text-center text-gray-500"><LoadingSpinner /></li>
+            // Loading state text color
+            <li className="px-6 py-4 text-center text-muted-foreground"><LoadingSpinner /></li>
           // No longer need !Array.isArray check here as setDomains ensures it's an array
           ) : domains.length === 0 ? (
-             <li className="px-6 py-4 text-center text-gray-500">No domains added yet.</li>
+             // Empty state text color
+             <li className="px-6 py-4 text-center text-muted-foreground">No domains added yet.</li>
           ) : (
             domains.map((domain) => (
-              <li key={domain.id} className="px-6 py-4 flex items-center justify-between">
+              // List item styling
+              <li key={domain.id} className="px-6 py-4 flex items-center justify-between hover:bg-muted/50">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{domain.domain_name}</p>
+                  {/* Domain name text color */}
+                  <p className="text-sm font-medium text-foreground truncate">{domain.domain_name}</p>
                   {/* Optionally show verification status later */}
                   {/* <p className={`text-xs ${domain.is_verified ? 'text-green-600' : 'text-yellow-600'}`}>
                     {domain.is_verified ? 'Verified' : 'Pending Verification'}
                   </p> */}
                 </div>
+                {/* Delete button styling (destructive action) */}
                 <button
                   onClick={() => handleDeleteDomain(domain.id)}
                   disabled={isLoading}
-                  className="ml-4 inline-flex items-center px-3 py-1 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                  className="ml-4 inline-flex items-center px-3 py-1 border border-destructive/50 text-sm font-medium rounded-md text-destructive bg-card hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive disabled:opacity-50"
                 >
                   Delete
                 </button>

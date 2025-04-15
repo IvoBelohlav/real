@@ -13,11 +13,11 @@ interface SectionTitleProps {
 }
 const SectionTitle: React.FC<SectionTitleProps> = ({ title, subtitle }) => (
   <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900">
+    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900 dark:text-neutral-100"> {/* Added dark mode text */}
       {title}
       <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full"></span>
     </h2>
-    <p className="max-w-2xl mx-auto mt-6 text-neutral-600">{subtitle}</p>
+    <p className="max-w-2xl mx-auto mt-6 text-neutral-600 dark:text-neutral-400">{subtitle}</p> {/* Added dark mode text */}
   </div>
 );
 
@@ -53,7 +53,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ item }) => (
     animate={{ opacity: 1, scale: 1 }}
     exit={{ opacity: 0, scale: 0.8 }}
     transition={{ duration: 0.3 }}
-    className="relative rounded-lg overflow-hidden shadow-md group"
+    className="relative rounded-lg overflow-hidden shadow-md group bg-neutral-800" // Added dark bg for card base
   >
     <Image
       src={item.imageUrl}
@@ -90,7 +90,7 @@ const PortfolioSection: React.FC = () => {
     : portfolioItemsData.filter(item => item.category === activeFilter);
 
   return (
-    <section className="py-16 md:py-24 bg-neutral-50" id="portfolio">
+    <section className="py-16 md:py-24 bg-neutral-50 dark:bg-neutral-900" id="portfolio"> {/* Added dark mode bg */}
       <div className="container mx-auto px-4">
         <SectionTitle
           title="See Dvojkavit in Action"
@@ -107,7 +107,7 @@ const PortfolioSection: React.FC = () => {
                 py-2 px-5 rounded-full text-sm font-medium transition-all duration-300
                 ${activeFilter === category
                   ? 'bg-primary-500 text-white shadow-sm'
-                  : 'bg-white text-neutral-700 hover:bg-neutral-100 border border-neutral-200'
+                  : 'bg-white dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-600 border border-neutral-200 dark:border-neutral-600' // Added dark mode styles
                 }
               `}
             >
@@ -127,7 +127,8 @@ const PortfolioSection: React.FC = () => {
 
         {/* CTA Button */}
         <div className="text-center mt-16">
-          <Link href="#contact" className="btn btn-primary btn-lg">
+           {/* Assuming Button component exists and handles dark mode */}
+          <Link href="#contact" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300 text-lg">
             Request a Demo
           </Link>
         </div>

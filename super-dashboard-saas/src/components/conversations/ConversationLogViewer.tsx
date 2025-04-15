@@ -21,17 +21,21 @@ const formatDate = (dateString?: string | null) => { // Allow null
   }
 };
 
-// Basic Modal structure (can be replaced with a shared component later)
+// Basic Modal structure - Apply dark theme styles
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
     return (
-      <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-start z-50 p-4 pt-16 overflow-y-auto"> {/* Adjusted padding-top */}
-        <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 my-8"> {/* Added margin-y */}
-          <div className="flex justify-between items-center mb-4 sticky top-0 bg-white py-2 z-10"> {/* Sticky header */}
-            <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      // Use background/80 for overlay, add backdrop blur
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex justify-center items-start z-50 p-4 pt-16 overflow-y-auto">
+        {/* Use card styling for modal content */}
+        <div className="relative bg-card rounded-lg shadow-xl w-full max-w-3xl p-6 my-8 border border-border">
+          {/* Style header with foreground and border, make sticky */}
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-border sticky top-0 bg-card py-2 z-10">
+            <h3 className="text-lg font-medium leading-6 text-foreground">{title}</h3>
+            {/* Style close button */}
+            <button onClick={onClose} className="text-muted-foreground hover:text-foreground focus:outline-none text-2xl">&times;</button>
           </div>
-          <div className="max-h-[70vh] overflow-y-auto pr-2"> {/* Adjusted max-height */}
+          <div className="max-h-[70vh] overflow-y-auto pr-2">
               {children}
           </div>
         </div>
@@ -61,35 +65,36 @@ const ConversationLogViewer: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800">Conversation History</h2>
+      {/* Header - Already styled */}
+      <h2 className="text-xl font-semibold text-foreground">Conversation History</h2>
 
-      {/* Conversation List/Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      {/* Conversation List/Table - Already styled */}
+      <div className="bg-card shadow overflow-hidden sm:rounded-md border border-border">
         {conversations.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session ID</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Time</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Messages</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Session ID</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Start Time</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">End Time</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Messages</th>
                   <th scope="col" className="relative px-6 py-3"><span className="sr-only">View</span></th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-card divide-y divide-border">
                 {conversations.map((conv) => (
-                  <tr key={conv.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500" title={conv.session_id}>
+                  <tr key={conv.id} className="hover:bg-muted/50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-muted-foreground" title={conv.session_id}>
                         {conv.session_id.substring(0, 8)}...
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(conv.start_time)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(conv.end_time)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{conv.messages?.length || 0}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{formatDate(conv.start_time)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{formatDate(conv.end_time)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">{conv.messages?.length || 0}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => setSelectedConversation(conv)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-primary hover:text-primary/80"
                       >
                         View Details
                       </button>
@@ -100,22 +105,23 @@ const ConversationLogViewer: React.FC = () => {
             </table>
           </div>
         ) : (
-          <p className="text-center text-gray-500 py-6">No conversation logs found.</p>
+          <p className="text-center text-muted-foreground py-6">No conversation logs found.</p>
         )}
       </div>
 
-       {/* Conversation Detail Modal */}
+       {/* Conversation Detail Modal - Already styled */}
        <Modal isOpen={!!selectedConversation} onClose={() => setSelectedConversation(null)} title={`Conversation: ${selectedConversation?.session_id.substring(0,8)}...`}>
          {selectedConversation && (
            <div className="space-y-3">
              {selectedConversation.messages.map((msg, index) => (
                <div key={index} className={`p-3 rounded-lg max-w-[85%] ${
-                 msg.sender === 'user' ? 'bg-blue-100 ml-auto' :
-                 msg.sender === 'agent' ? 'bg-yellow-100 mr-auto' : // Example style for agent
-                 'bg-gray-100 mr-auto' // Default for bot
+                 msg.sender === 'user' ? 'bg-primary text-primary-foreground ml-auto' : // User message
+                 msg.sender === 'agent' ? 'bg-accent text-accent-foreground mr-auto' : // Agent message (example)
+                 'bg-muted text-muted-foreground mr-auto' // Bot/System message
                }`}>
-                 <p className="text-sm text-gray-800">{msg.text}</p>
-                 <p className="text-xs text-gray-500 mt-1 text-right">{msg.sender} - {formatDate(msg.timestamp)}</p>
+                 <p className="text-sm">{msg.text}</p>
+                 {/* Adjust timestamp text color slightly */}
+                 <p className="text-xs text-muted-foreground/70 mt-1 text-right">{msg.sender} - {formatDate(msg.timestamp)}</p>
                </div>
              ))}
            </div>

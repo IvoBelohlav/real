@@ -50,16 +50,20 @@ const TagInput: React.FC<{
 
   return (
     <div className="mb-4">
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-        <div className="flex flex-wrap gap-1 p-2 flex-grow bg-white rounded-l-md">
+      {/* Apply dark theme label style */}
+      <label htmlFor={inputId} className="block text-sm font-medium text-muted-foreground mb-1">{label}</label>
+      {/* Apply dark theme input container style */}
+      <div className="flex items-center border border-border rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring focus-within:border-primary bg-input">
+        <div className="flex flex-wrap gap-1 p-2 flex-grow rounded-l-md">
             {tags.map((tag, index) => (
-              <span key={index} className="flex items-center bg-indigo-100 text-indigo-700 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              // Apply dark theme tag style
+              <span key={index} className="flex items-center bg-primary/10 text-primary text-xs font-medium px-2.5 py-0.5 rounded-full border border-primary/30">
                 {tag}
                 <button
                   type="button"
                   onClick={() => removeTag(index)}
-                  className="ml-1.5 text-indigo-500 hover:text-indigo-700 focus:outline-none"
+                  // Apply dark theme tag remove button style
+                  className="ml-1.5 text-primary/70 hover:text-primary focus:outline-none"
                   aria-label={`Remove ${tag}`}
                 >
                   <X size={12} />
@@ -73,19 +77,22 @@ const TagInput: React.FC<{
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
               placeholder={placeholder}
-              className="flex-grow p-1 border-none focus:ring-0 focus:outline-none text-sm min-w-[100px]"
+              // Apply dark theme tag input style
+              className="flex-grow p-1 border-none focus:ring-0 focus:outline-none text-sm min-w-[100px] bg-transparent text-foreground placeholder-muted-foreground"
             />
         </div>
          <button
             type="button"
             onClick={addTag}
-            className="px-3 py-2 text-gray-500 hover:text-indigo-600 focus:outline-none border-l border-gray-300 bg-gray-50 rounded-r-md"
+            // Apply dark theme tag add button style
+            className="px-3 py-2 text-muted-foreground hover:text-primary focus:outline-none border-l border-border bg-input rounded-r-md"
             aria-label={`Add ${label} tag`}
          >
             <Tag size={16} />
          </button>
       </div>
-      {helperText && <p className="mt-1 text-xs text-gray-500">{helperText}</p>}
+      {/* Apply dark theme helper text style */}
+      {helperText && <p className="mt-1 text-xs text-muted-foreground">{helperText}</p>}
     </div>
   );
 };
@@ -147,7 +154,9 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="edit-question" className="block text-sm font-medium text-gray-700">Question *</label>
+        {/* Apply dark theme label style */}
+        <label htmlFor="edit-question" className="block text-sm font-medium text-muted-foreground">Question *</label>
+        {/* Apply dark theme input style */}
         <input
           type="text"
           name="question"
@@ -155,12 +164,14 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
           value={formData.question}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm bg-input text-foreground placeholder-muted-foreground"
         />
       </div>
 
       <div>
-        <label htmlFor="edit-answer" className="block text-sm font-medium text-gray-700">Answer *</label>
+        {/* Apply dark theme label style */}
+        <label htmlFor="edit-answer" className="block text-sm font-medium text-muted-foreground">Answer *</label>
+        {/* Apply dark theme textarea style */}
         <textarea
           name="answer"
           id="edit-answer"
@@ -168,11 +179,11 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
           value={formData.answer}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm bg-input text-foreground placeholder-muted-foreground"
         />
       </div>
 
-      {/* Use TagInput for Keywords */}
+      {/* Use TagInput for Keywords (already styled internally) */}
       <TagInput
         label="Keywords"
         tags={formData.keywords || []}
@@ -184,24 +195,28 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
 
        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label htmlFor="edit-category" className="block text-sm font-medium text-gray-700">Category</label>
+                {/* Apply dark theme label style */}
+                <label htmlFor="edit-category" className="block text-sm font-medium text-muted-foreground">Category</label>
+                {/* Apply dark theme input style */}
                 <input
                 type="text"
                 name="category"
                 id="edit-category"
                 value={formData.category || ''}
                 onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm bg-input text-foreground placeholder-muted-foreground"
                 />
             </div>
             <div>
-                <label htmlFor="edit-language" className="block text-sm font-medium text-gray-700">Language</label>
+                {/* Apply dark theme label style */}
+                <label htmlFor="edit-language" className="block text-sm font-medium text-muted-foreground">Language</label>
+                {/* Apply dark theme select style */}
                 <select
                     name="language"
                     id="edit-language"
                     value={formData.language}
                     onChange={handleChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    className="mt-1 block w-full px-3 py-2 border border-border bg-input rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm text-foreground"
                 >
                     <option value="cs">Czech (cs)</option>
                     <option value="en">English (en)</option>
@@ -212,7 +227,9 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
             <div>
-                <label htmlFor="edit-widget_order" className="block text-sm font-medium text-gray-700">Widget Order</label>
+                {/* Apply dark theme label style */}
+                <label htmlFor="edit-widget_order" className="block text-sm font-medium text-muted-foreground">Widget Order</label>
+                {/* Apply dark theme input style */}
                 <input
                 type="number"
                 name="widget_order"
@@ -220,9 +237,10 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
                 value={formData.widget_order || ''} // Show empty instead of 0 if null/0
                 onChange={handleChange}
                 placeholder="Lower number = higher priority"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm bg-input text-foreground placeholder-muted-foreground"
                 />
             </div>
+            {/* Apply dark theme checkbox styles */}
             <div className="flex items-center pt-6 space-x-4">
                  <div className="flex items-center">
                     <input
@@ -231,9 +249,9 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
                         type="checkbox"
                         checked={formData.show_in_widget}
                         onChange={handleChange}
-                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        className="focus:ring-primary h-4 w-4 text-primary border-border rounded bg-input"
                     />
-                    <label htmlFor="edit-show_in_widget" className="ml-2 block text-sm text-gray-900">Show in Widget</label>
+                    <label htmlFor="edit-show_in_widget" className="ml-2 block text-sm text-muted-foreground">Show in Widget</label>
                  </div>
                  <div className="flex items-center">
                      <input
@@ -242,27 +260,27 @@ const EditWidgetFAQForm: React.FC<EditWidgetFAQFormProps> = ({ faq, onSubmit, on
                         type="checkbox"
                         checked={formData.active}
                         onChange={handleChange}
-                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                        className="focus:ring-primary h-4 w-4 text-primary border-border rounded bg-input"
                     />
-                    <label htmlFor="edit-active" className="ml-2 block text-sm text-gray-900">Active</label>
+                    <label htmlFor="edit-active" className="ml-2 block text-sm text-muted-foreground">Active</label>
                  </div>
             </div>
         </div>
 
-
-      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-6">
+      {/* Apply dark theme styles to buttons and border */}
+      <div className="flex justify-end space-x-3 pt-4 border-t border-border mt-6">
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-muted text-sm font-medium disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-indigo-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center justify-center min-w-[120px]" // Adjusted min-width
+          className="px-4 py-2 bg-primary border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 flex items-center justify-center min-w-[120px]" // Adjusted min-width
         >
           {isLoading ? <LoadingSpinner /> : (
               <>

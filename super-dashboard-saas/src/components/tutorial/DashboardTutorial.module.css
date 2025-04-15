@@ -1,4 +1,4 @@
-/* DashboardTutorial.module.css - Enhanced Light Theme Version */
+/* DashboardTutorial.module.css - Dark Theme Version */
 
 @keyframes fadeInScaleUp {
   from {
@@ -13,30 +13,31 @@
 
 /* Apply a custom class to the tooltip for easier targeting */
 .customTooltip {
-  background: #ffffff;
-  color: #1f2937;
-  border-radius: 12px; /* Slightly more rounded */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.07); /* Softer, layered shadow */
-  padding: 28px 32px; /* More padding */
+  /* Specific Black/Purple Theme using Hex - Updated */
+  background: #000000; /* Dark Purple */
+  color: #ffffff; /* White */
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.4); /* Darker shadow */
+  padding: 28px 32px;
   font-family: inherit;
-  max-width: 420px; /* Wider */
-  border: 1px solid #f3f4f6; /* Very light border */
-  animation: fadeInScaleUp 0.3s ease-out forwards; /* Entry animation */
+  max-width: 420px;
+  border: 1px solid #581c87; /* neutral-700 */
+  animation: fadeInScaleUp 0.3s ease-out forwards;
 }
 
 /* Style the text content */
 .customTooltip .introjs-tooltiptext {
-  font-size: 1.1rem; /* Larger text */
+  font-size: 1.1rem;
   line-height: 1.8;
   margin-bottom: 28px;
-  color: #374151;
+  color: #ffffff; /* White */
 }
 
-/* General button styling */
+/* General button styling - Dark background, light text */
 .customTooltip .introjs-button {
-  border: 1px solid #d1d5db;
+  border: 1px solid #475569; /* Darker Gray Border */
   border-radius: 8px;
-  padding: 12px 24px; /* Larger buttons */
+  padding: 12px 24px;
   font-size: 1rem;
   font-weight: 600;
   text-shadow: none;
@@ -45,63 +46,35 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff;
-  color: #374151;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  background-color: #334155; /* Dark Gray Background */
+  color: #ffffff; /* White Text */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Lighter shadow */
 }
 
 .customTooltip .introjs-button:hover {
-  background-color: #f9fafb;
-  border-color: #adb5bd;
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px); /* Subtle lift */
+  background-color: #475569; /* Lighter Dark Gray on hover */
+  border-color: #64748b; /* Medium Gray on hover */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
 }
 
-/* Primary button style (Next) */
-.customTooltip .introjs-nextbutton {
-  background-color: #3b82f6;
-  color: #ffffff;
-  border-color: #3b82f6;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-}
-
-.customTooltip .introjs-nextbutton:hover {
-  background-color: #2563eb;
-  border-color: #1d4ed8; /* Slightly darker border */
-  box-shadow: 0 5px 10px rgba(59, 130, 246, 0.35);
-  transform: translateY(-2px); /* More lift */
-}
-
-/* Secondary button style (Back) */
-.customTooltip .introjs-prevbutton {
-  background-color: #ffffff;
-  color: #4b5563;
-  border-color: #d1d5db;
-}
-
-.customTooltip .introjs-prevbutton:hover {
-  background-color: #f9fafb;
-  border-color: #adb5bd;
-  color: #1f2937;
-}
-
-/* Done button style (Similar to Back, maybe slightly different?) */
+/* Remove specific styles for Next/Prev/Done to inherit the general style */
+.customTooltip .introjs-nextbutton,
+.customTooltip .introjs-prevbutton,
 .customTooltip .introjs-donebutton {
-  background-color: #f9fafb; /* Slightly off-white */
-  color: #4b5563;
-  border-color: #d1d5db;
+  /* Inherit general styles */
 }
+
+.customTooltip .introjs-nextbutton:hover,
+.customTooltip .introjs-prevbutton:hover,
 .customTooltip .introjs-donebutton:hover {
-  background-color: #f3f4f6; /* Lighter grey */
-  border-color: #adb5bd;
-  color: #1f2937;
+ /* Inherit general hover styles */
 }
 
-
-/* Skip button style - More subtle */
+/* Skip button style - More subtle (Keep as is) */
 .customTooltip .introjs-skipbutton {
   background-color: transparent;
-  color: #adb5bd; /* Lighter grey */
+  color: #64748b; /* neutral-500 */
   font-weight: 500;
   padding: 8px 10px;
   font-size: 0.9rem;
@@ -114,13 +87,13 @@
 }
 
 .customTooltip .introjs-skipbutton:hover {
-  color: #6b7280; /* Darker grey on hover */
+  color: #cbd5e1; /* neutral-300 */
   background-color: transparent;
 }
 
 /* Button container adjustments */
 .customTooltip .introjs-tooltipbuttons {
-  border-top: 1px solid #f3f4f6; /* Lighter separator */
+  border-top: 1px solid #334155; /* Dark Gray Border */
   padding-top: 24px;
   margin-top: 24px;
   display: flex;
@@ -135,42 +108,43 @@
   display: none;
 }
 
-/* Progress bar styling */
-.customTooltip .introjs-progress {
-  background-color: #e5e7eb; /* Light grey background */
+.customTooltip .introjs-progressbar {
+  background-color: #9333ea !important; /* Purple Fill - Attempt 3 (Forced) */
+  height: 100%;
   border-radius: 4px;
-  height: 8px; /* Thicker bar */
-  margin: 20px 0; /* Space around progress bar */
-  overflow: hidden; /* Ensure inner bar respects radius */
+  height: 8px;
+  margin: 20px 0;
+  overflow: hidden;
 }
 
 .customTooltip .introjs-progressbar {
-  background-color: #3b82f6; /* Primary blue */
+  background-color: #9333ea !important;
   height: 100%;
-  border-radius: 4px; /* Match outer radius */
-  transition: width 0.3s ease-out; /* Smooth transition */
+  border-radius: 4px;
+  transition: width 0.3s ease-out;
 }
 
 
 /* Style the arrow */
 .customTooltip .introjs-arrow {
-  border: 7px solid transparent; /* Slightly larger arrow */
+  border: 7px solid transparent;
 }
 
+/* Arrow color should match the tooltip background */
 .customTooltip .introjs-arrow.top {
-  border-bottom-color: #ffffff;
+  border-bottom-color: #581c87; /* Dark Purple */
   top: -14px;
 }
 .customTooltip .introjs-arrow.bottom {
-  border-top-color: #ffffff;
+  border-top-color: #581c87; /* Dark Purple */
   bottom: -14px;
 }
 .customTooltip .introjs-arrow.left {
-  border-right-color: #ffffff;
+  border-right-color: #581c87; /* Dark Purple */
   left: -14px;
 }
 .customTooltip .introjs-arrow.right {
-  border-left-color: #ffffff;
+  border-left-color: #581c87; /* Dark Purple */
   right: -14px;
 }
 
@@ -182,8 +156,8 @@
 /* Custom class to attempt forcing highlight */
 .forceHighlight {
   /* Add styles that are likely to override others, e.g., a prominent border */
-  box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.7) !important; /* Blue shadow, !important might be needed */
-  border: 2px solid #2563eb !important; /* Solid blue border */
-  background-color: rgba(59, 130, 246, 0.1) !important; /* Slight blue background */
+  box-shadow: 0 0 0 5px rgba(168, 85, 247, 0.7) !important; /* Purple shadow */
+  border: 2px solid #a855f7 !important; /* Purple border */
+  background-color: rgba(168, 85, 247, 0.1) !important; /* Slight purple background */
   border-radius: 6px; /* Match button radius if possible */
 }

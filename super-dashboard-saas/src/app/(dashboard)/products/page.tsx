@@ -19,18 +19,17 @@ export default function ProductsPage() {
   }
 
   // Render subscription required message if not active
-  // Adjust this check based on whether product management requires a subscription
+  // Adjust this check based on whether product management requires a subscription - Apply dark theme styles
   if (!hasActiveSubscription) {
     return (
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Products</h1>
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded" role="alert">
-          <p className="font-bold">Subscription Required</p>
-          <p>You need an active subscription to manage Products.</p>
-          <Link href="/billing">
-            <span className="mt-2 inline-block text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer">
+      <div className="space-y-6"> {/* Added spacing */}
+        <h1 className="text-2xl font-semibold text-foreground mb-6">Products</h1>
+        {/* Use card styling with warning colors */}
+        <div className="bg-card border-l-4 border-yellow-500 text-yellow-500 p-4 rounded shadow-md" role="alert">
+          <p className="font-bold text-foreground">Subscription Required</p>
+          <p className="text-muted-foreground">You need an active subscription to manage Products.</p>
+          <Link href="/billing" className="mt-2 inline-block text-primary hover:text-primary/80 font-semibold cursor-pointer">
               View Subscription Plans
-            </span>
           </Link>
         </div>
       </div>
@@ -38,14 +37,15 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="space-y-6"> {/* Added space-y */}
-      <h1 className="text-2xl font-semibold text-gray-900">Manage Products</h1>
-      <p className="text-gray-600">
+    <div className="space-y-6">
+      {/* Apply dark theme text colors */}
+      <h1 className="text-2xl font-semibold text-foreground">Manage Products</h1>
+      <p className="text-muted-foreground">
         Add, edit, or remove products that can be referenced or sold via the chat widget.
       </p>
-      {/* Render the manager component inside a card */}
-      <div className="bg-white shadow rounded-lg p-6">
-         <ProductManager />
+      {/* Render the manager component inside a dark theme card */}
+      <div className="bg-card shadow rounded-lg p-6 border border-border">
+         <ProductManager /> {/* This component will need styling too */}
       </div>
     </div>
   );

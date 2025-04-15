@@ -9,6 +9,8 @@ import { themes } from '@/lib/themes';
 import { widgetThemePresets } from '@/lib/widgetThemePresets';
 import { WidgetConfig } from '@/types';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import CustomTooltip from '@/components/shared/CustomTooltip'; // Import the custom tooltip
+import { Info } from 'lucide-react'; // Import an icon for the tooltip trigger
 // We'll need to create or adapt styles. Using placeholder class names for now.
 // import styles from './WidgetConfigForm.module.css'; // TODO: Create this CSS module
 
@@ -82,6 +84,64 @@ const getDefaultFormData = (): WidgetConfig => {
     custom_css: '',
   };
 };
+
+// Tooltip content mapping
+const tooltipContent: Partial<Record<keyof WidgetConfig, string>> = {
+  main_title: "The title displayed at the top of the chat widget.",
+  logo_light_mode: "Upload your logo (WEBP format) for light theme display.",
+  logo_dark_mode: "Upload your logo (WEBP format) for dark theme display.",
+  greeting_message: "The initial message the chatbot sends to the user.",
+  widget_button_text: "Text displayed on the collapsed widget button (wide style).",
+  widget_help_text: "Help text shown near the collapsed widget button.",
+  collapsed_button_style: "Choose the style for the minimized chat button: 'Wide' shows text and icon, 'Circular' shows only the icon.",
+  second_button_enabled: "Enable an additional button inside the expanded chat window (e.g., for linking to docs).",
+  second_button_text: "Text for the second action button.",
+  second_button_link: "URL link for the second action button (must be a valid URL like https://example.com).",
+  isEnabled: "Globally enable or disable the chat widget on your website.",
+  primary_color_light: "Main accent color used for buttons, icons, etc. in light mode.",
+  secondary_color_light: "Secondary accent color, often used for backgrounds or borders in light mode.",
+  background_color_light: "The main background color of the chat window in light mode.",
+  text_color_light: "The primary text color used within the chat window in light mode.",
+  header_bg_color: "Background color of the widget header in light mode.",
+  header_text_color: "Text color within the widget header in light mode.",
+  button_bg_color_light: "Background color for primary buttons in light mode.",
+  button_text_color_light: "Text color for primary buttons in light mode.",
+  icon_background_color_light: "Background color for icons (like the mode toggle) in light mode.",
+  mode_toggle_background_light: "Background color specifically for the light/dark mode toggle button in light mode.",
+  primary_color_dark: "Main accent color used for buttons, icons, etc. in dark mode.",
+  secondary_color_dark: "Secondary accent color, often used for backgrounds or borders in dark mode.",
+  background_color_dark: "The main background color of the chat window in dark mode.",
+  text_color_dark: "The primary text color used within the chat window in dark mode.",
+  header_bg_color_dark: "Background color of the widget header in dark mode.",
+  header_text_color_dark: "Text color within the widget header in dark mode.",
+  button_bg_color_dark: "Background color for primary buttons in dark mode.",
+  button_text_color_dark: "Text color for primary buttons in dark mode.",
+  icon_background_color_dark: "Background color for icons (like the mode toggle) in dark mode.",
+  mode_toggle_background_dark: "Background color specifically for the light/dark mode toggle button in dark mode.",
+  font_family: "Select the primary font used throughout the widget.",
+  base_font_size: "Set the base font size for text within the widget.",
+  header_font_weight: "Adjust the boldness of the header text.",
+  message_font_weight: "Adjust the boldness of chat message text.",
+  button_font_weight: "Adjust the boldness of button text.",
+  widget_padding: "Controls the internal padding around the content within the widget frame (e.g., '1rem', '16px').",
+  message_spacing: "Controls the vertical space between chat messages (e.g., '0.75rem', '12px').",
+  input_field_padding: "Controls the internal padding within the message input field (e.g., '0.625rem', '10px').",
+  widget_border_radius: "Controls the roundness of the main widget corners.",
+  widget_border_style: "Sets the style of the border around the main widget (e.g., solid, dashed).",
+  widget_border_width: "Sets the thickness of the border around the main widget.",
+  message_bubble_border_radius: "Controls the roundness of the corners on individual chat message bubbles.",
+  message_bubble_border_style: "Sets the style of the border around message bubbles.",
+  message_bubble_border_width: "Sets the thickness of the border around message bubbles.",
+  input_field_border_radius: "Controls the roundness of the message input field corners.",
+  input_field_border_style: "Sets the style of the border around the message input field.",
+  input_field_border_width: "Sets the thickness of the border around the message input field.",
+  button_border_radius: "Controls the roundness of button corners.",
+  button_border_style: "Sets the style of the border around buttons.",
+  button_border_width: "Sets the thickness of the border around buttons.",
+  widget_shadow: "Apply a shadow effect to the main widget container.",
+  custom_css: "Add your own CSS rules to further customize the widget's appearance. Use with caution.",
+};
+
 
 const WidgetConfigForm = () => {
   const [activeTab, setActiveTab] = useState('general');
@@ -248,91 +308,130 @@ const WidgetConfigForm = () => {
     return <div className="text-red-600 bg-red-100 p-4 rounded">Error loading configuration: {fetchError?.message || 'Unknown error'}</div>;
   }
 
-  // If authenticated, not loading, and no fetch error, render the form:
-  // This component shouldn't render the form if not authenticated.
-  // We might add an explicit check here, but often the parent layout/guard handles this.
-  // if (!isAuthenticated && !isAuthLoading) {
-  //   return <div>Not authenticated.</div>; // Or null, or redirect handled by AuthGuard
-  // }
-
-  // Helper Render Functions (using Tailwind classes)
-  const renderInputField = (id: keyof WidgetConfig, label: string, type: string = 'text', options?: { placeholder?: string, className?: string, step?: number, min?: number }) => (
-    <div className={options?.className ?? 'sm:col-span-3'}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
-        {label}
-      </label>
-      <input
-        type={type}
-        name={id}
-        id={id}
-        value={(formData as any)[id] ?? ''}
-        onChange={handleChange}
-        placeholder={options?.placeholder}
-        step={options?.step}
-        min={options?.min}
-        className={`mt-1 shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md ${type === 'color' ? 'h-10 p-1 cursor-pointer border' : 'px-3 py-2 border'}`} 
-      />
-    </div>
-  );
-
-  const renderSelectField = (id: keyof WidgetConfig, label: string, options: { value: string; label: string }[], divClassName?: string) => (
-    <div className={divClassName ?? 'sm:col-span-3'}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
-        {label}
-      </label>
-      <select
-        id={id}
-        name={id}
-        value={(formData as any)[id] ?? ''}
-        onChange={handleChange}
-        className="mt-1 shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 border" 
-      >
-        {options.map(opt => (
-          <option key={opt.value} value={opt.value}>{opt.label}</option>
-        ))}
-      </select>
-    </div>
-  );
-
-  const renderTextareaField = (id: keyof WidgetConfig, label: string, rows: number = 4, options?: { placeholder?: string, className?: string }) => (
-    <div className={options?.className ?? 'sm:col-span-6'}>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
-        {label}
-      </label>
-      <textarea
-        id={id}
-        name={id}
-        rows={rows}
-        value={(formData as any)[id] ?? ''}
-        onChange={handleChange}
-        placeholder={options?.placeholder}
-        className="mt-1 shadow-sm focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md px-3 py-2" 
-      />
-    </div>
-  );
-
-  const renderFileUpload = (id: keyof WidgetConfig, label: string, currentPreview: string | null | undefined) => (
-     <div className="sm:col-span-3">
-        <label htmlFor={id} className="block text-sm font-medium text-gray-700"> {/* Removed mb-1 */}
-            {label} (.webp only)
-        </label>
-        <div className="mt-1 flex items-center space-x-4">
-            {currentPreview ? (
-                <img src={currentPreview} alt="Logo Preview" className="h-10 w-auto border border-gray-200 rounded" /> /* Adjusted border */
-            ) : (
-                <div className="h-10 w-16 bg-gray-50 border border-gray-200 rounded flex items-center justify-center text-xs text-gray-400">Preview</div> /* Simplified placeholder */
-            )}
-            <input
-                type="file"
-                id={id}
-                name={id}
-                accept=".webp"
-                onChange={(e) => handleFileChange(e, id)}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border file:border-gray-300 file:text-sm file:font-medium file:bg-white file:text-gray-700 hover:file:bg-gray-50" /* Simplified file input button */
-            />
+  // Helper Render Functions (using Tailwind classes - Apply dark theme styles)
+  // Helper Render Functions with Tooltips
+  const renderInputField = (id: keyof WidgetConfig, label: string, type: string = 'text', options?: { placeholder?: string, className?: string, step?: number, min?: number }) => {
+    const tooltipText = tooltipContent[id];
+    return (
+      <div className={options?.className ?? 'sm:col-span-3'}>
+        <div className="flex items-center space-x-1">
+          <label htmlFor={id} className="block text-sm font-medium text-muted-foreground">
+            {label}
+          </label>
+          {tooltipText && (
+            <CustomTooltip content={tooltipText} position="top">
+              <Info size={14} className="text-primary cursor-help" /> {/* Changed color */}
+            </CustomTooltip>
+          )}
         </div>
-     </div>
-  );
+        <input
+          type={type}
+          name={id}
+          id={id}
+          value={(formData as any)[id] ?? ''}
+          onChange={handleChange}
+          placeholder={options?.placeholder}
+          step={options?.step}
+          min={options?.min}
+          // Dark input styles
+          className={`mt-1 shadow-sm focus:ring-1 focus:ring-ring focus:border-primary block w-full sm:text-sm border-border rounded-md bg-input text-foreground placeholder-muted-foreground ${type === 'color' ? 'h-10 p-1 cursor-pointer border' : 'px-3 py-2 border'}`}
+        />
+      </div>
+    );
+  };
+
+  const renderSelectField = (id: keyof WidgetConfig, label: string, selectOptions: { value: string; label: string }[], divClassName?: string) => {
+    const className = divClassName || 'sm:col-span-3';
+    const tooltipText = tooltipContent[id];
+    return (
+      <div className={className}>
+        <div className="flex items-center space-x-1">
+          <label htmlFor={id} className="block text-sm font-medium text-muted-foreground">
+            {label}
+          </label>
+          {tooltipText && (
+            <CustomTooltip content={tooltipText} position="top">
+              <Info size={14} className="text-primary cursor-help" /> {/* Changed color */}
+            </CustomTooltip>
+          )}
+        </div>
+        <select
+          id={id}
+          name={id}
+          value={(formData as any)[id] ?? ''}
+          onChange={handleChange}
+          // Dark select styles
+          className="mt-1 shadow-sm focus:ring-1 focus:ring-ring focus:border-primary block w-full sm:text-sm border-border rounded-md px-3 py-2 border bg-input text-foreground"
+        >
+          {selectOptions.map(opt => (
+            <option key={opt.value} value={opt.value} className="bg-popover text-popover-foreground">{opt.label}</option>
+          ))}
+        </select>
+      </div>
+    );
+  };
+
+  const renderTextareaField = (id: keyof WidgetConfig, label: string, rows: number = 4, options?: { placeholder?: string, className?: string }) => {
+    const tooltipText = tooltipContent[id];
+    return (
+      <div className={options?.className ?? 'sm:col-span-6'}>
+        <div className="flex items-center space-x-1">
+          <label htmlFor={id} className="block text-sm font-medium text-muted-foreground">
+            {label}
+          </label>
+          {tooltipText && (
+            <CustomTooltip content={tooltipText} position="top">
+              <Info size={14} className="text-primary cursor-help" /> {/* Changed color */}
+            </CustomTooltip>
+          )}
+        </div>
+        <textarea
+          id={id}
+          name={id}
+          rows={rows}
+          value={(formData as any)[id] ?? ''}
+          onChange={handleChange}
+          placeholder={options?.placeholder}
+          // Dark textarea styles
+          className="mt-1 shadow-sm focus:ring-1 focus:ring-ring focus:border-primary block w-full sm:text-sm border border-border rounded-md px-3 py-2 bg-input text-foreground placeholder-muted-foreground"
+        />
+      </div>
+    );
+  };
+
+  const renderFileUpload = (id: keyof WidgetConfig, label: string, currentPreview: string | null | undefined) => {
+    const tooltipText = tooltipContent[id];
+    return (
+      <div className="sm:col-span-3">
+        <div className="flex items-center space-x-1">
+          <label htmlFor={id} className="block text-sm font-medium text-muted-foreground">
+            {label} (.webp only)
+          </label>
+          {tooltipText && (
+            <CustomTooltip content={tooltipText} position="top">
+              <Info size={14} className="text-primary cursor-help" /> {/* Changed color */}
+            </CustomTooltip>
+          )}
+        </div>
+        <div className="mt-1 flex items-center space-x-4">
+          {currentPreview ? (
+            <img src={currentPreview} alt="Logo Preview" className="h-10 w-auto border border-border rounded" />
+          ) : (
+            <div className="h-10 w-16 bg-muted border border-border rounded flex items-center justify-center text-xs text-muted-foreground">Preview</div>
+          )}
+          <input
+            type="file"
+            id={id}
+            name={id}
+            accept=".webp"
+            onChange={(e) => handleFileChange(e, id)}
+            // Dark file input styles
+            className="block w-full text-sm text-muted-foreground file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border file:border-border file:text-sm file:font-medium file:bg-secondary file:text-secondary-foreground hover:file:bg-muted"
+          />
+        </div>
+      </div>
+    );
+  };
 
   const fontOptions = [
     { value: 'Inter, sans-serif', label: 'Inter' },
@@ -382,57 +481,57 @@ const WidgetConfigForm = () => {
       { value: '9999px', label: 'Full (Pill)' },
   ];
 
-   const borderWidthOptions = [
+  const borderWidthOptions = [
       { value: '0px', label: 'None (0px)' },
       { value: '1px', label: 'Thin (1px)' },
       { value: '2px', label: 'Medium (2px)' },
       { value: '3px', label: 'Thick (3px)' },
   ];
 
-   const shadowOptions = [
+  const shadowOptions = [
       { value: 'none', label: 'None' },
       { value: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)', label: 'Small' },
       { value: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)', label: 'Medium' },
       { value: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', label: 'Large' },
     { value: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)', label: 'X-Large' },
-   ];
+  ];
 
-   const collapsedButtonStyleOptions = [
-     { value: 'wide', label: 'Wide (Text + Icon)' },
-     { value: 'circular', label: 'Circular (Icon Only)' },
-   ];
+  const collapsedButtonStyleOptions = [
+    { value: 'wide', label: 'Wide (Text + Icon)' },
+    { value: 'circular', label: 'Circular (Icon Only)' },
+  ];
 
   return (
-    <div className="bg-white"> {/* Removed shadow and rounding */}
-      <div className="p-6 sm:p-8"> {/* Increased padding */}
-        {/* Theme Preset Selector */}
-        <div className="mb-6 pb-4 border-b border-gray-200">
-          <h3 className="text-base font-semibold leading-6 text-gray-900 mb-2">Theme Preset</h3>
+    <div className="bg-card text-foreground"> {/* Apply card background and foreground */}
+      <div className="p-6 sm:p-8">
+        {/* Theme Preset Selector - Apply dark theme styles */}
+        <div className="mb-6 pb-4 border-b border-border">
+          <h3 className="text-base font-semibold leading-6 text-foreground mb-2">Theme Preset</h3>
           <div className="flex flex-wrap gap-2">
             <button
-                key="default"
-                type="button"
-                className={cn(
-                    'px-3 py-1 text-sm rounded-md border',
-                    selectedThemePreset === 'default'
-                        ? 'bg-indigo-600 text-white border-indigo-600' // Active state
-                        : 'bg-white text-gray-700 border-gray-300' // Default state (removed hover)
-                )}
-                onClick={() => handleThemePresetChange('default')}
+                 key="default"
+                 type="button"
+                 className={cn(
+                     'px-3 py-1 text-sm rounded-md border',
+                     selectedThemePreset === 'default'
+                         ? 'bg-primary text-primary-foreground border-primary' // Dark active state
+                         : 'bg-card text-foreground border-border hover:bg-secondary' // Dark default state
+                 )}
+                 onClick={() => handleThemePresetChange('default')}
             >
                 Default
             </button>
             {Object.keys(widgetThemePresets).map((themeKey) => (
               <button
                 key={themeKey}
-                type="button"
-                className={cn(
-                  'px-3 py-1 text-sm rounded-md border capitalize',
-                  selectedThemePreset === themeKey
-                    ? 'bg-indigo-600 text-white border-indigo-600' // Active state
-                    : 'bg-white text-gray-700 border-gray-300' // Default state (removed hover)
-                )}
-                onClick={() => handleThemePresetChange(themeKey)}
+                 type="button"
+                 className={cn(
+                   'px-3 py-1 text-sm rounded-md border capitalize',
+                   selectedThemePreset === themeKey
+                     ? 'bg-primary text-primary-foreground border-primary' // Dark active state
+                     : 'bg-card text-foreground border-border hover:bg-secondary' // Dark default state
+                 )}
+                 onClick={() => handleThemePresetChange(themeKey)}
               >
                 {themeKey.replace(/([A-Z])/g, ' $1').trim()} {/* Add space before caps */}
               </button>
@@ -440,34 +539,34 @@ const WidgetConfigForm = () => {
              <button
                 key="custom"
                 type="button"
-                disabled // Cannot select custom directly, it's set by editing
-                className={cn(
-                    'px-3 py-1 text-sm rounded-md border capitalize',
-                    selectedThemePreset === 'custom'
-                        ? 'bg-indigo-600 text-white border-indigo-600' // Active state
-                        : 'bg-gray-100 text-gray-400 border-gray-300 cursor-not-allowed' // Disabled state
-                )}
-            >
+                 disabled // Cannot select custom directly, it's set by editing
+                 className={cn(
+                     'px-3 py-1 text-sm rounded-md border capitalize',
+                     selectedThemePreset === 'custom'
+                         ? 'bg-primary text-primary-foreground border-primary' // Dark active state
+                         : 'bg-muted text-muted-foreground border-border cursor-not-allowed' // Dark disabled state
+                 )}
+             >
                 Custom
             </button>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="border-b border-gray-200 mb-8"> {/* Increased margin-bottom */}
-          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-            {['general', 'lightColors', 'darkColors', 'typography', 'spacing', 'borders', 'advanced'].map((tab) => (
+         {/* Tabs - Apply dark theme styles */}
+         <div className="border-b border-border mb-8">
+           <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs"> {/* Added overflow-x-auto */}
+             {['general', 'lightColors', 'darkColors', 'typography', 'spacing', 'borders', 'advanced'].map((tab) => (
               <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={cn(
-                  tab === activeTab
-                    ? 'border-indigo-600 text-indigo-600 font-semibold' // Adjusted active state
-                    : 'border-transparent text-gray-500 hover:text-gray-700', // Default state
-                  'whitespace-nowrap border-b-2 py-2 px-1 text-sm font-medium capitalize' // Adjusted padding
-                )}
-                aria-current={tab === activeTab ? 'page' : undefined}
+                 key={tab}
+                 type="button"
+                 onClick={() => setActiveTab(tab)}
+                 className={cn(
+                   tab === activeTab
+                     ? 'border-primary text-primary font-semibold' // Dark active state
+                     : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border', // Dark default state
+                   'whitespace-nowrap border-b-2 py-2 px-1 text-sm font-medium capitalize'
+                 )}
+                 aria-current={tab === activeTab ? 'page' : undefined}
               >
                 {tab.replace('Colors', ' Colors').replace(/([A-Z])/g, ' $1').trim()} {/* Format tab name */}
               </button>
@@ -477,213 +576,216 @@ const WidgetConfigForm = () => {
 
         {/* Form Content */}
         <form onSubmit={handleSubmit}>
-          {/* General Settings Tab */}
-          {activeTab === 'general' && ( // Opening parenthesis for general tab content
-            <div className="space-y-6"> {/* Adjusted vertical spacing */}
-              <h3 className="text-base font-semibold leading-6 text-gray-900">General Settings</h3> {/* Adjusted heading style */}
-              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                {renderInputField('main_title', 'Main Title', 'text', { className: 'sm:col-span-6 max-w-xl' })}
+           {/* General Settings Tab */}
+           {activeTab === 'general' && (
+             <div className="space-y-6">
+               <h3 className="text-base font-semibold leading-6 text-foreground">General Settings</h3>
+               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                 {renderInputField('main_title', 'Main Title', 'text', { className: 'sm:col-span-6 max-w-xl' })}
                 {renderFileUpload('logo_light_mode', 'Logo (Light Mode)', formData.logo_light_mode)}
                 {renderFileUpload('logo_dark_mode', 'Logo (Dark Mode)', formData.logo_dark_mode)}
                 {renderTextareaField('greeting_message', 'Greeting Message', 3, { className: 'sm:col-span-6 max-w-xl' })}
                 {renderInputField('widget_button_text', 'Widget Button Text', 'text', { className: 'sm:col-span-3' })}
                 {renderInputField('widget_help_text', 'Widget Help Text', 'text', { className: 'sm:col-span-3' })}
-
-                {/* --- New Fields --- */}
                 {renderSelectField('collapsed_button_style', 'Collapsed Button Style', collapsedButtonStyleOptions, 'sm:col-span-3')}
 
-                <div className="sm:col-span-6 border-t border-gray-200 pt-6 mt-4"> {/* Separator */}
-                  <h4 className="text-sm font-medium text-gray-600 mb-2">Second Action Button (Expanded Chat)</h4>
-                  <div className="flex items-center mb-4">
-                      <input
-                          id="second_button_enabled"
-                          name="second_button_enabled"
-                          type="checkbox"
-                          checked={formData.second_button_enabled ?? false}
-                          onChange={handleChange}
-                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                      />
-                      <label htmlFor="second_button_enabled" className="ml-2 block text-sm font-medium text-gray-700">
-                          Enable Second Action Button
-                      </label>
-                  </div>
-                  {formData.second_button_enabled && (
-                      <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6 pl-6 border-l-2 border-indigo-100"> {/* Indent conditional fields */}
-                          {renderInputField('second_button_text', 'Second Button Text', 'text', { className: 'sm:col-span-3' })}
-                          {renderInputField('second_button_link', 'Second Button Link (URL)', 'url', { placeholder: 'https://example.com', className: 'sm:col-span-3' })}
-                      </div>
-                  )}
-                </div>
+                 <div className="sm:col-span-6 border-t border-border pt-6 mt-4">
+                   <h4 className="text-sm font-medium text-muted-foreground mb-2">Second Action Button (Expanded Chat)</h4>
+                   <div className="flex items-center mb-4 space-x-1">
+                     <input
+                       id="second_button_enabled"
+                       name="second_button_enabled"
+                       type="checkbox"
+                       checked={formData.second_button_enabled ?? false}
+                       onChange={handleChange}
+                       className="focus:ring-primary h-4 w-4 text-primary border-border rounded bg-input"
+                     />
+                     <label htmlFor="second_button_enabled" className="ml-2 block text-sm font-medium text-muted-foreground">
+                       Enable Second Action Button
+                     </label>
+                           {tooltipContent.second_button_enabled && (
+                               <CustomTooltip content={tooltipContent.second_button_enabled} position="top">
+                                   <Info size={14} className="text-primary cursor-help" /> {/* Changed color */}
+                               </CustomTooltip>
+                           )}
+                   </div>
+                   {formData.second_button_enabled && (
+                     <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6 pl-6 border-l-2 border-primary/30">
+                       {renderInputField('second_button_text', 'Second Button Text', 'text', { className: 'sm:col-span-3' })}
+                       {renderInputField('second_button_link', 'Second Button Link (URL)', 'url', { placeholder: 'https://example.com', className: 'sm:col-span-3' })}
+                     </div>
+                   )}
+                 </div>
 
-                <div className="sm:col-span-6 border-t border-gray-200 pt-6 mt-4"> {/* Separator */}
-                   <h4 className="text-sm font-medium text-gray-600 mb-2">Widget Status</h4>
-                   {/* isEnabled Toggle */}
-                   <div className="flex items-center"> {/* Removed sm:col-span-6 and pt-2 */}
-                      <input
-                        id="isEnabled"
-                        name="isEnabled"
-                        type="checkbox"
-                        checked={formData.isEnabled ?? true}
-                        onChange={handleChange}
-                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                    />
-                    <label htmlFor="isEnabled" className="ml-2 block text-sm font-medium text-gray-700"> {/* Adjusted margin */}
-                        Enable Chat Widget
-                    </label>
-                 </div> {/* Closing div for Widget Status flex container */}
-              </div> {/* Closing div for Widget Status section */}
-            </div> {/* Closing div for grid */}
-          </div> // Closing div for general tab's outer div
-          )} {/* Correct closing for general tab conditional rendering */}
+                 <div className="sm:col-span-6 border-t border-border pt-6 mt-4">
+                   <h4 className="text-sm font-medium text-muted-foreground mb-2">Widget Status</h4>
+                   <div className="flex items-center space-x-1">
+                     <input
+                       id="isEnabled"
+                       name="isEnabled"
+                       type="checkbox"
+                       checked={formData.isEnabled ?? true}
+                       onChange={handleChange}
+                       className="focus:ring-primary h-4 w-4 text-primary border-border rounded bg-input"
+                     />
+                     <label htmlFor="isEnabled" className="ml-2 block text-sm font-medium text-muted-foreground">
+                       Enable Chat Widget
+                     </label>
+                     {tooltipContent.isEnabled && (
+                         <CustomTooltip content={tooltipContent.isEnabled} position="top">
+                             <Info size={14} className="text-primary cursor-help" /> {/* Changed color */}
+                         </CustomTooltip>
+                     )}
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
 
-          {/* Light Mode Colors Tab */}
-          {activeTab === 'lightColors' && ( // Opening parenthesis for lightColors tab content
-            <div className="space-y-6"> {/* Adjusted vertical spacing */}
-              <h3 className="text-base font-semibold leading-6 text-gray-900">Light Mode Colors</h3> {/* Adjusted heading style */}
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
-                {renderInputField('primary_color_light', 'Primary', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('secondary_color_light', 'Secondary', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('background_color_light', 'Background', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('text_color_light', 'Text', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('header_bg_color', 'Header BG', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('header_text_color', 'Header Text', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('button_bg_color_light', 'Button BG', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('button_text_color_light', 'Button Text', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('icon_background_color_light', 'Icon BG', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('mode_toggle_background_light', 'Mode Toggle BG', 'color', { className: 'sm:col-span-2' })}
-              </div> {/* Closing div for grid */}
-            </div> // Closing div for lightColors tab's outer div
-          )} {/* Correct closing for lightColors tab conditional rendering */}
+           {/* Light Mode Colors Tab */}
+           {activeTab === 'lightColors' && (
+             <div className="space-y-6">
+               <h3 className="text-base font-semibold leading-6 text-foreground">Light Mode Colors</h3>
+               <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
+                 {renderInputField('primary_color_light', 'Primary', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('secondary_color_light', 'Secondary', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('background_color_light', 'Background', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('text_color_light', 'Text', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('header_bg_color', 'Header BG', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('header_text_color', 'Header Text', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('button_bg_color_light', 'Button BG', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('button_text_color_light', 'Button Text', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('icon_background_color_light', 'Icon BG', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('mode_toggle_background_light', 'Mode Toggle BG', 'color', { className: 'sm:col-span-2' })}
+               </div>
+             </div>
+           )}
 
-          {/* Dark Mode Colors Tab */}
-          {activeTab === 'darkColors' && ( // Opening parenthesis for darkColors tab content
-             <div className="space-y-6"> {/* Adjusted vertical spacing */}
-              <h3 className="text-base font-semibold leading-6 text-gray-900">Dark Mode Colors</h3> {/* Adjusted heading style */}
-              <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
-                {renderInputField('primary_color_dark', 'Primary', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('secondary_color_dark', 'Secondary', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('background_color_dark', 'Background', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('text_color_dark', 'Text', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('header_bg_color_dark', 'Header BG', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('header_text_color_dark', 'Header Text', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('button_bg_color_dark', 'Button BG', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('button_text_color_dark', 'Button Text', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('icon_background_color_dark', 'Icon BG', 'color', { className: 'sm:col-span-2' })}
-                {renderInputField('mode_toggle_background_dark', 'Mode Toggle BG', 'color', { className: 'sm:col-span-2' })}
-              </div> {/* Closing div for grid */}
-            </div> // Closing div for darkColors tab's outer div
-          )} {/* Correct closing for darkColors tab conditional rendering */}
+           {/* Dark Mode Colors Tab */}
+           {activeTab === 'darkColors' && (
+             <div className="space-y-6">
+               <h3 className="text-base font-semibold leading-6 text-foreground">Dark Mode Colors</h3>
+               <div className="grid grid-cols-2 gap-y-6 gap-x-4 sm:grid-cols-4 lg:grid-cols-6">
+                 {renderInputField('primary_color_dark', 'Primary', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('secondary_color_dark', 'Secondary', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('background_color_dark', 'Background', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('text_color_dark', 'Text', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('header_bg_color_dark', 'Header BG', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('header_text_color_dark', 'Header Text', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('button_bg_color_dark', 'Button BG', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('button_text_color_dark', 'Button Text', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('icon_background_color_dark', 'Icon BG', 'color', { className: 'sm:col-span-2' })}
+                 {renderInputField('mode_toggle_background_dark', 'Mode Toggle BG', 'color', { className: 'sm:col-span-2' })}
+               </div>
+             </div>
+           )}
 
-          {/* Typography Tab */}
-          {activeTab === 'typography' && ( // Opening parenthesis for typography tab content
-            <div className="space-y-6"> {/* Adjusted vertical spacing */}
-              <h3 className="text-base font-semibold leading-6 text-gray-900">Typography</h3> {/* Adjusted heading style */}
-              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                {renderSelectField('font_family', 'Font Family', fontOptions, 'sm:col-span-6')}
-                {renderSelectField('base_font_size', 'Base Font Size', sizeOptions, 'sm:col-span-2')}
-                {renderSelectField('header_font_weight', 'Header Weight', weightOptions, 'sm:col-span-2')}
-                {renderSelectField('message_font_weight', 'Message Weight', weightOptions, 'sm:col-span-2')}
-                {renderSelectField('button_font_weight', 'Button Weight', weightOptions, 'sm:col-span-2')}
-              </div> {/* Closing div for grid */}
-            </div> // Closing div for typography tab's outer div
-          )} {/* Correct closing for typography tab conditional rendering */}
+           {/* Typography Tab */}
+           {activeTab === 'typography' && (
+             <div className="space-y-6">
+               <h3 className="text-base font-semibold leading-6 text-foreground">Typography</h3>
+               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                 {renderSelectField('font_family', 'Font Family', fontOptions, 'sm:col-span-6')}
+                 {renderSelectField('base_font_size', 'Base Font Size', sizeOptions, 'sm:col-span-2')}
+                 {renderSelectField('header_font_weight', 'Header Weight', weightOptions, 'sm:col-span-2')}
+                 {renderSelectField('message_font_weight', 'Message Weight', weightOptions, 'sm:col-span-2')}
+                 {renderSelectField('button_font_weight', 'Button Weight', weightOptions, 'sm:col-span-2')}
+               </div>
+             </div>
+           )}
 
-          {/* Spacing Tab */}
-          {activeTab === 'spacing' && ( // Opening parenthesis for spacing tab content
-            <div className="space-y-6"> {/* Adjusted vertical spacing */}
-              <h3 className="text-base font-semibold leading-6 text-gray-900">Spacing</h3> {/* Adjusted heading style */}
-              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                {renderInputField('widget_padding', 'Widget Padding', 'text', { placeholder: 'e.g., 1rem', className: 'sm:col-span-2' })}
-                {renderInputField('message_spacing', 'Message Spacing', 'text', { placeholder: 'e.g., 0.5rem', className: 'sm:col-span-2' })}
-                {renderInputField('input_field_padding', 'Input Field Padding', 'text', { placeholder: 'e.g., 0.5rem', className: 'sm:col-span-2' })}
-              </div> {/* Closing div for grid */}
-            </div> // Closing div for spacing tab's outer div
-          )} {/* Correct closing for spacing tab conditional rendering */}
+           {/* Spacing Tab */}
+           {activeTab === 'spacing' && (
+             <div className="space-y-6">
+               <h3 className="text-base font-semibold leading-6 text-foreground">Spacing</h3>
+               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                 {renderInputField('widget_padding', 'Widget Padding', 'text', { placeholder: 'e.g., 1rem', className: 'sm:col-span-2' })}
+                 {renderInputField('message_spacing', 'Message Spacing', 'text', { placeholder: 'e.g., 0.5rem', className: 'sm:col-span-2' })}
+                 {renderInputField('input_field_padding', 'Input Field Padding', 'text', { placeholder: 'e.g., 0.5rem', className: 'sm:col-span-2' })}
+               </div>
+             </div>
+           )}
 
            {/* Borders Tab */}
-          {activeTab === 'borders' && ( // Opening parenthesis for borders tab content
-            <div className="space-y-6"> {/* Adjusted vertical spacing */}
-              <h3 className="text-base font-semibold leading-6 text-gray-900">Borders</h3> {/* Adjusted heading style */}
-              {/* Simplified Grouping for Borders */}
-              <div className="space-y-6">
-                {/* Widget Borders Group */}
-                <div> {/* Removed border/padding */}
-                  <h4 className="text-sm font-medium text-gray-600 mb-4">Widget</h4> {/* Added margin */}
-                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    {renderSelectField('widget_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                    {renderSelectField('widget_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                    {renderSelectField('widget_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
-                  </div>
-                </div>
+           {activeTab === 'borders' && (
+             <div className="space-y-6">
+               <h3 className="text-base font-semibold leading-6 text-foreground">Borders</h3>
+               <div className="space-y-6">
+                 {/* Widget Borders Group */}
+                 <div>
+                   <h4 className="text-sm font-medium text-muted-foreground mb-4">Widget</h4>
+                   <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                     {renderSelectField('widget_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                     {renderSelectField('widget_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                     {renderSelectField('widget_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                   </div>
+                 </div>
+                 {/* Message Bubble Borders Group */}
+                 <div>
+                   <h4 className="text-sm font-medium text-muted-foreground mb-4">Message Bubbles</h4>
+                   <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                     {renderSelectField('message_bubble_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                     {renderSelectField('message_bubble_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                     {renderSelectField('message_bubble_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                   </div>
+                 </div>
+                 {/* Input Field Borders Group */}
+                 <div>
+                   <h4 className="text-sm font-medium text-muted-foreground mb-4">Input Field</h4>
+                   <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                     {renderSelectField('input_field_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                     {renderSelectField('input_field_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                     {renderSelectField('input_field_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                   </div>
+                 </div>
+                 {/* Button Borders Group */}
+                 <div>
+                   <h4 className="text-sm font-medium text-muted-foreground mb-4">Buttons</h4>
+                   <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                     {renderSelectField('button_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
+                     {renderSelectField('button_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
+                     {renderSelectField('button_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
+                   </div>
+                 </div>
+               </div>
+             </div>
+           )}
 
-                {/* Message Bubble Borders Group */}
-                <div> {/* Removed border/padding */}
-                  <h4 className="text-sm font-medium text-gray-600 mb-4">Message Bubbles</h4> {/* Added margin */}
-                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    {renderSelectField('message_bubble_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                    {renderSelectField('message_bubble_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                    {renderSelectField('message_bubble_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
-                  </div>
-                </div>
+           {/* Advanced Tab */}
+           {activeTab === 'advanced' && (
+             <div className="space-y-6">
+               <h3 className="text-base font-semibold leading-6 text-foreground">Advanced</h3>
+               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                 {renderSelectField('widget_shadow', 'Widget Shadow', shadowOptions, 'sm:col-span-6')}
+                 {renderTextareaField('custom_css', 'Custom CSS', 8, {
+                   placeholder: '/* Add custom CSS rules here */\n.widget-container {\n  /* Example */\n}',
+                   className: 'sm:col-span-6 max-w-xl'
+                 })}
+               </div>
+             </div>
+           )}
 
-                {/* Input Field Borders Group */}
-                <div> {/* Removed border/padding */}
-                  <h4 className="text-sm font-medium text-gray-600 mb-4">Input Field</h4> {/* Added margin */}
-                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    {renderSelectField('input_field_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                    {renderSelectField('input_field_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                    {renderSelectField('input_field_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
-                  </div>
-                </div>
+           {/* Action Buttons */}
+           <div className="pt-6 mt-6 border-t border-border flex justify-end space-x-3">
+             <button
+               type="button"
+               onClick={handleReset}
+               className="py-2 px-4 border border-border rounded-md text-sm font-medium text-muted-foreground bg-card hover:bg-secondary"
+             >
+               Reset to Default
+             </button>
+             <button
+               type="submit"
+               disabled={updateConfigMutation.isPending}
+               className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50"
+             >
+               {updateConfigMutation.isPending ? <LoadingSpinner /> : 'Save Configuration'}
+             </button>
+           </div>
+         </form>
+       </div>
+     </div>
+   );
+ };
 
-                {/* Button Borders Group */}
-                <div> {/* Removed border/padding */}
-                  <h4 className="text-sm font-medium text-gray-600 mb-4">Buttons</h4> {/* Added margin */}
-                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                    {renderSelectField('button_border_radius', 'Radius', radiusOptions, 'sm:col-span-2')}
-                    {renderSelectField('button_border_style', 'Style', borderStyleOptions, 'sm:col-span-2')}
-                    {renderSelectField('button_border_width', 'Width', borderWidthOptions, 'sm:col-span-2')}
-                  </div> {/* Closing div for grid */}
-                </div> {/* Closing div for Button Borders Group */}
-              </div> {/* Closing div for Simplified Grouping */}
-            </div> // Closing div for borders tab's outer div
-          )} {/* Correct closing for borders tab conditional rendering */}
-
-          {/* Advanced Tab */}
-          {activeTab === 'advanced' && ( // Opening parenthesis for advanced tab content
-            <div className="space-y-6"> {/* Adjusted vertical spacing */}
-              <h3 className="text-base font-semibold leading-6 text-gray-900">Advanced</h3> {/* Adjusted heading style */}
-              <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
-                {renderSelectField('widget_shadow', 'Widget Shadow', shadowOptions, 'sm:col-span-6')}
-                {renderTextareaField('custom_css', 'Custom CSS', 8, {
-                  placeholder: '/* Add custom CSS rules here */\n.widget-container {\n  /* Example */\n}',
-                  className: 'sm:col-span-6 max-w-xl'
-                })}
-              </div> {/* Closing div for grid */}
-            </div> // Closing div for advanced tab's outer div
-          )} {/* Correct closing for advanced tab conditional rendering */}
-
-          {/* Action Buttons */}
-          <div className="pt-6 mt-6 border-t border-gray-200 flex justify-end space-x-3"> {/* Adjusted padding/margin */}
-            <button
-              type="button"
-              onClick={handleReset}
-              className="py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" /* Removed shadow */
-            >
-              Reset to Default
-            </button>
-            <button
-              type="submit"
-              disabled={updateConfigMutation.isPending}
-              className="inline-flex justify-center py-2 px-4 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50" /* Removed shadow */
-            >
-              {updateConfigMutation.isPending ? <LoadingSpinner /> : 'Save Configuration'}
-            </button>
-          </div>
-        </form> 
-      </div> 
-    </div> // Closing div for bg-white
-  ); // Closing parenthesis for return statement
-}; // Closing brace for component function
-
-export default WidgetConfigForm;
+ export default WidgetConfigForm;

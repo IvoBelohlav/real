@@ -44,7 +44,7 @@ export default function ContactSubmissionsPage() {
         View messages submitted through the contact form in the chat widget.
       </p>
       {/* Render the actual manager component */}
-      <div className="bg-white p-6 rounded shadow">
+      <div> {/* Removed bg-white p-6 rounded shadow */}
          <ContactSubmissionsManager /> {/* Uncommented */}
          {/* <p className="text-center text-gray-500">Contact Submissions Component Placeholder</p> */}
       </div>

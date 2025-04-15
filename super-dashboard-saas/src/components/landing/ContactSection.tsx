@@ -12,11 +12,11 @@ interface SectionTitleProps {
 }
 const SectionTitle: React.FC<SectionTitleProps> = ({ title, subtitle }) => (
   <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900">
+    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900 dark:text-neutral-100"> {/* Added dark mode text */}
       {title}
       <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full"></span>
     </h2>
-    <p className="max-w-2xl mx-auto mt-6 text-neutral-600">{subtitle}</p>
+    <p className="max-w-2xl mx-auto mt-6 text-neutral-600 dark:text-neutral-400">{subtitle}</p> {/* Added dark mode text */}
   </div>
 );
 
@@ -66,7 +66,7 @@ const ContactSection: React.FC = () => {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-neutral-50" id="contact">
+    <section className="py-16 md:py-24 bg-neutral-50 dark:bg-neutral-900" id="contact"> {/* Added dark mode bg */}
       <div className="container mx-auto px-4">
         <SectionTitle
           title="Get In Touch"
@@ -110,34 +110,35 @@ const ContactSection: React.FC = () => {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="lg:col-span-2 bg-white p-8 rounded-lg shadow-lg"
+            className="lg:col-span-2 bg-white dark:bg-neutral-800 p-8 rounded-lg shadow-lg" // Added dark mode bg
           >
-            <h3 className="text-2xl font-bold mb-6 text-neutral-900">Send Us a Message</h3>
+            <h3 className="text-2xl font-bold mb-6 text-neutral-900 dark:text-neutral-100">Send Us a Message</h3> {/* Added dark mode text */}
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div className="form-group">
-                  <label htmlFor="name" className="form-label block mb-2 text-sm font-medium text-neutral-700">Your Name *</label>
-                  <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" required />
+                  <label htmlFor="name" className="form-label block mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">Your Name *</label> {/* Added dark mode text */}
+                  <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" required /> {/* Added dark mode styles */}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="email" className="form-label block mb-2 text-sm font-medium text-neutral-700">Your Email *</label>
-                  <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" required />
+                  <label htmlFor="email" className="form-label block mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">Your Email *</label> {/* Added dark mode text */}
+                  <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" required /> {/* Added dark mode styles */}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="phone" className="form-label block mb-2 text-sm font-medium text-neutral-700">Phone Number</label>
-                  <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" />
+                  <label htmlFor="phone" className="form-label block mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">Phone Number</label> {/* Added dark mode text */}
+                  <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" /> {/* Added dark mode styles */}
                 </div>
                 <div className="form-group">
-                  <label htmlFor="subject" className="form-label block mb-2 text-sm font-medium text-neutral-700">Subject</label>
-                  <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" />
+                  <label htmlFor="subject" className="form-label block mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">Subject</label> {/* Added dark mode text */}
+                  <input type="text" id="subject" name="subject" value={formData.subject} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" /> {/* Added dark mode styles */}
                 </div>
                 <div className="form-group md:col-span-2">
-                  <label htmlFor="message" className="form-label block mb-2 text-sm font-medium text-neutral-700">Your Message *</label>
-                  <textarea id="message" name="message" value={formData.message} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" rows={5} required></textarea>
+                  <label htmlFor="message" className="form-label block mb-2 text-sm font-medium text-neutral-700 dark:text-neutral-300">Your Message *</label> {/* Added dark mode text */}
+                  <textarea id="message" name="message" value={formData.message} onChange={handleChange} className="form-control w-full px-4 py-2 border border-neutral-300 dark:border-neutral-600 bg-white dark:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-lg focus:ring-primary-500 focus:border-primary-500 transition duration-300" rows={5} required></textarea> {/* Added dark mode styles */}
                 </div>
               </div>
               <div className="mt-6">
-                <button type="submit" className="btn btn-primary btn-lg w-full md:w-auto" disabled={isSubmitting}>
+                 {/* Assuming Button component exists and handles dark mode */}
+                <button type="submit" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 disabled:opacity-50" disabled={isSubmitting}>
                   {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
               </div>
@@ -162,6 +163,7 @@ const ContactSection: React.FC = () => {
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             title="Office Location Map"
+            className="dark:filter dark:grayscale dark:contrast-125 dark:invert" // Added dark mode map styles
           ></iframe>
         </motion.div>
       </div>

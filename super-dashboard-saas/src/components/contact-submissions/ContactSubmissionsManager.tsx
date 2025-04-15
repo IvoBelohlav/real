@@ -73,68 +73,90 @@ const ContactSubmissionsManager: React.FC = () => {
   }
 
   if (isError) {
-    return <div className="text-red-600 bg-red-100 p-4 rounded">Error loading submissions: {error?.message}</div>;
+    // Dark theme error styling
+    return <div className="text-red-500 bg-red-900/20 border border-red-500/50 p-4 rounded-md">Error loading submissions: {error?.message}</div>;
   }
 
   return (
-    <div className="space-y-6">
-       <h2 className="text-xl font-semibold text-gray-800">Received Submissions</h2>
-      {/* Submissions List/Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        {submissions && submissions.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted At</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {submissions.map((sub) => (
-                  <tr key={sub.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(sub.submittedAt)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{sub.email}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{sub.phone || '-'}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500 max-w-md whitespace-normal">{sub.message}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        sub.completed ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {sub.completed ? 'Completed' : 'Pending'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                      <button
-                        onClick={() => handleToggleComplete(sub)}
-                        disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.id === sub.id}
-                        className="text-indigo-600 hover:text-indigo-900 disabled:opacity-50"
-                        title={sub.completed ? 'Mark as Pending' : 'Mark as Completed'}
-                      >
-                        {sub.completed ? 'Undo' : 'Complete'}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(sub.id)}
-                        disabled={deleteSubmissionMutation.isPending && deleteSubmissionMutation.variables === sub.id}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                      >
-                        Delete
-                      </button>
-                    </td>
+    // Use background for the page area if needed, card provides the main container bg
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8"> {/* Added padding consistent with dashboard pages */}
+       {/* Heading styling - standard dashboard heading */}
+       <h2 className="text-2xl font-bold tracking-tight text-foreground">Contact Form Submissions</h2>
+       <p className="text-muted-foreground">View messages submitted through the contact form in the chat widget.</p>
+
+      {/* Card styling - Target: Black background with purple border */}
+      <div className="bg-black text-card-foreground rounded-lg border-2 border-primary"> {/* Explicit black background, purple border */}
+        {/* Optional Card Header */}
+        {/* <div className="flex flex-col space-y-1.5 p-6">
+          <h3 className="text-lg font-semibold leading-none tracking-tight">Received Submissions</h3>
+        </div> */}
+
+        {/* Card Content */}
+        <div className="p-0"> {/* Remove padding if table handles it */}
+          {submissions && submissions.length > 0 ? (
+            <div className="overflow-x-auto">
+              {/* Table styling */}
+              <table className="w-full caption-bottom text-sm"> {/* Use w-full for better responsiveness */}
+                {/* Table header styling */}
+                <thead className="[&_tr]:border-b"> {/* shadcn thead style */}
+                  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"> {/* shadcn tr style */}
+                    {/* Header cell styling */}
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Submitted At</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Email</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Phone</th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 max-w-xs">Message</th> {/* Added max-w */}
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Status</th>
+                    <th className="h-12 px-4 align-middle font-medium text-muted-foreground text-right">Actions</th> {/* Adjusted alignment */}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p className="text-center text-gray-500 py-6">No contact submissions found.</p>
-        )}
-      </div>
-    </div>
+                </thead>
+                {/* Table body styling */}
+                <tbody className="[&_tr:last-child]:border-0"> {/* shadcn tbody style */}
+                  {submissions.map((sub) => (
+                    // Table row styling
+                    <tr key={sub.id} className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"> {/* shadcn tr style */}
+                      {/* Table cell styling */}
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 whitespace-nowrap text-muted-foreground">{formatDate(sub.submittedAt)}</td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 whitespace-nowrap text-foreground">{sub.email}</td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 whitespace-nowrap text-muted-foreground">{sub.phone || '-'}</td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 text-muted-foreground max-w-xs whitespace-normal break-words">{sub.message}</td> {/* Added break-words */}
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 whitespace-nowrap">
+                        {/* Badge styling - Keeping existing distinct colors for clarity */}
+                        <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full border ${ // Adjusted padding/size slightly
+                          sub.completed ? 'bg-green-900/30 text-green-400 border-green-700/50' : 'bg-yellow-900/30 text-yellow-400 border-yellow-700/50'
+                        }`}>
+                          {sub.completed ? 'Completed' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 whitespace-nowrap text-right space-x-2"> {/* Adjusted alignment */}
+                        {/* Button styling - Using text variants */}
+                        <button
+                          onClick={() => handleToggleComplete(sub)}
+                          disabled={updateStatusMutation.isPending && updateStatusMutation.variables?.id === sub.id}
+                          className="text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium" // Ensure font size/weight
+                          title={sub.completed ? 'Mark as Pending' : 'Mark as Completed'}
+                        >
+                          {sub.completed ? 'Undo' : 'Complete'}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(sub.id)}
+                          disabled={deleteSubmissionMutation.isPending && deleteSubmissionMutation.variables === sub.id}
+                          className="text-destructive hover:text-destructive/80 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium" // Ensure font size/weight
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            // Apply dark theme muted text style within card padding
+            <p className="text-center text-muted-foreground p-6">No contact submissions found.</p>
+          )}
+        </div> {/* End Card Content */}
+      </div> {/* End Card */}
+    </div> // End Main Container
   );
 };
 

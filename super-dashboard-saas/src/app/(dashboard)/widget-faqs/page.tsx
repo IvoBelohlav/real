@@ -18,19 +18,18 @@ export default function WidgetFAQsPage() {
     );
   }
 
-  // Render subscription required message if not active
+  // Render subscription required message if not active - Apply dark theme styles
   // Adjust this check based on whether FAQ management requires a subscription
   if (!hasActiveSubscription) {
     return (
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6">Widget FAQs</h1>
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded" role="alert">
-          <p className="font-bold">Subscription Required</p>
-          <p>You need an active subscription to manage Widget FAQs.</p>
-          <Link href="/billing">
-            <span className="mt-2 inline-block text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer">
+      <div className="space-y-6"> {/* Added spacing */}
+        <h1 className="text-2xl font-semibold text-foreground mb-6">Widget FAQs</h1>
+        {/* Use card styling with warning colors */}
+        <div className="bg-card border-l-4 border-yellow-500 text-yellow-500 p-4 rounded shadow-md" role="alert">
+          <p className="font-bold text-foreground">Subscription Required</p>
+          <p className="text-muted-foreground">You need an active subscription to manage Widget FAQs.</p>
+          <Link href="/billing" className="mt-2 inline-block text-primary hover:text-primary/80 font-semibold cursor-pointer">
               View Subscription Plans
-            </span>
           </Link>
         </div>
       </div>
@@ -38,14 +37,15 @@ export default function WidgetFAQsPage() {
   }
 
   return (
-    <div className="space-y-6"> {/* Added space-y */}
-      <h1 className="text-2xl font-semibold text-gray-900">Manage Widget FAQs</h1>
-      <p className="text-gray-600">
+    <div className="space-y-6">
+      {/* Apply dark theme text colors */}
+      <h1 className="text-2xl font-semibold text-foreground">Manage Widget FAQs</h1>
+      <p className="text-muted-foreground">
         Add, edit, or remove Frequently Asked Questions that can be displayed or searched within the chat widget.
       </p>
-      {/* Render the manager component inside a card */}
-      <div className="bg-white shadow rounded-lg p-6">
-         <WidgetFAQManager />
+      {/* Render the manager component inside a dark theme card */}
+      <div className="bg-card shadow rounded-lg p-6 border border-border">
+         <WidgetFAQManager /> {/* This component will need styling too */}
       </div>
     </div>
   );

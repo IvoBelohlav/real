@@ -22,7 +22,7 @@ const parseOptionalFloat = (value: string | number | null | undefined): number |
   return isNaN(num) ? null : num;
 };
 
-// Simple Tag Input Component (Copied for consistency)
+// Simple Tag Input Component (Updated for black/purple theme)
 const TagInput: React.FC<{
   label: string;
   tags: string[];
@@ -60,16 +60,16 @@ const TagInput: React.FC<{
 
   return (
     <div className="mb-4">
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-        <div className="flex flex-wrap gap-1 p-2 flex-grow bg-white rounded-l-md">
+      <label htmlFor={inputId} className="block text-sm font-medium text-white mb-1">{label}</label>
+      <div className="flex items-center border border-[#333333] rounded-md shadow-sm focus-within:ring-1 focus-within:ring-purple-500 focus-within:border-purple-500">
+        <div className="flex flex-wrap gap-1 p-2 flex-grow bg-black rounded-l-md">
             {tags.map((tag, index) => (
-              <span key={index} className="flex items-center bg-indigo-100 text-indigo-700 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              <span key={index} className="flex items-center bg-purple-900/40 text-purple-300 text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {tag}
                 <button
                   type="button"
                   onClick={() => removeTag(index)}
-                  className="ml-1.5 text-indigo-500 hover:text-indigo-700 focus:outline-none"
+                  className="ml-1.5 text-purple-300 hover:text-white focus:outline-none"
                   aria-label={`Remove ${tag}`}
                 >
                   <X size={12} />
@@ -83,13 +83,13 @@ const TagInput: React.FC<{
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
               placeholder={placeholder}
-              className="flex-grow p-1 border-none focus:ring-0 focus:outline-none text-sm min-w-[100px]"
+              className="flex-grow p-1 border-none focus:ring-0 focus:outline-none text-sm min-w-[100px] bg-black text-white placeholder:text-gray-500"
             />
         </div>
          <button
             type="button"
             onClick={addTag}
-            className="px-3 py-2 text-gray-500 hover:text-indigo-600 focus:outline-none border-l border-gray-300 bg-gray-50 rounded-r-md"
+            className="px-3 py-2 text-gray-400 hover:text-purple-400 focus:outline-none border-l border-[#333333] bg-[#111111] rounded-r-md"
             aria-label={`Add ${label} tag`}
          >
             <Tag size={16} />
@@ -263,44 +263,44 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" data-intro="product-form"> {/* Added data-intro */}
+    <form onSubmit={handleSubmit} className="space-y-4" data-intro="product-form">
       {/* Product Name & AI Button */}
-      <div data-intro="product-name-field"> {/* Added data-intro */}
-        <label htmlFor="product_name" className="block text-sm font-medium text-gray-700">Product Name *</label>
+      <div data-intro="product-name-field">
+        <label htmlFor="product_name" className="block text-sm font-medium text-white">Product Name *</label>
         <div className="flex items-center space-x-2 mt-1">
             <input
               type="text" name="product_name" id="product_name" value={textData.product_name} onChange={handleTextChange} required
-              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="block w-full px-3 py-2 border border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-black text-white"
             />
             <button
                 type="button" onClick={handleGenerateSuggestions}
-                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium border border-blue-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={isAiLoading || !textData.product_name} // Disable if loading or no product name
+                className="px-3 py-2 bg-purple-900/40 text-purple-300 rounded-md hover:bg-purple-900/60 text-sm font-medium border border-purple-800/50 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isAiLoading || !textData.product_name}
                 title={!textData.product_name ? "Enter Product Name first" : "Generate AI Suggestions"}
              >
-                {isAiLoading ? <LoadingSpinner /> : <Sparkles size={16} />} {/* Removed size prop */}
+                {isAiLoading ? <LoadingSpinner /> : <Sparkles size={16} />}
                 <span>Suggest</span>
              </button>
         </div>
-         {aiError && <p className="text-xs text-red-600 mt-1">Suggestion Error: {aiError}</p>}
+         {aiError && <p className="text-xs text-red-400 mt-1">Suggestion Error: {aiError}</p>}
       </div>
 
       {/* Description */}
-      <div data-intro="product-description-field"> {/* Added data-intro */}
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description *</label>
-        <textarea name="description" id="description" rows={4} value={textData.description} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
+      <div data-intro="product-description-field">
+        <label htmlFor="description" className="block text-sm font-medium text-white">Description *</label>
+        <textarea name="description" id="description" rows={4} value={textData.description} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-black text-white"/>
       </div>
 
       {/* Category & Business Type */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div data-intro="product-category-field"> {/* Added data-intro */}
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category *</label>
-          <input type="text" name="category" id="category" value={textData.category} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
+        <div data-intro="product-category-field">
+          <label htmlFor="category" className="block text-sm font-medium text-white">Category *</label>
+          <input type="text" name="category" id="category" value={textData.category} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-black text-white"/>
         </div>
-        <div data-intro="product-businesstype-field"> {/* Added data-intro */}
-          <label htmlFor="business_type" className="block text-sm font-medium text-gray-700">Business Type *</label>
+        <div data-intro="product-businesstype-field">
+          <label htmlFor="business_type" className="block text-sm font-medium text-white">Business Type *</label>
           {isLoadingBusinessTypes ? <LoadingSpinner /> : (
-            <select name="business_type" id="business_type" value={textData.business_type} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            <select name="business_type" id="business_type" value={textData.business_type} onChange={handleTextChange} required className="mt-1 block w-full px-3 py-2 border border-[#333333] bg-black rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-white">
               <option value="" disabled>Select type</option>
               {businessTypes?.map((bt) => <option key={bt.id || bt.type} value={bt.type}>{bt.type}</option>)}
             </select>
@@ -309,29 +309,29 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
       </div>
 
       {/* Features (Tag Input) */}
-      <div data-intro="product-features-field"> {/* Added data-intro */}
+      <div data-intro="product-features-field">
         <TagInput label="Features" tags={features} setTags={setFeatures} placeholder="Add feature..." helperText="Key product features." idSuffix="prod-features"/>
       </div>
 
       {/* Pricing */}
-       <fieldset className="border border-gray-300 p-3 rounded-md" data-intro="product-pricing-field"> {/* Added data-intro */}
-         <legend className="text-sm font-medium text-gray-700 px-1">Pricing</legend>
+       <fieldset className="border border-[#333333] p-3 rounded-md bg-[#111111]" data-intro="product-pricing-field">
+         <legend className="text-sm font-medium text-white px-1">Pricing</legend>
          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-                <label htmlFor="one_time_price" className="block text-xs font-medium text-gray-600">One-Time</label>
-                <input type="number" step="0.01" name="one_time_price" id="one_time_price" value={textData.one_time_price} onChange={handleTextChange} className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-sm"/>
+                <label htmlFor="one_time_price" className="block text-xs font-medium text-gray-400">One-Time</label>
+                <input type="number" step="0.01" name="one_time_price" id="one_time_price" value={textData.one_time_price} onChange={handleTextChange} className="mt-1 block w-full px-2 py-1 border border-[#333333] rounded-md shadow-sm sm:text-sm bg-black text-white"/>
             </div>
             <div>
-                <label htmlFor="monthly_price" className="block text-xs font-medium text-gray-600">Monthly</label>
-                <input type="number" step="0.01" name="monthly_price" id="monthly_price" value={textData.monthly_price} onChange={handleTextChange} className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-sm"/>
+                <label htmlFor="monthly_price" className="block text-xs font-medium text-gray-400">Monthly</label>
+                <input type="number" step="0.01" name="monthly_price" id="monthly_price" value={textData.monthly_price} onChange={handleTextChange} className="mt-1 block w-full px-2 py-1 border border-[#333333] rounded-md shadow-sm sm:text-sm bg-black text-white"/>
             </div>
             <div>
-                <label htmlFor="annual_price" className="block text-xs font-medium text-gray-600">Annual</label>
-                <input type="number" step="0.01" name="annual_price" id="annual_price" value={textData.annual_price} onChange={handleTextChange} className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-sm"/>
+                <label htmlFor="annual_price" className="block text-xs font-medium text-gray-400">Annual</label>
+                <input type="number" step="0.01" name="annual_price" id="annual_price" value={textData.annual_price} onChange={handleTextChange} className="mt-1 block w-full px-2 py-1 border border-[#333333] rounded-md shadow-sm sm:text-sm bg-black text-white"/>
             </div>
             <div>
-                <label htmlFor="currency" className="block text-xs font-medium text-gray-600">Currency</label>
-                <input type="text" name="currency" id="currency" value={textData.currency} onChange={handleTextChange} required className="mt-1 block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm sm:text-sm"/>
+                <label htmlFor="currency" className="block text-xs font-medium text-gray-400">Currency</label>
+                <input type="text" name="currency" id="currency" value={textData.currency} onChange={handleTextChange} required className="mt-1 block w-full px-2 py-1 border border-[#333333] rounded-md shadow-sm sm:text-sm bg-black text-white"/>
             </div>
          </div>
        </fieldset>
@@ -345,27 +345,27 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
       {/* URL & Priority */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="url" className="block text-sm font-medium text-gray-700">Product URL</label>
-          <input type="url" name="url" id="url" value={textData.url} onChange={handleTextChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
+          <label htmlFor="url" className="block text-sm font-medium text-white">Product URL</label>
+          <input type="url" name="url" id="url" value={textData.url} onChange={handleTextChange} className="mt-1 block w-full px-3 py-2 border border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-black text-white"/>
         </div>
         <div>
-          <label htmlFor="admin_priority" className="block text-sm font-medium text-gray-700">Admin Priority (0-10)</label>
-          <input type="number" name="admin_priority" id="admin_priority" min="0" max="10" value={textData.admin_priority} onChange={handleTextChange} className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"/>
+          <label htmlFor="admin_priority" className="block text-sm font-medium text-white">Admin Priority (0-10)</label>
+          <input type="number" name="admin_priority" id="admin_priority" min="0" max="10" value={textData.admin_priority} onChange={handleTextChange} className="mt-1 block w-full px-3 py-2 border border-[#333333] rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm bg-black text-white"/>
         </div>
       </div>
 
       {/* Image Upload */}
-      <div data-intro="product-image-field"> {/* Added data-intro */}
-        <label htmlFor="image_file" className="block text-sm font-medium text-gray-700">Product Image</label>
+      <div data-intro="product-image-field">
+        <label htmlFor="image_file" className="block text-sm font-medium text-white">Product Image</label>
         <div className="mt-1 flex items-center space-x-4">
             <input
-              type="file" name="image_file" id="image_file" accept="image/webp" onChange={handleImageChange} // Changed accept to image/webp
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              type="file" name="image_file" id="image_file" accept="image/webp" onChange={handleImageChange}
+              className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-900/40 file:text-purple-300 hover:file:bg-purple-900/60"
             />
             {imagePreview && (
               <div className="flex items-center space-x-2">
-                <img src={imagePreview} alt="Preview" className="h-16 w-16 rounded-md border border-gray-300 object-cover" />
-                 <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="text-xs text-red-600 hover:text-red-800" title="Remove Image">
+                <img src={imagePreview} alt="Preview" className="h-16 w-16 rounded-md border border-[#333333] object-cover" />
+                 <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="text-xs text-red-400 hover:text-red-300" title="Remove Image">
                     <X size={16}/>
                  </button>
               </div>
@@ -374,11 +374,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSubmit, onCancel, 
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-6">
-        <button type="button" onClick={onCancel} disabled={isLoading} className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium disabled:opacity-50">
+      <div className="flex justify-end space-x-3 pt-4 border-t border-[#333333] mt-6">
+        <button type="button" onClick={onCancel} disabled={isLoading} className="px-4 py-2 bg-black text-white rounded-md hover:bg-[#111111] text-sm font-medium disabled:opacity-50 border border-[#333333]">
           Cancel
         </button>
-        <button type="submit" disabled={isLoading || isLoadingBusinessTypes} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]" data-intro="product-submit-button"> {/* Added data-intro */}
+        <button type="submit" disabled={isLoading || isLoadingBusinessTypes} className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[120px]" data-intro="product-submit-button">
           {isLoading ? <LoadingSpinner /> : (
               <>
                 {product ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />}

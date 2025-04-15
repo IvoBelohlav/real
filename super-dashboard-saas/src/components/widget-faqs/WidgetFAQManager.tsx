@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import WidgetFAQList from './WidgetFAQList';
 import AddWidgetFAQForm from './AddWidgetFAQForm';
 import EditWidgetFAQForm from './EditWidgetFAQForm';
+import CustomTooltip from '@/components/shared/CustomTooltip'; // Import the tooltip
 import { PlusCircle, RefreshCw, HelpCircle, MessageSquareText, X, AlertTriangle } from 'lucide-react';
 
 // Modal component with animations
@@ -33,20 +34,21 @@ const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; chi
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed inset-0 z-50 flex justify-center items-center p-4 pointer-events-none"
           >
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden pointer-events-auto">
-              <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-blue-100">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                  <HelpCircle className="mr-2 h-5 w-5 text-blue-600" />
+            {/* Apply dark theme styles to Modal */}
+            <div className="bg-card rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden pointer-events-auto border border-border">
+              <div className="flex justify-between items-center px-6 py-4 border-b border-border bg-card"> {/* Use card bg, border */}
+                <h3 className="text-lg font-semibold text-foreground flex items-center"> {/* Use foreground text */}
+                  <HelpCircle className="mr-2 h-5 w-5 text-primary" /> {/* Use primary color */}
                   {title}
                 </h3>
                 <button 
                   onClick={onClose} 
-                  className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="text-muted-foreground hover:text-foreground hover:bg-secondary rounded-full p-1 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring" // Dark theme button styles
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
-              <div className="max-h-[75vh] overflow-y-auto p-6">
+              <div className="max-h-[75vh] overflow-y-auto p-6 bg-background"> {/* Use background color */}
                 {children}
               </div>
             </div>
@@ -182,9 +184,10 @@ const WidgetFAQManager: React.FC = () => {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center p-6 bg-red-50 text-red-700 rounded-xl border border-red-200 shadow-sm"
+        // Apply dark theme error styles
+        className="flex items-center p-6 bg-destructive/10 text-destructive rounded-xl border border-destructive/30 shadow-sm"
       >
-        <AlertTriangle className="h-6 w-6 mr-3 text-red-500 flex-shrink-0" />
+        <AlertTriangle className="h-6 w-6 mr-3 text-destructive flex-shrink-0" />
         <p className="font-medium">Error loading FAQs: {error?.message}</p>
       </motion.div>
     );
@@ -197,16 +200,16 @@ const WidgetFAQManager: React.FC = () => {
       animate="visible"
       className="space-y-6"
     >
-      {/* Header section with title and buttons */}
+      {/* Header section with title and buttons - Apply dark theme styles */}
       <motion.div 
         variants={itemVariants}
-        className="flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-xl bg-white p-5 shadow-md border border-gray-200"
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center rounded-xl bg-card p-5 shadow-md border border-border"
       >
         <div className="flex items-center mb-4 sm:mb-0">
-          <MessageSquareText className="h-6 w-6 text-blue-600 mr-3" />
+          <MessageSquareText className="h-6 w-6 text-primary mr-3" /> {/* Use primary color */}
           <div>
-            <h2 className="text-xl font-bold text-gray-800">Widget FAQs</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-xl font-bold text-foreground">Widget FAQs</h2>
+            <p className="text-sm text-muted-foreground mt-1">
               Manage frequently asked questions that appear in the widget.
             </p>
           </div>
@@ -217,24 +220,26 @@ const WidgetFAQManager: React.FC = () => {
             whileTap="tap"
             variants={buttonVariants}
             onClick={handleRefresh}
-            className="px-3 py-2 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-lg shadow-sm hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 inline-flex items-center transition-colors duration-200"
+            // Dark theme secondary button style
+            className="px-3 py-2 text-sm font-medium text-secondary-foreground bg-secondary border border-border rounded-lg shadow-sm hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 inline-flex items-center transition-colors duration-200"
             disabled={isLoading}
             title="Refresh FAQs"
           >
             <RefreshCw size={16} className={`mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </motion.button>
-          <motion.button
-            whileHover="hover"
-            whileTap="tap"
-            variants={buttonVariants}
-            onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium inline-flex items-center shadow-md transition-colors duration-200"
-          >
-            <PlusCircle size={16} className="mr-1.5" />
-            Add New FAQ
-          </motion.button>
+          <CustomTooltip content="Create a new Frequently Asked Question for the widget">
+            <motion.button
+              onClick={() => setIsAddModalOpen(true)}
+              // Dark theme primary button style
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 text-sm font-medium inline-flex items-center shadow-md transition-colors duration-200"
+            >
+              <PlusCircle size={16} className="mr-1.5" />
+              Add New FAQ
+            </motion.button>
+          </CustomTooltip>
         </div>
+        
       </motion.div>
 
       {/* FAQ List */}

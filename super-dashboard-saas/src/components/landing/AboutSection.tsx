@@ -13,11 +13,11 @@ interface SectionTitleProps {
 }
 const SectionTitle: React.FC<SectionTitleProps> = ({ title, subtitle }) => (
   <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900">
+    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900 dark:text-neutral-100"> {/* Added dark mode text */}
       {title}
       <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full"></span>
     </h2>
-    <p className="max-w-2xl mx-auto mt-6 text-neutral-600">{subtitle}</p>
+    <p className="max-w-2xl mx-auto mt-6 text-neutral-600 dark:text-neutral-400">{subtitle}</p> {/* Added dark mode text */}
   </div>
 );
 
@@ -35,14 +35,14 @@ const ValueItem: React.FC<ValueItemProps> = ({ icon, title, text, delay = 0 }) =
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true, amount: 0.3 }}
     transition={{ duration: 0.5, delay }}
-    className="flex items-start bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+    className="flex items-start bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300" // Added dark mode bg
   >
     <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 text-white flex items-center justify-center mr-4 text-xl">
       {icon}
     </div>
     <div>
-      <h3 className="text-xl font-bold mb-2 text-neutral-900">{title}</h3>
-      <p className="text-neutral-600 leading-relaxed">{text}</p>
+      <h3 className="text-xl font-bold mb-2 text-neutral-900 dark:text-neutral-100">{title}</h3> {/* Added dark mode text */}
+      <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed">{text}</p> {/* Added dark mode text */}
     </div>
   </motion.div>
 );
@@ -64,7 +64,7 @@ const AboutSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-white" id="about">
+    <section className="py-16 md:py-24 bg-white dark:bg-neutral-900" id="about"> {/* Added dark mode bg */}
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Image */}
@@ -81,6 +81,7 @@ const AboutSection: React.FC = () => {
               width={600}
               height={500}
               className="rounded-lg shadow-xl object-cover"
+              unoptimized // Added for external placeholder
             />
             <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/70 to-transparent rounded-b-lg">
               <h3 className="text-white text-xl font-semibold">Pioneering AI Chat Solutions</h3>
@@ -94,30 +95,31 @@ const AboutSection: React.FC = () => {
             viewport={{ once: true, amount: 0.2 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-block text-sm font-semibold py-1 px-3 rounded-full bg-primary-100 text-primary-600 mb-4">
+            <span className="inline-block text-sm font-semibold py-1 px-3 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-300 mb-4"> {/* Added dark mode styles */}
               About Dvojkavit
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold mb-5 text-neutral-900 relative">
+            <h2 className="text-3xl md:text-4xl font-bold mb-5 text-neutral-900 dark:text-neutral-100 relative"> {/* Added dark mode text */}
               We Build Intelligent Conversation Experiences
               <span className="absolute bottom-[-10px] left-0 w-16 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full"></span>
             </h2>
-            <p className="text-neutral-600 mb-6 text-lg leading-relaxed">
+            <p className="text-neutral-600 dark:text-neutral-400 mb-6 text-lg leading-relaxed"> {/* Added dark mode text */}
               Dvojkavit was founded with the mission to revolutionize how businesses interact with their customers online. We leverage the power of artificial intelligence to create chatbots that are not just functional, but truly engaging and helpful.
             </p>
-            <p className="text-neutral-600 mb-8 leading-relaxed">
+            <p className="text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed"> {/* Added dark mode text */}
               Our team combines expertise in AI, natural language processing, and user experience design to build solutions that drive growth, improve efficiency, and delight users.
             </p>
 
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
               {stats.map((stat, index) => (
-                <div key={index} className="text-center p-3 bg-neutral-50 rounded-md">
-                  <div className="text-3xl font-bold text-primary-600 mb-1">{stat.number}</div>
-                  <div className="text-sm text-neutral-600">{stat.text}</div>
+                <div key={index} className="text-center p-3 bg-neutral-50 dark:bg-neutral-800 rounded-md"> {/* Added dark mode bg */}
+                  <div className="text-3xl font-bold text-primary-600 dark:text-primary-400 mb-1">{stat.number}</div> {/* Added dark mode text */}
+                  <div className="text-sm text-neutral-600 dark:text-neutral-400">{stat.text}</div> {/* Added dark mode text */}
                 </div>
               ))}
             </div>
-            <Link href="#contact" className="btn btn-primary">
+            {/* Assuming Button component exists and handles dark mode */}
+            <Link href="#contact" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
               Learn More About Us
             </Link>
           </motion.div>

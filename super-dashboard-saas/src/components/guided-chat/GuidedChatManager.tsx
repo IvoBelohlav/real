@@ -4,33 +4,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { fetchApi } from '@/lib/api';
-import { GuidedChatFlow, GuidedChatOption } from '@/types'; // Import the flow type
+import { GuidedChatFlow, GuidedChatOption } from '@/types'; 
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import GuidedFlowForm from './GuidedFlowForm';
-import { PlusCircle, RefreshCw, Upload, Download, Edit, Trash2, Home, AlertTriangle, FolderTree } from 'lucide-react'; // Ensure FolderTree is imported
-
-// Basic Modal structure (Re-using from previous examples)
-const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => {
-  if (!isOpen) return null;
-  return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center z-50 p-4">
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl p-6"> {/* Wider modal for flow form */}
-        <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
-        </div>
-        <div className="max-h-[75vh] overflow-y-auto pr-2">
-            {children}
-        </div>
-      </div>
-    </div>
-  );
-};
-
+import CustomTooltip from '@/components/shared/CustomTooltip'; // Import the tooltip
+import { PlusCircle, RefreshCw, Upload, Download, Edit, Trash2, Home, AlertTriangle, FolderTree, X } from 'lucide-react';
 
 const GuidedChatManager: React.FC = () => {
   const queryClient = useQueryClient();
-  const [editingFlow, setEditingFlow] = useState<GuidedChatFlow | null>(null); // Flow being edited/created
+  const [editingFlow, setEditingFlow] = useState<GuidedChatFlow | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mainFlowExists, setMainFlowExists] = useState(false);
 
@@ -49,7 +31,7 @@ const GuidedChatManager: React.FC = () => {
         console.warn("Guided Chat: 'main' flow not found. Consider creating it.");
       }
     }
-  }, [flows]); // Dependency array ensures this runs when flows data updates
+  }, [flows]);
 
   // --- Mutations ---
 
@@ -58,7 +40,7 @@ const GuidedChatManager: React.FC = () => {
      mutationFn: (newFlowData) => {
         // Ensure default options if creating 'main' flow
         const payload = newFlowData.name === 'main'
-            ? { name: 'main', options: [], ...newFlowData } // Add default options if needed
+            ? { name: 'main', options: [], ...newFlowData }
             : { name: `New Flow ${Date.now()}`, options: [], ...newFlowData };
         return fetchApi('/api/guided-flows', {
             method: 'POST',
@@ -69,7 +51,7 @@ const GuidedChatManager: React.FC = () => {
      onSuccess: (newFlow) => {
        queryClient.invalidateQueries({ queryKey: ['guidedFlows'] });
        toast.success(`Flow '${newFlow.name}' created! Opening editor...`);
-       setEditingFlow(newFlow); // Open editor with the newly created flow
+       setEditingFlow(newFlow);
      },
      onError: (error) => {
       toast.error(`Failed to create flow: ${error.message}`);
@@ -86,10 +68,9 @@ const GuidedChatManager: React.FC = () => {
     onSuccess: (updatedFlow) => {
       queryClient.invalidateQueries({ queryKey: ['guidedFlows'] });
       toast.success(`Flow '${updatedFlow.name}' updated successfully!`);
-      setEditingFlow(null); // Close modal on success
+      setEditingFlow(null);
     },
     onError: (error, variables) => {
-      // Ensure variables.data exists and has a name property before accessing it
       const flowName = variables?.data?.name || 'the flow';
       toast.error(`Failed to update ${flowName}: ${error.message}`);
     },
@@ -146,7 +127,6 @@ const GuidedChatManager: React.FC = () => {
      }
    });
 
-
   // --- Handlers ---
   const handleCreateNewFlow = () => {
      const flowName = prompt("Enter a name for the new flow (lowercase, numbers, underscores only):");
@@ -195,7 +175,6 @@ const GuidedChatManager: React.FC = () => {
 
   const handleSaveFlow = (flowData: Partial<GuidedChatFlow>) => {
     if (editingFlow?.id) {
-        // Add circular reference check here if desired before mutation
         updateFlowMutation.mutate({ flowId: editingFlow.id, data: flowData });
     } else {
         console.error("Save handler called without an editingFlow ID.");
@@ -205,106 +184,182 @@ const GuidedChatManager: React.FC = () => {
   const handleRefresh = () => { toast.info('Refreshing flows...'); refetch(); };
 
   // --- Render Logic ---
-
   const mainFlow = flows?.find((f: GuidedChatFlow) => f.name === 'main');
   const secondaryFlows = flows?.filter((f: GuidedChatFlow) => f.name !== 'main').sort((a: GuidedChatFlow, b: GuidedChatFlow) => a.name.localeCompare(b.name)) || [];
+
+  // Pure black modal with purple accents - defined inline
+  const Modal = ({ children }: { children: React.ReactNode }) => {
+    if (!editingFlow) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black/80 flex justify-center items-center z-50 p-4">
+        <div className="relative bg-black rounded-lg shadow-xl w-full max-w-3xl p-6 border border-[#333333]">
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-[#333333]">
+            <h3 className="text-lg font-semibold text-purple-400">
+              {editingFlow ? `Edit Flow: ${editingFlow.name}` : 'Flow Editor'}
+            </h3>
+            <button 
+              onClick={() => setEditingFlow(null)} 
+              className="text-gray-400 hover:text-white focus:outline-none"
+            >
+              <X size={24} />
+            </button>
+          </div>
+          <div className="max-h-[75vh] overflow-y-auto pr-2">
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-gray-800">Guided Chat Flows</h2>
-          <p className="text-sm text-gray-500 mt-1">Create and manage guided conversation paths for your chatbot.</p>
+          <h2 className="text-xl font-semibold text-white">Guided Chat Flows</h2>
+          <p className="text-sm text-gray-400 mt-1">Create and manage guided conversation paths for your chatbot.</p>
         </div>
-        <div className="flex items-center space-x-2 flex-shrink-0 flex-wrap gap-2"> {/* Added flex-wrap and gap */}
-           <input type="file" ref={fileInputRef} accept=".json" onChange={handleFileImport} style={{ display: 'none' }} />
-           <button onClick={handleImportClick} disabled={importFlowsMutation.isPending} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 inline-flex items-center">
-             <Upload size={14} className="mr-1" /> {importFlowsMutation.isPending ? 'Importing...' : 'Import'}
-           </button>
-           <button onClick={handleExport} disabled={exportFlowsMutation.isPending} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 inline-flex items-center">
-             <Download size={14} className="mr-1" /> {exportFlowsMutation.isPending ? 'Exporting...' : 'Export'}
-           </button>
-           <button onClick={handleRefresh} className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 inline-flex items-center" disabled={isLoading} title="Refresh Flows">
-             <RefreshCw size={14} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
-           </button>
-          <button onClick={handleCreateNewFlow} disabled={createFlowMutation.isPending} className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium inline-flex items-center shadow-sm disabled:opacity-50">
-            <PlusCircle size={16} className="mr-1" /> {createFlowMutation.isPending ? 'Creating...' : 'Add New Flow'}
-          </button>
+         <div className="flex items-center space-x-2 flex-shrink-0 flex-wrap gap-2">
+            <input type="file" ref={fileInputRef} accept=".json" onChange={handleFileImport} style={{ display: 'none' }} />
+            <CustomTooltip content="Import flows from a JSON file">
+              <button 
+                onClick={handleImportClick} 
+                disabled={importFlowsMutation.isPending} 
+                className="px-3 py-1.5 text-xs font-medium text-white bg-black border border-[#333333] rounded-md shadow-sm hover:bg-[#111111] disabled:opacity-50 inline-flex items-center"
+              >
+                <Upload size={14} className="mr-1" /> {importFlowsMutation.isPending ? 'Importing...' : 'Import'}
+              </button>
+            </CustomTooltip>
+            <CustomTooltip content="Export all flows to a JSON file">
+              <button 
+                onClick={handleExport} 
+                disabled={exportFlowsMutation.isPending} 
+                className="px-3 py-1.5 text-xs font-medium text-white bg-black border border-[#333333] rounded-md shadow-sm hover:bg-[#111111] disabled:opacity-50 inline-flex items-center"
+              >
+                <Download size={14} className="mr-1" /> {exportFlowsMutation.isPending ? 'Exporting...' : 'Export'}
+              </button>
+            </CustomTooltip>
+            <CustomTooltip content="Reload the list of flows">
+              <button 
+                onClick={handleRefresh} 
+                className="px-3 py-1.5 text-xs font-medium text-white bg-black border border-[#333333] rounded-md shadow-sm hover:bg-[#111111] disabled:opacity-50 inline-flex items-center" 
+                disabled={isLoading} 
+              >
+                <RefreshCw size={14} className={`mr-1 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
+              </button>
+            </CustomTooltip>
+            <CustomTooltip content="Create a new guided conversation flow">
+              <button 
+                onClick={handleCreateNewFlow} 
+                disabled={createFlowMutation.isPending} 
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 text-sm font-medium inline-flex items-center shadow-sm disabled:opacity-50"
+              >
+                <PlusCircle size={16} className="mr-1" /> {createFlowMutation.isPending ? 'Creating...' : 'Add New Flow'}
+              </button>
+            </CustomTooltip>
         </div>
       </div>
 
       {/* Loading/Error States */}
       {isLoading && <div className="flex justify-center p-10"><LoadingSpinner /></div>}
-      {isError && <div className="text-red-600 bg-red-100 p-4 rounded">Error loading flows: {error?.message}</div>}
+      {isError && <div className="text-red-400 bg-[#300000] p-4 rounded border border-red-900">Error loading flows: {error?.message}</div>}
 
       {/* Flow Lists - Render only if not loading and no error */}
       {!isLoading && !isError && (
         <div className="space-y-6">
           {/* Main Flow Section */}
           <div>
-            <h3 className="text-lg font-medium text-gray-700 mb-2 flex items-center"><Home size={18} className="mr-2 text-indigo-600"/> Main Flow</h3>
+            <h3 className="text-lg font-medium text-white mb-2 flex items-center">
+              <Home size={18} className="mr-2 text-purple-400"/> Main Flow
+            </h3>
             {mainFlow ? (
-              <div className="bg-white shadow rounded-md px-4 py-4 sm:px-6 flex justify-between items-center border border-gray-200">
+              <div className="bg-black shadow-md rounded-md px-4 py-4 sm:px-6 flex justify-between items-center border border-[#222222]">
                 <div>
-                  <p className="text-sm font-medium text-indigo-700 truncate">{mainFlow.name}</p>
-                  <p className="text-xs text-gray-500">{mainFlow.options?.length || 0} options (Entry point)</p>
-                </div>
-                <div className="space-x-2">
-                  <button onClick={() => setEditingFlow(mainFlow)} className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Edit</button>
-                  {/* Delete button is disabled for main flow */}
-                  <button className="text-gray-400 text-sm cursor-not-allowed" disabled title="Main flow cannot be deleted">Delete</button>
+                  <p className="text-sm font-medium text-white truncate">{mainFlow.name}</p>
+                  <p className="text-xs text-gray-400">{mainFlow.options?.length || 0} options (Entry point)</p>
+                 </div>
+                 <div className="space-x-2">
+                   <CustomTooltip content="Edit the main entry flow">
+                     <button 
+                       onClick={() => setEditingFlow(mainFlow)} 
+                       className="text-purple-400 hover:text-purple-300 text-sm font-medium inline-flex items-center"
+                     >
+                       <Edit size={14} className="mr-1" /> Edit
+                     </button>
+                   </CustomTooltip>
+                   {/* Delete button is disabled for main flow */}
+                   <CustomTooltip content="The main flow cannot be deleted">
+                     <button className="text-gray-500 text-sm cursor-not-allowed inline-flex items-center" disabled>
+                       <Trash2 size={14} className="mr-1" /> Delete
+                     </button>
+                   </CustomTooltip>
                 </div>
               </div>
             ) : (
-              <div className="text-center py-6 px-4 bg-yellow-50 rounded-md border border-dashed border-yellow-300 flex items-center justify-center text-yellow-700">
+              <div className="text-center py-6 px-4 bg-[#1a1005] rounded-md border border-dashed border-amber-900/50 flex items-center justify-center text-amber-400">
                  <AlertTriangle size={16} className="mr-2"/> No 'main' flow found. Create one named "main" to define the starting point.
-                 {/* Optionally add a button to create the main flow */}
-                 {/* <button onClick={() => createFlowMutation.mutate({ name: 'main' })} className="...">Create Main Flow</button> */}
               </div>
             )}
           </div>
 
           {/* Secondary Flows Section */}
           <div>
-            <h3 className="text-lg font-medium text-gray-700 mb-2 flex items-center"><FolderTree size={18} className="mr-2 text-gray-500"/> Secondary Flows</h3>
+            <h3 className="text-lg font-medium text-white mb-2 flex items-center">
+              <FolderTree size={18} className="mr-2 text-gray-400"/> Secondary Flows
+            </h3>
             {secondaryFlows.length > 0 ? (
-              <ul role="list" className="divide-y divide-gray-200 bg-white shadow rounded-md border border-gray-200">
+              <ul role="list" className="divide-y divide-[#222222] bg-black shadow-md rounded-md border border-[#222222]">
                 {secondaryFlows.map((flow) => (
-                  <li key={flow.id} className="px-4 py-4 sm:px-6 flex justify-between items-center hover:bg-gray-50">
+                  <li key={flow.id} className="px-4 py-4 sm:px-6 flex justify-between items-center hover:bg-[#111111]">
                     <div>
-                      <p className="text-sm font-medium text-gray-800 truncate">{flow.name}</p>
-                      <p className="text-xs text-gray-500">{flow.options?.length || 0} options</p>
-                    </div>
-                    <div className="space-x-2">
-                      <button onClick={() => setEditingFlow(flow)} className="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Edit</button>
-                      <button onClick={() => handleDeleteFlow(flow)} disabled={deleteFlowMutation.isPending && deleteFlowMutation.variables?.flowId === flow.id} className="text-red-600 hover:text-red-900 text-sm font-medium disabled:opacity-50">Delete</button>
+                      <p className="text-sm font-medium text-white truncate">{flow.name}</p>
+                      <p className="text-xs text-gray-400">{flow.options?.length || 0} options</p>
+                     </div>
+                     <div className="space-x-2">
+                       <CustomTooltip content={`Edit the '${flow.name}' flow`}>
+                         <button 
+                           onClick={() => setEditingFlow(flow)} 
+                           className="text-purple-400 hover:text-purple-300 text-sm font-medium inline-flex items-center"
+                         >
+                           <Edit size={14} className="mr-1" /> Edit
+                         </button>
+                       </CustomTooltip>
+                       <CustomTooltip content={`Delete the '${flow.name}' flow`}>
+                         <button 
+                           onClick={() => handleDeleteFlow(flow)} 
+                           disabled={deleteFlowMutation.isPending && deleteFlowMutation.variables?.flowId === flow.id} 
+                           className="text-red-400 hover:text-red-300 text-sm font-medium disabled:opacity-50 inline-flex items-center"
+                         >
+                           <Trash2 size={14} className="mr-1" /> Delete
+                         </button>
+                       </CustomTooltip>
                     </div>
                   </li>
                 ))}
               </ul>
             ) : (
-              <div className="text-center py-6 px-4 bg-gray-50 rounded-md border border-dashed border-gray-300">
-                <p className="text-gray-500">No secondary flows created yet.</p>
+              <div className="text-center py-6 px-4 bg-black rounded-md border border-dashed border-[#333333]">
+                <p className="text-gray-400">No secondary flows created yet.</p>
               </div>
             )}
           </div>
         </div>
       )}
 
-       {/* Flow Editor Modal */}
-       <Modal isOpen={!!editingFlow} onClose={() => setEditingFlow(null)} title={editingFlow ? `Edit Flow: ${editingFlow.name}` : 'Flow Editor'}>
-         {editingFlow && (
-            <GuidedFlowForm
-                flow={editingFlow}
-                allFlows={flows || []} // Pass all flows array to the prop
-                onSave={handleSaveFlow}
-                onCancel={() => setEditingFlow(null)}
-                isLoading={updateFlowMutation.isPending}
-            />
-         )}
-       </Modal>
-
+      {/* Flow Editor Modal - Render conditionally with black background */}
+      {editingFlow && (
+        <Modal>
+          <GuidedFlowForm
+            flow={editingFlow}
+            allFlows={flows || []} 
+            onSave={handleSaveFlow}
+            onCancel={() => setEditingFlow(null)}
+            isLoading={updateFlowMutation.isPending}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

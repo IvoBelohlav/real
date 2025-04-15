@@ -1,155 +1,140 @@
-'use client';
+'use client'; // Added 'use client'
 
 import React from 'react';
 import Link from 'next/link';
-import { FaBolt, FaMapMarkerAlt, FaPhone, FaEnvelope, FaClock, FaFacebookF, FaTwitter, FaLinkedinIn, FaInstagram, FaArrowUp } from 'react-icons/fa';
+import { FaRobot, FaTwitter, FaGithub, FaLinkedinIn, FaInstagram, FaArrowUp, FaDiscord } from 'react-icons/fa';
+import { Globe, Mail, MessageSquare, ArrowRight } from 'lucide-react';
 
 const Footer: React.FC = () => {
-
   const scrollToTop = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    const targetId = e.currentTarget.getAttribute('href');
-    const targetElement = targetId ? document.querySelector(targetId) : null;
-
-    if (targetElement) {
-      window.scrollTo({
-        top: targetElement.getBoundingClientRect().top + window.scrollY - 100, // Adjust offset if needed
-        behavior: 'smooth',
-      });
-    } else {
-       window.scrollTo({ top: 0, behavior: 'smooth' }); // Fallback for #header or if target not found
-    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const footerLinks = {
-    services: [
-      { href: '#services', label: 'AI Chatbot Development' },
-      { href: '#services', label: 'Lead Generation Bot' },
-      { href: '#services', label: 'Support Automation' },
-      { href: '#services', label: 'Implementation Setup' },
-      { href: '#services', label: 'Integration Services' },
-      { href: '#services', label: 'Analytics & Optimization' },
-    ],
-    company: [
-      { href: '#about', label: 'About Us' },
-      { href: '#portfolio', label: 'Use Cases' },
-      { href: '#testimonials', label: 'Testimonials' },
-      { href: '#pricing', label: 'Pricing' },
-      { href: '#faq', label: 'FAQ' },
-      { href: '#contact', label: 'Contact Us' },
-    ],
-  };
-
-  const socialLinks = [
-    { href: '#', label: 'Facebook', icon: <FaFacebookF /> },
-    { href: '#', label: 'Twitter', icon: <FaTwitter /> },
-    { href: '#', label: 'LinkedIn', icon: <FaLinkedinIn /> },
-    { href: '#', label: 'Instagram', icon: <FaInstagram /> },
+  const footerLinks = [
+    {
+      title: "Platform",
+      links: [
+        { label: "Studio", href: "#" },
+        { label: "App Library", href: "#" },
+        { label: "Integrations", href: "#" },
+        { label: "API", href: "#" },
+        { label: "Extensions", href: "#" },
+      ]
+    },
+    {
+      title: "Resources",
+      links: [
+        { label: "Documentation", href: "#" },
+        { label: "Knowledge Base", href: "#" },
+        { label: "Blog", href: "#" },
+        { label: "Community", href: "#" },
+        { label: "Changelog", href: "#" },
+      ]
+    },
+    {
+      title: "Company",
+      links: [
+        { label: "About Us", href: "#" },
+        { label: "Careers", href: "#" },
+        { label: "Privacy Policy", href: "#" },
+        { label: "Terms of Service", href: "#" },
+        { label: "Contact", href: "#" },
+      ]
+    },
   ];
 
   return (
-    <footer className="bg-neutral-900 text-neutral-400 pt-16 pb-8 relative">
-      <div className="container mx-auto px-4">
-        {/* Footer Top */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 pb-12 border-b border-neutral-800 mb-8">
-          {/* About Column */}
-          <div>
-            <Link href="#home" onClick={scrollToTop} className="inline-flex items-center text-2xl font-bold text-white mb-4">
-              <FaBolt className="mr-2 text-primary-500" />
-              dvojkavit
+    <footer className="bg-black border-t border-purple-600/30 pt-16 pb-8">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
+          {/* Company Info */}
+          <div className="md:col-span-2">
+            <Link href="#" className="flex items-center mb-6">
+              <div className="bg-purple-900 p-1.5 rounded-lg mr-2">
+                <FaRobot className="h-5 w-5 text-purple-300" />
+              </div>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-300 to-violet-400">
+                ChatWidget
+              </span>
             </Link>
-            <p className="text-sm leading-relaxed mb-6">
-              Dvojkavit provides intelligent AI chatbot solutions to automate support, generate leads, and enhance user engagement for businesses worldwide.
+            <p className="text-neutral-400 mb-6 max-w-md">
+              Advanced AI-powered chat widget for businesses of every size — customize, deploy,
+              and engage with customers instantly.
             </p>
-            <div className="flex space-x-3">
-              {socialLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  aria-label={link.label}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-neutral-800 hover:bg-primary-500 text-neutral-300 hover:text-white flex items-center justify-center transition-all duration-300 transform hover:-translate-y-1"
-                >
-                  {link.icon}
-                </a>
-              ))}
+            <div className="flex space-x-4 mb-8">
+              <Link href="#" className="text-neutral-500 hover:text-purple-400 transition-colors duration-300">
+                <FaTwitter className="h-5 w-5" />
+              </Link>
+              <Link href="#" className="text-neutral-500 hover:text-purple-400 transition-colors duration-300">
+                <FaGithub className="h-5 w-5" />
+              </Link>
+              <Link href="#" className="text-neutral-500 hover:text-purple-400 transition-colors duration-300">
+                <FaLinkedinIn className="h-5 w-5" />
+              </Link>
+              <Link href="#" className="text-neutral-500 hover:text-purple-400 transition-colors duration-300">
+                <FaDiscord className="h-5 w-5" />
+              </Link>
+            </div>
+            <div className="relative">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full bg-black/30 backdrop-blur-sm border border-purple-600/30 rounded-full px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500 pr-12"
+              />
+              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gradient-to-r from-purple-600 to-violet-600 text-white p-1.5 rounded-full hover:from-purple-700 hover:to-violet-700 transition-colors">
+                <ArrowRight className="h-4 w-4" />
+              </button>
             </div>
           </div>
 
-          {/* Services Links */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Services</h4>
-            <ul className="space-y-2">
-              {footerLinks.services.map((link) => (
-                <li key={link.label}>
-                  <Link href={link.href} onClick={scrollToTop} className="text-sm hover:text-white transition-colors duration-300 py-1 block">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company Links */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Company</h4>
-            <ul className="space-y-2">
-              {footerLinks.company.map((link) => (
-                <li key={link.label}>
-                  <Link href={link.href} onClick={scrollToTop} className="text-sm hover:text-white transition-colors duration-300 py-1 block">
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Contact Us</h4>
-            <ul className="space-y-3 text-sm">
-              <li className="flex items-start">
-                <FaMapMarkerAlt className="text-primary-500 mr-3 mt-1 flex-shrink-0" />
-                <span>123 AI Street, Future City, FC 54321</span>
-              </li>
-              <li className="flex items-start">
-                <FaPhone className="text-primary-500 mr-3 mt-1 flex-shrink-0" />
-                <a href="tel:+15551234567" className="hover:text-white transition-colors duration-300">+1 (555) 123-4567</a>
-              </li>
-              <li className="flex items-start">
-                <FaEnvelope className="text-primary-500 mr-3 mt-1 flex-shrink-0" />
-                <a href="mailto:support@dvojkavit.com" className="hover:text-white transition-colors duration-300">support@dvojkavit.com</a>
-              </li>
-              <li className="flex items-start">
-                <FaClock className="text-primary-500 mr-3 mt-1 flex-shrink-0" />
-                <span>Mon - Fri: 9:00 AM - 5:00 PM</span>
-              </li>
-            </ul>
-          </div>
+          {/* Links */}
+          {footerLinks.map((section, i) => (
+            <div key={i}>
+              <h3 className="text-white font-medium mb-4">{section.title}</h3>
+              <ul className="space-y-3">
+                {section.links.map((link, j) => (
+                  <li key={j}>
+                    <Link
+                      href={link.href}
+                      className="text-neutral-400 hover:text-purple-400 transition-colors duration-300"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        {/* Footer Bottom */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-          <p className="text-sm text-neutral-500 mb-4 md:mb-0">
-            © {new Date().getFullYear()} Dvojkavit. All rights reserved.
+        <div className="mt-16 pt-8 border-t border-purple-600/20 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-neutral-500 text-sm mb-4 md:mb-0">
+            © {new Date().getFullYear()} ChatWidget. All rights reserved.
           </p>
-          <div className="flex space-x-4">
-            {/* Replace # with actual links if available */}
-            <Link href="/privacy-policy" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors duration-300">Privacy Policy</Link>
-            <Link href="/terms-of-service" className="text-sm text-neutral-500 hover:text-neutral-300 transition-colors duration-300">Terms of Service</Link>
+          <div className="flex space-x-6">
+            <Link href="#" className="text-neutral-500 hover:text-purple-400 text-sm transition-colors duration-300">
+              Privacy Policy
+            </Link>
+            <Link href="#" className="text-neutral-500 hover:text-purple-400 text-sm transition-colors duration-300">
+              Terms of Service
+            </Link>
+            <Link href="#" className="text-neutral-500 hover:text-purple-400 text-sm transition-colors duration-300">
+              Cookie Policy
+            </Link>
           </div>
         </div>
 
-        {/* Back to Top Button */}
-        <a
-          href="#header" // Points to the header ID for scrolling
-          onClick={scrollToTop}
-          className="absolute right-6 bottom-8 w-12 h-12 bg-primary-500 hover:bg-primary-600 text-white rounded-full flex items-center justify-center transition-all duration-300 shadow-lg transform hover:-translate-y-1"
-          aria-label="Back to top"
-        >
-          <FaArrowUp />
-        </a>
+        {/* Back to top button */}
+        <div className="flex justify-center mt-12">
+          <a
+            href="#"
+            onClick={scrollToTop}
+            className="bg-purple-900/30 hover:bg-purple-900/50 border border-purple-600/30 p-2.5 rounded-full transition-colors duration-300 group shadow-lg shadow-purple-900/20"
+          >
+            <FaArrowUp className="h-4 w-4 text-purple-300 group-hover:text-purple-200" />
+          </a>
+        </div>
       </div>
     </footer>
   );

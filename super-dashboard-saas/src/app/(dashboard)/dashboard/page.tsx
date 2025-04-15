@@ -38,15 +38,16 @@ interface InfoCardProps {
   className?: string;
 }
 
+// Apply dark theme styles using CSS variables
 const InfoCard: React.FC<InfoCardProps> = ({ title, icon: Icon, children, linkTo, className }) => (
-  <div className={`bg-white shadow rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-md ${className}`}>
+  <div className={`bg-card shadow rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-lg border border-border ${className}`}>
     <div className="flex justify-between items-start mb-4">
-      <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-      <Icon className="h-6 w-6 text-gray-400" /> {/* Display icon */}
+      <h3 className="text-lg font-medium text-card-foreground">{title}</h3>
+      <Icon className="h-6 w-6 text-muted-foreground" /> {/* Use muted foreground for icon */}
     </div>
     <div className="mb-4">{children}</div>
     {linkTo && (
-      <Link href={linkTo} className="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
+      <Link href={linkTo} className="text-sm font-medium text-primary hover:text-primary/80 flex items-center"> {/* Use primary color for link */}
         Go to {title} <FiArrowRight className="ml-1 h-4 w-4" />
       </Link>
     )}
@@ -135,70 +136,72 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold text-gray-900">Dashboard Overview</h1>
+      {/* Apply dark theme text color */}
+      <h1 className="text-2xl font-semibold text-foreground">Dashboard Overview</h1>
 
-      {/* Welcome message */}
-      {user && <p className="text-gray-600">Welcome back, {user.email || 'User'}!</p>}
+      {/* Welcome message - Apply dark theme text color */}
+      {user && <p className="text-muted-foreground">Welcome back, {user.email || 'User'}!</p>}
 
       {/* Grid for key info cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {/* Subscription Status Card */}
+        {/* Subscription Status Card - Apply dark theme text colors */}
         <InfoCard title="Subscription" icon={FiCreditCard} linkTo="/billing">
-          <p className="text-2xl font-semibold text-gray-800 capitalize">
+          <p className="text-2xl font-semibold text-foreground capitalize">
             {subscriptionPlanName} Plan {/* Use the display name */}
           </p>
-          <p className={`mt-1 text-sm font-medium capitalize ${isActiveSubscription ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`mt-1 text-sm font-medium capitalize ${isActiveSubscription ? 'text-green-500' : 'text-red-500'}`}> {/* Adjusted green/red intensity */}
             Status: {subscriptionStatus} {/* Display the status */}
           </p>
         </InfoCard>
 
-        {/* Widget Status Card */}
+        {/* Widget Status Card - Apply dark theme text colors */}
         <InfoCard title="Chat Widget" icon={FiSettings} linkTo="/widget-config">
-          <p className={`text-2xl font-semibold ${widgetEnabled ? 'text-green-600' : 'text-red-600'}`}>
+          <p className={`text-2xl font-semibold ${widgetEnabled ? 'text-green-500' : 'text-red-500'}`}> {/* Adjusted green/red intensity */}
             {widgetEnabled ? 'Enabled' : 'Disabled'}
           </p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Your chat widget is currently {widgetEnabled ? 'active' : 'inactive'} on authorized domains.
-            {!widgetEnabled && <span className="text-red-600"> (Requires active subscription)</span>}
+            {!widgetEnabled && <span className="text-red-500"> (Requires active subscription)</span>}
           </p>
         </InfoCard>
 
         {/* Statistics Card */}
+        {/* Statistics Card - Apply dark theme text colors */}
         <InfoCard title="Statistics" icon={FiBarChart2} linkTo="/conversations"> {/* Link to conversations or a dedicated stats page */}
           {stats ? (
             <div className="space-y-3">
                <div>
-                 <p className="text-sm font-medium text-gray-500">Total Conversations</p>
+                 <p className="text-sm font-medium text-muted-foreground">Total Conversations</p>
                  {/* Display fetched stats */}
-                 <p className="text-2xl font-semibold text-gray-800">{stats.totalConversations}</p>
+                 <p className="text-2xl font-semibold text-foreground">{stats.totalConversations}</p>
                </div>
                <div>
-                  <p className="text-sm font-medium text-gray-500">Authorized Domains</p>
-                  <p className="text-2xl font-semibold text-gray-800">{stats.authorizedDomains}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Authorized Domains</p>
+                  <p className="text-2xl font-semibold text-foreground">{stats.authorizedDomains}</p>
                 </div>
                 {/* Added Total Messages */}
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Total Messages</p>
-                  <p className="text-2xl font-semibold text-gray-800">{stats.totalMessages}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Total Messages</p>
+                  <p className="text-2xl font-semibold text-foreground">{stats.totalMessages}</p>
                 </div>
                 {/* Added Active Widgets */}
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Active Widgets</p>
-                  <p className="text-2xl font-semibold text-gray-800">{stats.activeWidgets}</p>
+                  <p className="text-sm font-medium text-muted-foreground">Active Widgets</p>
+                  <p className="text-2xl font-semibold text-foreground">{stats.activeWidgets}</p>
                 </div>
                 {/* Added Average Conversation Length */}
                 {stats.average_conversation_length !== undefined && ( // Check if the value exists
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Avg. Conversation Length</p>
-                    <p className="text-2xl font-semibold text-gray-800">
-                      {stats.average_conversation_length.toFixed(1)} <span className="text-base font-normal text-gray-500">msgs/convo</span>
+                    <p className="text-sm font-medium text-muted-foreground">Avg. Conversation Length</p>
+                    <p className="text-2xl font-semibold text-foreground">
+                      {stats.average_conversation_length.toFixed(1)} <span className="text-base font-normal text-muted-foreground">msgs/convo</span>
                     </p>
                   </div>
                 )}
               </div>
             ) : (
-              <p className="text-gray-500">Statistics data unavailable.</p>
+              <p className="text-muted-foreground">Statistics data unavailable.</p>
            )}
             {/* TODO: Add link to detailed stats page if needed */}
          </InfoCard>
@@ -207,10 +210,10 @@ export default function DashboardPage() {
       </div>
       {/* End of Grid */}
 
-      {/* Conversation Trend Chart */}
+      {/* Conversation Trend Chart - Apply dark theme styles */}
       {stats && stats.conversation_history && stats.conversation_history.length > 0 && (
-        <div className="bg-white shadow rounded-lg p-6 mt-8">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Conversation Trends (Last 30 Days)</h3>
+        <div className="bg-card shadow rounded-lg p-6 mt-8 border border-border"> {/* Use card background and border */}
+          <h3 className="text-lg font-medium text-card-foreground mb-4">Conversation Trends (Last 30 Days)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
               data={stats.conversation_history}
@@ -218,9 +221,10 @@ export default function DashboardPage() {
                 top: 5, right: 30, left: 0, bottom: 5, // Adjusted left margin
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" /> {/* Lighter grid lines */}
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" /> {/* Use border color for grid */}
               <XAxis
                 dataKey="date"
+                stroke="var(--muted-foreground)" // Use muted foreground for axis line and ticks
                 tickFormatter={(tick) => {
                   // Show only month and day for brevity
                   const date = new Date(tick + 'T00:00:00Z'); // Ensure parsing as UTC date part
@@ -233,13 +237,13 @@ export default function DashboardPage() {
                 // Consider showing fewer ticks if too crowded:
                 // tickCount={7} // Example: Show ~7 ticks
               />
-              <YAxis allowDecimals={false} /> {/* Ensure whole numbers for counts */}
+              <YAxis allowDecimals={false} stroke="var(--muted-foreground)" /> {/* Use muted foreground for axis line and ticks */}
               <Tooltip
-                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', borderRadius: '4px', border: '1px solid #ccc' }}
+                contentStyle={{ backgroundColor: 'var(--popover)', borderRadius: '4px', border: '1px solid var(--border)', color: 'var(--popover-foreground)' }} // Use popover styles
                 labelFormatter={(label) => new Date(label + 'T00:00:00Z').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
               />
-              <Legend />
-              <Line type="monotone" dataKey="count" name="Conversations" stroke="#3b82f6" strokeWidth={2} activeDot={{ r: 8 }} dot={{ r: 3 }} /> {/* Blue line */}
+              <Legend wrapperStyle={{ color: 'var(--foreground)' }} /> {/* Style legend text */}
+              <Line type="monotone" dataKey="count" name="Conversations" stroke="var(--primary)" strokeWidth={2} activeDot={{ r: 8, fill: 'var(--primary)' }} dot={{ r: 3, fill: 'var(--primary)' }} /> {/* Use primary color */}
             </LineChart>
           </ResponsiveContainer>
         </div>

@@ -15,15 +15,15 @@ const ClientsSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-12 bg-white border-b border-neutral-200">
+    <section className="py-12 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800"> {/* Added dark mode styles */}
       <div className="container mx-auto px-4">
-        <h3 className="text-center text-base font-semibold text-purple-600 uppercase tracking-wider mb-8">
+        <h3 className="text-center text-base font-semibold text-purple-600 dark:text-purple-400 uppercase tracking-wider mb-8"> {/* Added dark mode text */}
           Powering Conversations For
         </h3>
         <div className="flex flex-wrap justify-center items-center gap-x-10 gap-y-6 md:gap-x-16 lg:gap-x-20">
           {clientLogos.map((logo, index) => (
-            <motion.div 
-              key={index} 
+            <motion.div
+              key={index}
               className="flex justify-center"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -36,7 +36,7 @@ const ClientsSection: React.FC = () => {
                 alt={logo.alt}
                 width={150}
                 height={50}
-                className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300 filter grayscale hover:grayscale-0"
+                className="object-contain opacity-60 hover:opacity-100 transition-opacity duration-300 filter grayscale hover:grayscale-0 dark:invert dark:hover:invert-0" // Added dark mode invert
                 unoptimized // Necessary if using external placeholder service without configuring domains
               />
             </motion.div>

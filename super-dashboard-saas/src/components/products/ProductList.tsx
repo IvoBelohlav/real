@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import { Product } from '@/types'; // Import the Product type
-import { Edit, Trash2, ImageOff } from 'lucide-react'; // Import icons
+import { Product } from '@/types';
+import { Edit, Trash2, ImageOff } from 'lucide-react';
 
 interface ProductListProps {
   products: Product[];
   onEdit: (product: Product) => void;
   onDelete: (productId: string) => void;
-  isLoadingDelete?: boolean; // Optional prop to disable delete button
+  isLoadingDelete?: boolean;
 }
 
 const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDelete, isLoadingDelete }) => {
@@ -41,86 +41,81 @@ const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDelete, i
   // Function to get priority styling (example)
   const getPriorityClass = (priority?: number): string => {
     const p = priority ?? 0;
-    if (p >= 7) return 'text-red-600 font-semibold';
-    if (p >= 4) return 'text-yellow-600 font-semibold';
-    return 'text-green-600 font-semibold';
+    if (p >= 7) return 'text-red-400 font-medium';
+    if (p >= 4) return 'text-amber-400 font-medium';
+    return 'text-green-400 font-medium';
   };
 
   return (
-    // Apply styles similar to Lermo's table container if needed, e.g., background, shadow
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+    <div className="bg-black shadow-md rounded-lg overflow-hidden border border-[#222222]">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-100">
+        <table className="min-w-full divide-y divide-[#222222]">
+          <thead className="bg-[#111111]">
             <tr>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16"> {/* Fixed width for image */}
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-purple-400 uppercase tracking-wider w-16">
                 Image
               </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-purple-400 uppercase tracking-wider">
                 Name
               </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-purple-400 uppercase tracking-wider">
                 Category
               </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-purple-400 uppercase tracking-wider">
                 Business Type
               </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-purple-400 uppercase tracking-wider">
                 Price
               </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-purple-400 uppercase tracking-wider">
                 Features
               </th>
-              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-purple-400 uppercase tracking-wider">
                 Priority
               </th>
-              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-purple-400 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-black divide-y divide-[#222222]">
             {products.map((product) => (
-              <tr key={product.id} className="hover:bg-gray-50 transition-colors duration-150">
+              <tr key={product.id} className="hover:bg-[#111111] transition-colors duration-150">
                 <td className="px-4 py-3 whitespace-nowrap">
                   {product.image_url ? (
                     <img
-                      // Assuming image_url might be relative, prepend API base if needed
-                      // Or use a utility function like Lermo's getStaticUrl
                       src={product.image_url}
                       alt={product.product_name}
-                      className="h-10 w-10 rounded-md object-cover border border-gray-200" // Added border
-                      onError={(e) => (e.currentTarget.src = '/placeholder-image.png')} // Basic fallback
+                      className="h-10 w-10 rounded-md object-cover border border-[#333333]"
+                      onError={(e) => (e.currentTarget.src = '/placeholder-image.png')}
                     />
                   ) : (
-                    <div className="h-10 w-10 rounded-md bg-gray-100 flex items-center justify-center text-gray-400 text-xs border border-gray-200">
-                      <ImageOff size={18} /> {/* Icon placeholder */}
+                    <div className="h-10 w-10 rounded-md bg-[#111111] flex items-center justify-center text-gray-400 text-xs border border-[#333333]">
+                      <ImageOff size={18} />
                     </div>
                   )}
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{product.product_name}</div>
-                  {/* Add SKU if available in your Product type */}
-                  {/* {product.sku && <div className="text-xs text-gray-500">SKU: {product.sku}</div>} */}
+                  <div className="text-sm font-medium text-white">{product.product_name}</div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
                   {product.category}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-300">
                   {product.business_type}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600"> {/* Price styling */}
+                <td className="px-4 py-3 whitespace-nowrap text-sm text-white">
                   {formatPrice(product.pricing)}
                 </td>
-                <td className="px-4 py-3 text-sm text-gray-500 max-w-xs"> {/* Max width for features */}
+                <td className="px-4 py-3 text-sm text-gray-300 max-w-xs">
                    <div className="flex flex-wrap gap-1">
-                      {product.features?.slice(0, 3).map((feature, idx) => ( // Show up to 3 features
-                        <span key={idx} className="px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded-full">
+                      {product.features?.slice(0, 3).map((feature, idx) => (
+                        <span key={idx} className="px-2 py-0.5 text-xs bg-[#222222] text-gray-200 rounded-full">
                           {feature}
                         </span>
                       ))}
                       {product.features && product.features.length > 3 && (
-                        <span className="px-2 py-0.5 text-xs bg-gray-200 text-gray-600 rounded-full">
+                        <span className="px-2 py-0.5 text-xs bg-[#333333] text-gray-400 rounded-full">
                           +{product.features.length - 3} more
                         </span>
                       )}
@@ -134,7 +129,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDelete, i
                 <td className="px-4 py-3 whitespace-nowrap text-center text-sm font-medium space-x-2">
                   <button
                     onClick={() => onEdit(product)}
-                    className="text-indigo-600 hover:text-indigo-800 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    className="text-purple-400 hover:text-purple-300 inline-flex items-center px-2.5 py-1.5 border border-[#333333] text-xs font-medium rounded bg-black hover:bg-[#111111] focus:outline-none"
                     title="Edit Product"
                     disabled={isLoadingDelete}
                   >
@@ -142,7 +137,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, onEdit, onDelete, i
                   </button>
                   <button
                     onClick={() => onDelete(product.id)}
-                    className="text-red-600 hover:text-red-800 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                    className="text-red-400 hover:text-red-300 inline-flex items-center px-2.5 py-1.5 border border-[#333333] text-xs font-medium rounded bg-black hover:bg-[#111111] focus:outline-none"
                     title="Delete Product"
                     disabled={isLoadingDelete}
                   >

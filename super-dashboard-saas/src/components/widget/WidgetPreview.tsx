@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { WidgetConfig } from '@/types';
 import { fetchApi } from '@/lib/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import { cn } from '@/lib/utils'; // Import cn utility
 
 // Basic visual representation of the widget
 const WidgetPreview: React.FC = () => {
@@ -98,25 +99,37 @@ const WidgetPreview: React.FC = () => {
 
             {/* Mock Widget Bubble - Updated Design */}
             <div
-                className={`absolute ${positionClasses} h-12 px-5 rounded-full shadow-lg flex items-center justify-center cursor-pointer group`} /* Adjusted height, padding, shadow */
+                className={cn(
+                    `absolute ${positionClasses} shadow-lg flex items-center justify-center cursor-pointer group`,
+                    currentConfig.collapsed_button_style === 'circular'
+                        ? 'w-12 h-12 rounded-full p-0' // Circular style: fixed size, full round, no padding
+                        : 'h-12 px-5 rounded-full' // Wide style: original height/padding/rounding
+                )}
                 style={{
                     backgroundColor: buttonBgColor || (previewMode === 'dark' ? '#DC2626' : '#DC2626'), // Defaulting to red as per image
                     color: buttonTextColor || '#ffffff',
-                    borderRadius: currentConfig.button_border_radius || '9999px', // Keep pill shape default
+                    // Use button_border_radius only for wide style, circular is always rounded-full via class
+                    borderRadius: currentConfig.collapsed_button_style !== 'circular' ? (currentConfig.button_border_radius || '9999px') : undefined,
+                    // borderRadius: currentConfig.button_border_radius || '9999px', // Keep pill shape default <-- REMOVED DUPLICATE
                     borderWidth: currentConfig.button_border_width || '0px',
                     borderStyle: currentConfig.button_border_style || 'none',
                     borderColor: previewMode === 'dark' ? 'var(--neutral-600)' : 'var(--neutral-300)',
                 }}
                 title="Chat Widget Preview"
             >
-                {/* Text */}
-                <span className="text-sm font-semibold mr-2" style={{ fontWeight: currentConfig.button_font_weight || '600' }}> {/* Adjusted font weight */}
-                    {currentConfig.widget_button_text || 'Chat Now'} {/* Default to "Chat Now" */}
-                </span>
+                {/* Text (Conditionally Rendered) */}
+                {currentConfig.collapsed_button_style !== 'circular' && (
+                    <span className="text-sm font-semibold mr-2" style={{ fontWeight: currentConfig.button_font_weight || '600' }}>
+                        {currentConfig.widget_button_text || 'Chat Now'}
+                    </span>
+                )}
 
-                {/* Icon */}
-                <div className="bg-white/20 rounded-full p-1"> {/* Icon background circle */}
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}> {/* Adjusted size/stroke */}
+                {/* Icon Container (Adjusted for centering in circular mode) */}
+                <div className={cn(
+                    "bg-white/20 rounded-full p-1", // Base styles
+                    currentConfig.collapsed_button_style === 'circular' ? '' : '' // No specific style needed here now, centering is handled by flex parent
+                 )}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
                 </div>

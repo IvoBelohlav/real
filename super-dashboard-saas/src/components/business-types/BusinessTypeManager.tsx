@@ -12,17 +12,21 @@ import BusinessTypeForm from './BusinessTypeForm'; // A single form for add/edit
 // Keep or import shared Modal
 // import Modal from '@/components/shared/Modal';
 
-// Basic Modal structure (can be replaced with a shared component later)
+// Basic Modal structure - Apply dark theme styles
 const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: React.ReactNode }> = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-75 flex justify-center items-center z-50 p-4">
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-3xl p-6"> {/* Wider modal */}
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+    // Use background/80 for overlay, add backdrop blur
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+      {/* Use card styling for modal content */}
+      <div className="relative bg-card rounded-lg shadow-xl w-full max-w-3xl p-6 border border-border">
+        {/* Style header with foreground and border */}
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-border"> {/* Added padding-bottom and border */}
+          <h3 className="text-lg font-medium leading-6 text-foreground">{title}</h3>
+          {/* Style close button */}
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground focus:outline-none text-2xl">&times;</button>
         </div>
-        <div className="max-h-[80vh] overflow-y-auto pr-2"> {/* Added scroll */}
+        <div className="max-h-[80vh] overflow-y-auto pr-2">
             {children}
         </div>
       </div>
@@ -137,18 +141,20 @@ const BusinessTypeManager: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header - Apply dark theme text and button styles */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Business Types</h2>
+        <h2 className="text-xl font-semibold text-foreground">Business Types</h2>
+        {/* Use primary button style */}
         <button
           onClick={handleOpenAddModal}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm font-medium"
         >
           Add New Type
         </button>
       </div>
 
-      {/* Render Business Type List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
+      {/* Render Business Type List - Apply dark theme card styles */}
+      <div className="bg-card shadow overflow-hidden sm:rounded-md border border-border">
          {businessTypes && businessTypes.length > 0 ? (
             <BusinessTypeList
                 businessTypes={businessTypes}
@@ -160,7 +166,8 @@ const BusinessTypeManager: React.FC = () => {
                 isLoadingDelete={deleteBusinessTypeMutation.isPending}
             />
          ) : (
-            <p className="text-center text-gray-500 py-6">No business types found. Add one to get started!</p>
+            // Apply dark theme muted text style
+            <p className="text-center text-muted-foreground py-6">No business types found. Add one to get started!</p>
          )}
       </div>
 

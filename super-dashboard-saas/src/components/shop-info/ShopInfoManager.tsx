@@ -219,36 +219,39 @@ const ShopInfoManager: React.FC = () => {
         return <div className="text-red-600 bg-red-100 p-4 rounded">Error loading shop info: {error?.message}</div>;
     }
 
-    // Helper Render Functions
+    // Helper Render Functions - Apply dark theme styles
     const renderInputField = (id: keyof ShopInfo, label: string, type: string = 'text', required: boolean = false, options?: { placeholder?: string, className?: string }) => (
         <div className={options?.className ?? 'sm:col-span-6'}>
-          <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}{required && '*'}</label>
+          {/* Use muted-foreground for label */}
+          <label htmlFor={id} className="block text-sm font-medium text-muted-foreground mb-1">{label}{required && '*'}</label>
+          {/* Use input styling */}
           <input
             type={type}
             name={id}
             id={id}
             value={(formData as any)[id] ?? ''}
-            onChange={handleInputChange} // Use the updated handler
+            onChange={handleInputChange}
             required={required}
             placeholder={options?.placeholder}
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md px-3 py-2 border"
+            className="shadow-sm focus:ring-ring focus:border-primary block w-full sm:text-sm border-border rounded-md px-3 py-2 border bg-input text-foreground placeholder-muted-foreground"
           />
         </div>
       );
 
       const renderTextareaField = (id: keyof ShopInfo, label: string, rows: number = 3, required: boolean = false, options?: { placeholder?: string, className?: string }) => (
         <div className={options?.className ?? 'sm:col-span-6'}>
-          <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">{label}{required && '*'}</label>
+          {/* Use muted-foreground for label */}
+          <label htmlFor={id} className="block text-sm font-medium text-muted-foreground mb-1">{label}{required && '*'}</label>
+          {/* Use textarea styling */}
           <textarea
             name={id}
             id={id}
             rows={rows}
-            // Value is handled directly for standard textareas
             value={(formData as any)[id] ?? ''}
-            onChange={handleInputChange} // Use the updated handler
+            onChange={handleInputChange}
             required={required}
             placeholder={options?.placeholder}
-            className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md px-3 py-2"
+            className="shadow-sm focus:ring-ring focus:border-primary block w-full sm:text-sm border border-border rounded-md px-3 py-2 bg-input text-foreground placeholder-muted-foreground"
           />
         </div>
       );
@@ -256,12 +259,13 @@ const ShopInfoManager: React.FC = () => {
       // TODO: Add render functions or components for Addresses, SocialMedia, AboutSections, BusinessHours
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-8 divide-y divide-gray-200">
-            {/* Basic Info */}
-            <div className="space-y-6 sm:space-y-5">
+        // Use border color for divider
+        <form onSubmit={handleSubmit} className="space-y-8 divide-y divide-border">
+            {/* Basic Info - Apply dark theme text */}
+            <div className="space-y-6 sm:space-y-5 pt-8 sm:pt-10"> {/* Added padding top */}
                 <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Basic Information</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Core details about your shop.</p>
+                    <h3 className="text-lg leading-6 font-medium text-foreground">Basic Information</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Core details about your shop.</p>
                 </div>
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     {renderInputField('shop_name', 'Shop Name', 'text', true, { className: 'sm:col-span-4' })}
@@ -277,10 +281,10 @@ const ShopInfoManager: React.FC = () => {
                 </div>
             </div>
 
-             {/* Contact Info */}
+             {/* Contact Info - Apply dark theme text */}
              <div className="pt-8 space-y-6 sm:pt-10 sm:space-y-5">
                 <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Contact Information</h3>
+                    <h3 className="text-lg leading-6 font-medium text-foreground">Contact Information</h3>
                 </div>
                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     {renderInputField('primary_email', 'Primary Email', 'email', true, { className: 'sm:col-span-3' })}
@@ -292,11 +296,11 @@ const ShopInfoManager: React.FC = () => {
                  </div>
              </div>
 
-             {/* AI Specific Fields */}
+             {/* AI Specific Fields - Apply dark theme text */}
              <div className="pt-8 space-y-6 sm:pt-10 sm:space-y-5">
                 <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">AI Assistant Configuration</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Information used to tailor the AI's responses.</p>
+                    <h3 className="text-lg leading-6 font-medium text-foreground">AI Assistant Configuration</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Information used to tailor the AI's responses.</p>
                 </div>
                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     {renderTextareaField('ai_prompt_summary', 'AI Prompt Summary', 4, true, { className: 'sm:col-span-6', placeholder: 'Concise summary for AI system prompts (max 1000 chars)' })}
@@ -313,11 +317,11 @@ const ShopInfoManager: React.FC = () => {
                  </div>
              </div>
 
-             {/* Business Details */}
+             {/* Business Details - Apply dark theme text */}
              <div className="pt-8 space-y-6 sm:pt-10 sm:space-y-5">
                 <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Business Details</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Keywords, services, and payment methods.</p>
+                    <h3 className="text-lg leading-6 font-medium text-foreground">Business Details</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Keywords, services, and payment methods.</p>
                 </div>
                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     {/* Use EditableListInput for Services */}
@@ -350,11 +354,11 @@ const ShopInfoManager: React.FC = () => {
                  </div>
              </div>
 
-             {/* Policies */}
+             {/* Policies - Apply dark theme text */}
              <div className="pt-8 space-y-6 sm:pt-10 sm:space-y-5">
                 <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Policies</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Shipping, return, and warranty information.</p>
+                    <h3 className="text-lg leading-6 font-medium text-foreground">Policies</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Shipping, return, and warranty information.</p>
                 </div>
                  <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     {renderTextareaField('shipping_policy', 'Shipping Policy', 5, false, { className: 'sm:col-span-6' })}
@@ -366,20 +370,21 @@ const ShopInfoManager: React.FC = () => {
              {/* TODO: Add sections for Addresses, Social Media, About Sections, Business Hours */}
              {/* These require more complex form elements or sub-components */}
              <div className="pt-8 space-y-6 sm:pt-10 sm:space-y-5">
-                 <p className="text-gray-500 italic">Placeholders for Addresses, Social Media, About Sections, Business Hours...</p>
+                 <p className="text-muted-foreground italic">Placeholders for Addresses, Social Media, About Sections, Business Hours...</p>
                  {/* Basic structure example - needs dynamic handling */}
-                 {/* <div>Addresses: {JSON.stringify(formData.addresses)}</div> */}
+                 {/* <div className="text-muted-foreground">Addresses: {JSON.stringify(formData.addresses)}</div> */}
                  {/* <div>Social Media: {JSON.stringify(formData.social_media)}</div> */}
              </div>
 
 
             {/* Save Button */}
+            {/* Save Button - Use primary button style */}
             <div className="pt-5">
                 <div className="flex justify-end">
                 <button
                     type="submit"
                     disabled={updateShopInfoMutation.isPending}
-                    className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50"
                 >
                     {updateShopInfoMutation.isPending ? <LoadingSpinner /> : 'Save Shop Information'}
                 </button>

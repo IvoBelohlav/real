@@ -92,7 +92,7 @@ const InvoiceList: React.FC = () => {
 
   if (loading) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="flex justify-center items-center p-16"
@@ -104,12 +104,13 @@ const InvoiceList: React.FC = () => {
 
   if (error) {
     return (
+      // Apply dark theme error styles
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 shadow-sm"
+        className="flex items-center p-4 bg-destructive/80 text-destructive-foreground rounded-lg border border-destructive shadow-sm"
       >
-        <AlertTriangle className="h-5 w-5 mr-2 text-red-500" />
+        <AlertTriangle className="h-5 w-5 mr-2 text-destructive-foreground" />
         <p>Error: {error}</p>
       </motion.div>
     );
@@ -125,21 +126,23 @@ const InvoiceList: React.FC = () => {
   };
 
   return (
+    // Apply dark theme card styles
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "spring", duration: 0.5 }}
-      className="border rounded-xl shadow-md overflow-hidden bg-white"
+      className="border rounded-xl shadow-md overflow-hidden bg-card border-border" // Use card bg and border
     >
-      <div className="p-5 bg-gradient-to-r from-blue-50 to-blue-100 border-b border-blue-200">
+      {/* Apply dark theme header styles */}
+      <div className="p-5 bg-muted/50 border-b border-border"> {/* Use muted bg and border */}
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <Receipt className="h-6 w-6 text-blue-600 mr-2" />
-            <h3 className="text-xl font-semibold text-gray-800">Invoice History</h3>
+            <Receipt className="h-6 w-6 text-primary mr-2" /> {/* Use primary color */}
+            <h3 className="text-xl font-semibold text-foreground">Invoice History</h3> {/* Use foreground text */}
           </div>
         </div>
       </div>
-      
+
       <div className="p-4">
         {invoices.length === 0 ? (
           <motion.div
@@ -147,81 +150,88 @@ const InvoiceList: React.FC = () => {
             animate={{ opacity: 1 }}
             className="text-center py-10"
           >
-            <p className="text-gray-500">No invoices found.</p>
+            {/* Use muted text */}
+            <p className="text-muted-foreground">No invoices found.</p>
           </motion.div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <motion.table 
+          // Apply dark theme table container styles
+          <div className="overflow-x-auto rounded-lg border border-border">
+            <motion.table
               variants={tableVariants}
               initial="hidden"
               animate="show"
-              className="min-w-full divide-y divide-gray-200"
+              className="min-w-full divide-y divide-border" // Use border color
             >
-              <thead className="bg-gray-50">
+              {/* Apply dark theme table header styles */}
+              <thead className="bg-muted/50">
                 <tr>
-                  <th 
-                    scope="col" 
-                    className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:bg-muted transition-colors duration-200"
                     onClick={() => handleSort('date')}
                   >
                     <div className="flex items-center">
-                      <Calendar className="h-4 w-4 mr-1.5 text-gray-400" />
+                      <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
                       Date
                       {getSortIcon('date')}
                     </div>
                   </th>
-                  <th 
-                    scope="col" 
-                    className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                  <th
+                    scope="col"
+                    className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider cursor-pointer hover:bg-muted transition-colors duration-200"
                     onClick={() => handleSort('amount')}
                   >
                     <div className="flex items-center">
-                      <Banknote className="h-4 w-4 mr-1.5 text-gray-400" />
+                      <Banknote className="h-4 w-4 mr-1.5 text-muted-foreground" />
                       Amount
                       {getSortIcon('amount')}
                     </div>
                   </th>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <AnimatePresence>
-                <motion.tbody className="bg-white divide-y divide-gray-200">
+                {/* Apply dark theme table body styles */}
+                <motion.tbody className="bg-card divide-y divide-border">
                   {sortedInvoices.map((invoice) => (
-                    <motion.tr 
+                    <motion.tr
                       key={invoice.id}
                       variants={rowVariants}
                       exit={{ opacity: 0, x: -10 }}
-                      className="hover:bg-blue-50 transition-colors duration-150"
+                      className="hover:bg-muted/50 transition-colors duration-150" // Use muted hover
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        {/* Apply dark theme text colors */}
+                        <div className="text-sm font-medium text-foreground">
                           {format(new Date(invoice.created), 'PP')}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {format(new Date(invoice.created), 'p')}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-foreground">
                           {formatCurrency(invoice.amount_due, invoice.currency)}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
+                        {/* Apply dark theme badge styles */}
                         <span className={`px-3 py-1.5 inline-flex items-center text-xs font-semibold rounded-full ${
-                          invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
-                          invoice.status === 'open' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
+                          invoice.status === 'paid' ? 'bg-green-700/20 text-green-400' :
+                          invoice.status === 'open' ? 'bg-yellow-700/20 text-yellow-400' :
+                          'bg-muted text-muted-foreground' // Use muted for other statuses
                         }`}>
                           <span className={`w-2 h-2 mr-1.5 rounded-full ${
                             invoice.status === 'paid' ? 'bg-green-500' :
                             invoice.status === 'open' ? 'bg-yellow-500' :
-                            'bg-gray-500'
+                            'bg-gray-500' // Keep gray or map to muted
                           }`}></span>
                           {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        {/* Apply dark theme button styles */}
                         {invoice.hosted_invoice_url && (
                           <motion.a
                             whileHover="hover"
@@ -230,7 +240,7 @@ const InvoiceList: React.FC = () => {
                             href={invoice.hosted_invoice_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center px-3 py-1.5 border border-blue-300 rounded-md shadow-sm text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                            className="inline-flex items-center px-3 py-1.5 border border-border rounded-md shadow-sm text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring transition-colors duration-200"
                           >
                             <ExternalLink className="mr-1.5 h-4 w-4" /> View
                           </motion.a>
@@ -244,7 +254,7 @@ const InvoiceList: React.FC = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             download
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                            className="inline-flex items-center px-3 py-1.5 border border-border rounded-md shadow-sm text-sm font-medium text-secondary-foreground bg-secondary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring transition-colors duration-200"
                           >
                             <FileDown className="mr-1.5 h-4 w-4" /> PDF
                           </motion.a>

@@ -67,25 +67,29 @@ const TagInput: React.FC<{
   };
 
   return (
-    <div className="mb-4"> {/* Consistent margin */}
-      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <div className="flex items-center border border-gray-300 rounded-md shadow-sm focus-within:ring-1 focus-within:ring-indigo-500 focus-within:border-indigo-500">
-        <div className="flex flex-wrap gap-1 p-2 flex-grow bg-white rounded-l-md"> {/* Ensure bg color */}
-            {/* Render existing tags */}
+    <div className="mb-4">
+      {/* Apply dark theme label style */}
+      <label htmlFor={inputId} className="block text-sm font-medium text-muted-foreground mb-1">{label}</label>
+      {/* Apply dark theme container style */}
+      <div className="flex items-center border border-border rounded-md shadow-sm focus-within:ring-1 focus-within:ring-ring focus-within:border-primary">
+        {/* Apply dark theme inner container style */}
+        <div className="flex flex-wrap gap-1 p-2 flex-grow bg-input rounded-l-md">
+            {/* Render existing tags - Apply dark theme tag style */}
             {tags.map((tag, index) => (
-              <span key={index} className="flex items-center bg-indigo-100 text-indigo-700 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              <span key={index} className="flex items-center bg-secondary text-secondary-foreground text-xs font-medium px-2.5 py-0.5 rounded-full">
                 {tag}
+                {/* Apply dark theme remove button style */}
                 <button
                   type="button"
                   onClick={() => removeTag(index)}
-                  className="ml-1.5 text-indigo-500 hover:text-indigo-700 focus:outline-none"
+                  className="ml-1.5 text-muted-foreground hover:text-destructive focus:outline-none"
                   aria-label={`Remove ${tag}`}
                 >
-                  <X size={12} /> {/* Use X icon */}
+                  <X size={12} />
                 </button>
               </span>
             ))}
-            {/* Input field for new tags */}
+            {/* Input field for new tags - Apply dark theme input style */}
             <input
               id={inputId}
               type="text"
@@ -93,20 +97,21 @@ const TagInput: React.FC<{
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
               placeholder={placeholder}
-              className="flex-grow p-1 border-none focus:ring-0 focus:outline-none text-sm min-w-[100px]" // Ensure input has some base width
+              className="flex-grow p-1 border-none focus:ring-0 focus:outline-none text-sm min-w-[100px] bg-transparent text-foreground placeholder-muted-foreground"
             />
         </div>
-         {/* Button to add the current input value as a tag */}
+         {/* Button to add the current input value as a tag - Apply dark theme button style */}
          <button
             type="button"
             onClick={addTag}
-            className="px-3 py-2 text-gray-500 hover:text-indigo-600 focus:outline-none border-l border-gray-300 bg-gray-50 rounded-r-md" // Added bg and rounded
+            className="px-3 py-2 text-muted-foreground hover:text-primary focus:outline-none border-l border-border bg-muted rounded-r-md"
             aria-label={`Add ${label} tag`}
          >
             <Tag size={16} />
          </button>
       </div>
-      {helperText && <p className="mt-1 text-xs text-gray-500">{helperText}</p>}
+      {/* Apply dark theme helper text style */}
+      {helperText && <p className="mt-1 text-xs text-muted-foreground">{helperText}</p>}
     </div>
   );
 };
@@ -208,10 +213,10 @@ const BusinessTypeForm: React.FC<BusinessTypeFormProps> = ({ businessType, onSub
 
   // --- Render ---
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-1"> {/* Reduced space-y, keep padding */}
-      {/* Type Name */}
-      <div className="mb-4"> {/* Added margin bottom */}
-        <label htmlFor="type" className="block text-sm font-medium text-gray-700">Type Name *</label>
+    <form onSubmit={handleSubmit} className="space-y-4 p-1">
+      {/* Type Name - Already styled */}
+      <div className="mb-4">
+        <label htmlFor="type" className="block text-sm font-medium text-muted-foreground">Type Name *</label>
          <div className="flex items-center space-x-2 mt-1">
             <input
               type="text"
@@ -224,32 +229,32 @@ const BusinessTypeForm: React.FC<BusinessTypeFormProps> = ({ businessType, onSub
               }}
               required
               disabled={!!businessType} // Disable editing type name for existing types
-              className={`block w-full px-3 py-2 border ${jsonErrors.type ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${businessType ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+              className={`block w-full px-3 py-2 border ${jsonErrors.type ? 'border-destructive' : 'border-border'} rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm ${businessType ? 'bg-muted cursor-not-allowed text-muted-foreground' : 'bg-input text-foreground'}`}
             />
-            {/* AI Suggestion Button - Updated title */}
              <button
                 type="button"
                 onClick={handleGenerateSuggestions}
-                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 text-sm font-medium border border-blue-300 flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-muted text-sm font-medium border border-border flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isAiLoading || !typeName.trim()} // Disable if loading or no type name
-                title={!typeName.trim() ? "Nejprve zadejte název typu" : "Navrhnout vlastnosti a metriky (AI)"} // Updated tooltip
+                title={!typeName.trim() ? "Nejprve zadejte název typu" : "Navrhnout vlastnosti a metriky (AI)"}
              >
                 {isAiLoading ? <LoadingSpinner /> : <Sparkles size={16} />}
                 <span>Navrhnout</span>
              </button>
          </div>
-         {aiError && <p className="mt-1 text-xs text-red-600">Chyba návrhu: {aiError}</p>}
-         {jsonErrors.type && <p className="mt-1 text-xs text-red-600">{jsonErrors.type}</p>}
-         {businessType && <p className="mt-1 text-xs text-gray-500">Název typu nelze po vytvoření změnit.</p>}
-         {!businessType && <p className="mt-1 text-xs text-gray-500">Unique identifier (e.g., electronics, clothing). Cannot be changed later.</p>}
+         {aiError && <p className="mt-1 text-xs text-destructive">Chyba návrhu: {aiError}</p>}
+         {jsonErrors.type && <p className="mt-1 text-xs text-destructive">{jsonErrors.type}</p>}
+         {businessType && <p className="mt-1 text-xs text-muted-foreground">Název typu nelze po vytvoření změnit.</p>}
+         {!businessType && <p className="mt-1 text-xs text-muted-foreground">Unique identifier (e.g., electronics, clothing). Cannot be changed later.</p>}
       </div>
 
       {/* Removed Query Patterns TagInput */}
 
-      {/* --- Comparison Config Section (Simplified) --- */}
-      <fieldset className="border border-gray-200 p-4 rounded-md space-y-4 mt-4"> {/* Adjusted border/margin */}
-          <legend className="text-sm font-medium text-gray-700 px-1">Comparison Configuration</legend>
+      {/* --- Comparison Config Section (Simplified) - Already styled */}
+      <fieldset className="border border-border p-4 rounded-md space-y-4 mt-4">
+          <legend className="text-sm font-medium text-muted-foreground px-1">Comparison Configuration</legend>
 
+          {/* TagInput styling will be handled in the next step */}
           <TagInput
               label="Key Features"
               tags={keyFeatures}
@@ -278,24 +283,24 @@ const BusinessTypeForm: React.FC<BusinessTypeFormProps> = ({ businessType, onSub
       {/* Removed JsonTextArea for category_configs */}
 
 
-      {/* Action Buttons */}
-      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-6">
+      {/* Action Buttons - Already styled */}
+      <div className="flex justify-end space-x-3 pt-4 border-t border-border mt-6">
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-muted text-sm font-medium disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           type="submit"
-          disabled={isLoading || isAiLoading} // Disable if AI is "loading"
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
+          disabled={isLoading || isAiLoading}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
         >
           {isLoading ? <LoadingSpinner /> : (
               <>
-                {businessType ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />} {/* Use Save icon when editing */}
+                {businessType ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />}
                 {businessType ? 'Update Type' : 'Create Type'}
               </>
           )}

@@ -12,11 +12,11 @@ interface SectionTitleProps {
 }
 const SectionTitle: React.FC<SectionTitleProps> = ({ title, subtitle }) => (
   <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900">
+    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900 dark:text-neutral-100"> {/* Added dark mode text */}
       {title}
       <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full"></span>
     </h2>
-    <p className="max-w-2xl mx-auto mt-6 text-neutral-600">{subtitle}</p>
+    <p className="max-w-2xl mx-auto mt-6 text-neutral-600 dark:text-neutral-400">{subtitle}</p> {/* Added dark mode text */}
   </div>
 );
 
@@ -56,14 +56,14 @@ interface AccordionItemProps {
 }
 const AccordionItem: React.FC<AccordionItemProps> = ({ item, isOpen, onClick }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden mb-4 transition-shadow duration-300 hover:shadow-lg">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-md overflow-hidden mb-4 transition-shadow duration-300 hover:shadow-lg"> {/* Added dark mode bg */}
       <button
         onClick={onClick}
         className="flex justify-between items-center w-full p-5 md:p-6 text-left focus:outline-none"
         aria-expanded={isOpen}
       >
-        <h3 className="text-lg font-semibold text-neutral-800 mr-4">{item.question}</h3>
-        <div className="text-primary-500 text-xl flex-shrink-0">
+        <h3 className="text-lg font-semibold text-neutral-800 dark:text-neutral-100 mr-4">{item.question}</h3> {/* Added dark mode text */}
+        <div className="text-primary-500 dark:text-primary-400 text-xl flex-shrink-0"> {/* Added dark mode text */}
           {isOpen ? <FaMinus /> : <FaPlus />}
         </div>
       </button>
@@ -81,7 +81,7 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ item, isOpen, onClick }) 
             transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
             className="overflow-hidden"
           >
-            <div className="px-5 md:px-6 pb-5 text-neutral-600 leading-relaxed">
+            <div className="px-5 md:px-6 pb-5 text-neutral-600 dark:text-neutral-400 leading-relaxed"> {/* Added dark mode text */}
               {item.answer}
             </div>
           </motion.div>
@@ -101,7 +101,7 @@ const FaqSection: React.FC = () => {
   };
 
   return (
-    <section className="py-16 md:py-24 bg-neutral-50" id="faq">
+    <section className="py-16 md:py-24 bg-neutral-50 dark:bg-neutral-900" id="faq"> {/* Added dark mode bg */}
       <div className="container mx-auto px-4">
         <SectionTitle
           title="Frequently Asked Questions"
@@ -120,8 +120,9 @@ const FaqSection: React.FC = () => {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-lg text-neutral-700 mb-4">Still have questions?</p>
-          <Link href="#contact" className="btn btn-primary">
+          <p className="text-lg text-neutral-700 dark:text-neutral-300 mb-4">Still have questions?</p> {/* Added dark mode text */}
+          {/* Assuming Button component exists and handles dark mode */}
+          <Link href="#contact" className="inline-block bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
             Contact Our Support Team
           </Link>
         </div>

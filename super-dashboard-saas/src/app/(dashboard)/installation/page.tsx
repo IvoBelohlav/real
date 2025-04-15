@@ -63,12 +63,14 @@ export default function InstallationPage() {
     // Check for subscription requirement next
     if (!hasActiveSubscription) {
       return (
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded" role="alert">
+        // Use warning/accent colors for dark theme
+        <div className="bg-yellow-900/20 border-l-4 border-yellow-500 text-yellow-300 p-4 rounded" role="alert">
           <p className="font-bold">Subscription Required</p>
           <p>You need an active subscription to access the widget installation code.</p>
           <Link href="/billing" legacyBehavior>
             {/* Use legacyBehavior or wrap Link directly around content */}
-            <a className="mt-2 inline-block text-indigo-600 hover:text-indigo-800 font-semibold cursor-pointer">
+            {/* Link styling for dark theme */}
+            <a className="mt-2 inline-block text-primary hover:text-primary/80 font-semibold cursor-pointer">
               View Subscription Plans
             </a>
           </Link>
@@ -78,7 +80,8 @@ export default function InstallationPage() {
 
     // Check for errors after loading and subscription checks
     if (error) {
-       return <p className="text-red-500 bg-red-100 p-3 rounded">Error: {error}</p>;
+       // Error styling for dark theme
+       return <p className="text-red-500 bg-red-900/20 border border-red-500/50 p-3 rounded-md">Error: {error}</p>;
     }
 
     // If we have the API key (implies successful fetch, active subscription, no errors)
@@ -116,25 +119,32 @@ export default function InstallationPage() {
 </html>`;
 
       return ( // Keep only this return statement for the apiKey block
-        <div className="bg-white shadow rounded-lg p-6"> {/* Wrap content in a card */}
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Embed Your Widget</h2>
-          <p className="text-gray-600 mb-4">
+        // Use card styling for dark theme
+        <div className="bg-card shadow rounded-lg p-6 border border-border"> {/* Wrap content in a card */}
+          {/* Heading styling */}
+          <h2 className="text-xl font-semibold text-foreground mb-4">Embed Your Widget</h2>
+          {/* Description styling */}
+          <p className="text-muted-foreground mb-4">
             Copy and paste this complete HTML template to create a test page for the Lermo widget. You can also extract just the widget container and scripts to integrate into your existing website.
           </p>
-          <pre className="bg-gray-900 text-white p-4 rounded overflow-x-auto text-sm">
+          {/* Code block styling */}
+          <pre className="bg-muted text-muted-foreground p-4 rounded overflow-x-auto text-sm border border-border">
             <code>{embedCode}</code>
           </pre>
+          {/* Button styling (primary action) */}
           <button
             onClick={() => navigator.clipboard.writeText(embedCode)}
-            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring"
           >
             Copy Code
           </button>
-          <p className="mt-6 text-sm text-gray-500">
+          {/* Footer text styling */}
+          <p className="mt-6 text-sm text-muted-foreground">
             Your unique API Key is included. Make sure this key remains confidential.
             Need to configure your widget's appearance or behavior? Go to the{' '}
+            {/* Link styling */}
             <Link href="/widget-config" legacyBehavior>
-              <a className="text-indigo-600 hover:underline cursor-pointer">Widget Config</a>
+              <a className="text-primary hover:underline cursor-pointer">Widget Config</a>
             </Link> page.
           </p>
         </div>
@@ -143,13 +153,15 @@ export default function InstallationPage() {
 
     // Fallback case: Loading is done, user has subscription, no error occurred, but apiKey is still null.
     // This might indicate an issue with the API response structure not caught above.
-    return <p className="text-gray-500">Could not retrieve your API key. Please try refreshing the page or contact support if the issue persists.</p>;
+    // Fallback text styling
+    return <p className="text-muted-foreground">Could not retrieve your API key. Please try refreshing the page or contact support if the issue persists.</p>;
   };
 
   // Main component return structure - Calls renderContent()
   return (
     <div className="space-y-6"> {/* Added space-y */}
-      <h1 className="text-2xl font-semibold text-gray-900">Widget Installation</h1> {/* Removed mb-6 */}
+      {/* Main heading styling */}
+      <h1 className="text-2xl font-semibold text-foreground">Widget Installation</h1> {/* Removed mb-6 */}
       {renderContent()} {/* Call the render function here */}
     </div>
   );

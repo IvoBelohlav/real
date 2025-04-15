@@ -33,8 +33,9 @@ const WidgetFAQList: React.FC<WidgetFAQListProps> = ({
 
   if (error) {
     return (
-      <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded flex items-center" role="alert">
-        <AlertCircle className="h-5 w-5 text-red-500 mr-3" />
+      // Dark theme error styles
+      <div className="bg-destructive/10 border-l-4 border-destructive text-destructive p-4 rounded flex items-center" role="alert">
+        <AlertCircle className="h-5 w-5 text-destructive mr-3" />
         <p>Error loading FAQs: {error.message}</p>
       </div>
     );
@@ -42,66 +43,68 @@ const WidgetFAQList: React.FC<WidgetFAQListProps> = ({
 
   if (!faqs || faqs.length === 0) {
     return (
-      <div className="text-center py-10 px-4 bg-gray-50 rounded-md border border-dashed border-gray-300"> {/* Added border */}
-        <p className="text-gray-500">No Widget FAQs configured yet.</p>
+      // Dark theme "empty" state styles
+      <div className="text-center py-10 px-4 bg-card rounded-md border border-dashed border-border">
+        <p className="text-muted-foreground">No Widget FAQs configured yet.</p>
         {/* Optional: Add a button here to trigger the add modal if needed */}
       </div>
     );
   }
 
   return (
-    // Apply styles similar to Lermo's table container if needed, e.g., background, shadow
-    <div className="bg-white shadow-md rounded-lg overflow-hidden">
+    // Apply dark theme card styles
+    <div className="bg-card shadow-md rounded-lg overflow-hidden border border-border">
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-100"> {/* Slightly darker header */}
+        <table className="min-w-full divide-y divide-border"> {/* Dark divider */}
+          <thead className="bg-secondary"> {/* Dark header */}
             <tr>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"> {/* Adjusted padding/font */}
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider"> {/* Dark text */}
                 Question
               </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Answer
               </th>
-              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Category
               </th>
-              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Order
               </th>
-              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Status
               </th>
-              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider"> {/* Centered Actions */}
+              <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-card divide-y divide-border"> {/* Dark background and divider */}
             {faqs.map((faq) => (
-              <tr key={faq.id} className="hover:bg-gray-50 transition-colors duration-150"> {/* Hover effect */}
-                <td className="px-4 py-4 whitespace-normal text-sm font-medium text-gray-800">{faq.question}</td> {/* Adjusted padding/font */}
-                <td className="px-4 py-4 text-sm text-gray-600 max-w-sm break-words" title={faq.answer}> {/* Allow wrapping */}
+              <tr key={faq.id} className="hover:bg-secondary transition-colors duration-150"> {/* Dark hover */}
+                <td className="px-4 py-4 whitespace-normal text-sm font-medium text-foreground">{faq.question}</td> {/* Dark text */}
+                <td className="px-4 py-4 text-sm text-muted-foreground max-w-sm break-words" title={faq.answer}> {/* Dark text */}
                   {faq.answer}
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{faq.category || '-'}</td>
-                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">{faq.widget_order ?? '-'}</td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-muted-foreground">{faq.category || '-'}</td> {/* Dark text */}
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-muted-foreground text-center">{faq.widget_order ?? '-'}</td> {/* Dark text */}
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-center">
+                  {/* Dark theme status badges */}
                   <span className={`px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      faq.active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      faq.active ? 'bg-green-600/20 text-green-400' : 'bg-red-600/20 text-red-400'
                   }`}>
                       {faq.active ? 'Active' : 'Inactive'}
                   </span>
                   <span className={`ml-2 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      faq.show_in_widget ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                      faq.show_in_widget ? 'bg-blue-600/20 text-blue-400' : 'bg-muted text-muted-foreground'
                   }`}>
                       {faq.show_in_widget ? 'In Widget' : 'Hidden'}
                   </span>
                 </td>
-                <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2"> {/* Centered actions */}
-                  {/* Styled buttons similar to Lermo */}
+                <td className="px-4 py-4 whitespace-nowrap text-center text-sm font-medium space-x-2">
+                  {/* Dark theme action buttons */}
                   <button
                     onClick={() => onEdit(faq)}
-                    className="text-indigo-600 hover:text-indigo-800 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    className="text-primary hover:text-primary/80 inline-flex items-center px-2.5 py-1.5 border border-border text-xs font-medium rounded bg-card hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50"
                     title="Edit FAQ"
                     disabled={isLoadingDelete}
                   >
@@ -109,7 +112,7 @@ const WidgetFAQList: React.FC<WidgetFAQListProps> = ({
                   </button>
                   <button
                     onClick={() => onDelete(faq.id)}
-                    className="text-red-600 hover:text-red-800 inline-flex items-center px-2.5 py-1.5 border border-gray-300 text-xs font-medium rounded bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                    className="text-destructive hover:text-destructive/80 inline-flex items-center px-2.5 py-1.5 border border-border text-xs font-medium rounded bg-card hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive disabled:opacity-50"
                     title="Delete FAQ"
                     disabled={isLoadingDelete}
                   >

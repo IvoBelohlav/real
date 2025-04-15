@@ -46,70 +46,77 @@ const BusinessTypeList: React.FC<BusinessTypeListProps> = ({ businessTypes, onEd
         variants={tableVariants}
         initial="hidden"
         animate="visible"
-        className="min-w-full divide-y divide-gray-200"
+        className="min-w-full divide-y divide-border" // Use border color
       >
-        <thead className="bg-blue-50">
+        {/* Apply dark theme header styles */}
+        <thead className="bg-muted/50"> {/* Use muted background */}
           <tr>
-            <th scope="col" className="px-5 py-3.5 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+            <th scope="col" className="px-5 py-3.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               <div className="flex items-center">
-                <Layers size={16} className="mr-1.5 text-blue-500" />
+                <Layers size={16} className="mr-1.5 text-primary" /> {/* Use primary color */}
                 Type Name
               </div>
             </th>
-            <th scope="col" className="px-5 py-3.5 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+            <th scope="col" className="px-5 py-3.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               <div className="flex items-center">
-                <Hash size={16} className="mr-1.5 text-blue-500" />
+                <Hash size={16} className="mr-1.5 text-primary" />
                 Key Features Count
               </div>
             </th>
-            <th scope="col" className="px-5 py-3.5 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+            <th scope="col" className="px-5 py-3.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
               <div className="flex items-center">
-                <Calendar size={16} className="mr-1.5 text-blue-500" />
+                <Calendar size={16} className="mr-1.5 text-primary" />
                 Comparison Metrics Count
               </div>
             </th>
-            <th scope="col" className="px-5 py-3.5 text-right text-xs font-medium text-gray-700 uppercase tracking-wider">
+            <th scope="col" className="px-5 py-3.5 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        {/* Apply dark theme body styles */}
+        <tbody className="bg-card divide-y divide-border"> {/* Use card background and border */}
           {businessTypes.map((bt) => (
-            <motion.tr 
+            <motion.tr
               key={bt.id}
               variants={rowVariants}
-              className="hover:bg-blue-50 transition-colors duration-150 group"
+              className="hover:bg-muted/50 transition-colors duration-150 group" // Use muted hover
             >
               <td className="px-5 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">{bt.type}</div>
+                {/* Use foreground text */}
+                <div className="text-sm font-medium text-foreground">{bt.type}</div>
               </td>
               <td className="px-5 py-4 whitespace-nowrap">
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {/* Use secondary badge style */}
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                   {bt.key_features?.length || 0}
                 </div>
               </td>
               <td className="px-5 py-4 whitespace-nowrap">
-                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                {/* Use secondary badge style */}
+                <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
                   {bt.comparison_metrics?.length || 0}
                 </div>
               </td>
               <td className="px-5 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                {/* Use primary button style (small variant) */}
                 <motion.button
                   variants={buttonVariants}
                   initial="initial"
                   whileHover="hover"
                   onClick={() => onEdit(bt)}
-                  className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                  className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring transition-colors duration-200"
                   aria-label={`Edit ${bt.type}`}
                 >
                   <Edit size={14} className="mr-1" /> Edit
                 </motion.button>
+                {/* Use destructive button style (small variant) */}
                 <motion.button
                   variants={buttonVariants}
                   initial="initial"
                   whileHover="hover"
                   onClick={() => onDelete(bt.id!)}
-                  className={`inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200 ${isLoadingDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-destructive-foreground bg-destructive hover:bg-destructive/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive transition-colors duration-200 ${isLoadingDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={isLoadingDelete || !bt.id}
                   aria-label={`Delete ${bt.type}`}
                 >

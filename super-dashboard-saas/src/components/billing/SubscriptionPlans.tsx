@@ -190,10 +190,11 @@ export default function SubscriptionPlans() {
 
   if (!stripePromise) {
     return (
+      // Apply dark theme error styles
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="text-red-600 p-4 bg-red-50 rounded-lg shadow border border-red-200"
+        className="text-destructive-foreground p-4 bg-destructive/80 rounded-lg shadow border border-destructive"
       >
         Stripe is not configured. Please add NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY to your environment variables.
       </motion.div>
@@ -221,50 +222,56 @@ export default function SubscriptionPlans() {
       animate="show"
       className="space-y-8"
     >
+       {/* Apply dark theme error styles */}
        {(contextError || localError) && (
-         <motion.div 
+         <motion.div
            initial={{ opacity: 0, y: -10 }}
            animate={{ opacity: 1, y: 0 }}
            transition={{ type: "spring" }}
-           className="text-red-500 bg-red-50 p-4 rounded-lg border border-red-200 shadow-sm"
+           className="text-destructive-foreground bg-destructive/80 p-4 rounded-lg border border-destructive shadow-sm"
          >
-           {contextError || localError}
+           {contextError || localError || 'An error occurred.'} {/* Ensure fallback message */}
          </motion.div>
        )}
 
+       {/* Current Plan Display - Apply dark theme styles */}
        {currentPlan && hasActiveSubscription && (
-         <motion.div 
+         <motion.div
            initial={{ opacity: 0, scale: 0.95 }}
            animate={{ opacity: 1, scale: 1 }}
            transition={{ type: "spring", stiffness: 100 }}
-           className="bg-white shadow-lg rounded-xl p-6 border-2 border-blue-500 mb-8 relative overflow-hidden"
+           className="bg-card shadow-lg rounded-xl p-6 border-2 border-primary mb-8 relative overflow-hidden" // Use primary border
          >
-           <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
+           {/* Use primary background for tag */}
+           <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-bl-lg">
              CURRENT PLAN
            </div>
            <div className="flex items-start justify-between">
              <div>
-               <h3 className="text-lg font-medium text-gray-900 mb-2">Your Current Plan</h3>
-               <p className="text-2xl font-bold text-blue-600 mb-1">
+               {/* Use foreground/muted text */}
+               <h3 className="text-lg font-medium text-foreground mb-2">Your Current Plan</h3>
+               <p className="text-2xl font-bold text-primary mb-1">
                  {currentPlan.name}
                </p>
                {currentSubscription?.status && (
                  <div className="flex items-center">
-                   <span className="text-sm text-gray-600 capitalize flex items-center mr-2">
+                   <span className="text-sm text-muted-foreground capitalize flex items-center mr-2">
+                     {/* Use theme colors for status dot */}
                      <span className={`w-2 h-2 rounded-full mr-1.5 ${
-                       currentSubscription.status === 'active' ? 'bg-green-500' : 'bg-yellow-500'
+                       currentSubscription.status === 'active' ? 'bg-green-500' : 'bg-yellow-500' // Keep status colors or map
                      }`}></span>
                      Status: {currentSubscription.status}
                    </span>
                  </div>
                )}
              </div>
+             {/* Use primary button style */}
              <motion.button
                whileHover={{ scale: 1.03 }}
                whileTap={{ scale: 0.97 }}
                onClick={handleManageSubscription}
                disabled={isCheckoutLoading === 'manage'}
-               className="mt-1 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors duration-200"
+               className="mt-1 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-md text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-colors duration-200"
              >
                {isCheckoutLoading === 'manage' ? <LoadingSpinner /> : 'Manage Subscription'}
              </motion.button>
@@ -289,62 +296,69 @@ export default function SubscriptionPlans() {
                key={plan.id}
                variants={planCardVariants}
                whileHover={{ y: -5, transition: { type: "spring", stiffness: 300 } }}
-               className={`bg-white rounded-xl p-6 flex flex-col border-2 transition-all duration-300 relative
-                 ${isCurrentActivePlan 
-                   ? 'border-green-500 shadow-lg shadow-green-100' 
-                   : isPremium 
-                     ? 'border-blue-500 shadow-lg' 
-                     : 'border-gray-200 shadow-md hover:shadow-lg hover:border-blue-300'}`}
+               // Apply dark theme card styles
+               className={`bg-card rounded-xl p-6 flex flex-col border-2 transition-all duration-300 relative
+                 ${isCurrentActivePlan
+                   ? 'border-green-500 shadow-lg shadow-green-900/30' // Adjusted shadow for dark
+                   : isPremium
+                     ? 'border-primary shadow-lg shadow-primary/20' // Use primary color
+                     : 'border-border shadow-md hover:shadow-lg hover:border-primary/50'}`} // Use border color
              >
+               {/* Use primary color for popular tag */}
                {isPremium && !isCurrentActivePlan && (
-                 <div className="absolute -top-4 -right-4 bg-blue-600 text-white text-xs font-bold px-4 py-1 rounded-full transform rotate-12 shadow-md">
+                 <div className="absolute -top-4 -right-4 bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-full transform rotate-12 shadow-md">
                    POPULAR
                  </div>
                )}
-               
-               <h3 className="text-xl font-bold text-gray-900">{plan.name}</h3>
-               <p className="mt-2 text-3xl font-extrabold text-blue-700">{plan.price}</p>
-               
-               <ul className="mt-6 space-y-3 text-sm text-gray-600 flex-grow">
+
+               {/* Apply dark theme text colors */}
+               <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
+               <p className="mt-2 text-3xl font-extrabold text-primary">{plan.price}</p>
+
+               {/* Apply dark theme text and icon colors */}
+               <ul className="mt-6 space-y-3 text-sm text-muted-foreground flex-grow">
                  {plan.features.map((feature, idx) => (
-                   <motion.li 
-                     key={feature} 
+                   <motion.li
+                     key={feature}
                      variants={featureVariants}
                      className="flex items-center"
                    >
-                     <CheckCircle2 className="w-5 h-5 mr-2 text-blue-500 flex-shrink-0" />
+                     <CheckCircle2 className="w-5 h-5 mr-2 text-primary flex-shrink-0" /> {/* Use primary color */}
                      {feature}
                    </motion.li>
                  ))}
                </ul>
-               
+
                <div className="mt-8">
                  {isCurrentActivePlan ? (
-                   <div className="text-center py-3 px-4 border-2 border-green-500 bg-green-50 rounded-lg">
-                     <p className="text-sm font-medium text-green-700 flex items-center justify-center">
+                   // Apply dark theme current plan indicator
+                   <div className="text-center py-3 px-4 border-2 border-green-500 bg-green-900/20 rounded-lg">
+                     <p className="text-sm font-medium text-green-400 flex items-center justify-center">
                        <CheckCircle2 size={16} className="mr-1.5" /> Current Plan
                      </p>
                    </div>
                  ) : isEnterprise ? (
+                   /* Apply dark theme secondary button style for Contact Sales */
                    <motion.a
                      whileHover={{ scale: 1.03 }}
                      whileTap={{ scale: 0.97 }}
                      href="mailto:your-sales-email@example.com?subject=Enterprise Plan Inquiry"
-                     className="w-full inline-flex items-center justify-center px-4 py-3 border border-blue-300 text-sm font-medium rounded-lg shadow-sm text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                     className="w-full inline-flex items-center justify-center px-4 py-3 border border-border text-sm font-medium rounded-lg shadow-sm text-secondary-foreground bg-secondary hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring transition-colors duration-200"
                    >
                      <Sparkles size={16} className="mr-1.5" /> Contact Sales
                    </motion.a>
                  ) : (
+                   // Apply dark theme primary/secondary button styles
                    <motion.button
                      whileHover={{ scale: 1.03 }}
                      whileTap={{ scale: 0.97 }}
                      onClick={() => handleCheckout(plan.stripePriceId)}
                      disabled={isCheckoutLoading === plan.stripePriceId}
                      className={`w-full inline-flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-lg shadow-md ${
-                       isPremium 
-                         ? 'text-white bg-blue-600 hover:bg-blue-700' 
-                         : 'text-blue-700 bg-blue-100 hover:bg-blue-200'
-                     } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200`}
+                       isPremium
+                         ? 'text-primary-foreground bg-primary hover:bg-primary/90' // Primary for Premium
+                         : 'text-secondary-foreground bg-secondary hover:bg-muted' // Secondary for Basic
+                     } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200`}
                    >
                      {isCheckoutLoading === plan.stripePriceId ? <LoadingSpinner /> : 'Subscribe'}
                    </motion.button>

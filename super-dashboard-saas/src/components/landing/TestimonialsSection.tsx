@@ -1,220 +1,117 @@
-'use client';
+'use client'; // Added 'use client'
 
-import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaStar, FaStarHalfAlt, FaRegStar, FaChevronLeft, FaChevronRight, FaQuoteLeft } from 'react-icons/fa';
+import { QuoteIcon } from 'lucide-react';
+import React from 'react'; // Added React import
 
-// Reusable Section Title Component (Can be imported if created separately)
-interface SectionTitleProps {
-  title: string;
-  subtitle: string;
-}
-const SectionTitle: React.FC<SectionTitleProps> = ({ title, subtitle }) => (
-  <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900">
-      {title}
-      <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full"></span>
-    </h2>
-    <p className="max-w-2xl mx-auto mt-6 text-neutral-600">{subtitle}</p>
-  </div>
-);
-
-// Star Rating Component
-interface StarRatingProps {
-  rating: number;
-}
-const StarRating: React.FC<StarRatingProps> = ({ rating }) => {
-  const stars = [];
-  for (let i = 1; i <= 5; i++) {
-    if (i <= rating) {
-      stars.push(<FaStar key={i} className="text-secondary-500" />);
-    } else if (i === Math.ceil(rating) && !Number.isInteger(rating)) {
-      stars.push(<FaStarHalfAlt key={i} className="text-secondary-500" />);
-    } else {
-      stars.push(<FaRegStar key={i} className="text-secondary-500" />);
-    }
-  }
-  return <div className="flex space-x-1">{stars}</div>;
-};
-
-interface Testimonial {
-  id: number;
-  quote: string;
-  rating: number;
-  name: string;
-  position: string;
-  company: string;
-  avatarUrl: string;
-}
-
-// Sample Testimonial Data
-const testimonialsData: Testimonial[] = [
-  {
-    id: 1,
-    quote: "Dvojkavit revolutionized our customer support. Response times are instant, and our team can focus on complex issues. Highly recommended!",
-    rating: 5,
-    name: "Alice Johnson",
-    position: "Support Manager",
-    company: "Tech Solutions Inc.",
-    avatarUrl: "/api/placeholder/60/60?text=AJ",
-  },
-  {
-    id: 2,
-    quote: "The lead generation bot has been a game-changer. We're capturing more qualified leads than ever before, directly impacting our sales pipeline.",
-    rating: 4.5,
-    name: "Bob Williams",
-    position: "Marketing Director",
-    company: "Growth Co.",
-    avatarUrl: "/api/placeholder/60/60?text=BW",
-  },
-  {
-    id: 3,
-    quote: "Easy to set up and customize. The visual flow builder made creating complex conversation paths surprisingly simple. Great platform!",
-    rating: 5,
-    name: "Charlie Brown",
-    position: "Operations Lead",
-    company: "Innovate Ltd.",
-    avatarUrl: "/api/placeholder/60/60?text=CB",
-  },
-   {
-    id: 4,
-    quote: "The analytics dashboard provides valuable insights into customer interactions, helping us continuously improve our service.",
-    rating: 4,
-    name: "Diana Miller",
-    position: "Product Manager",
-    company: "Data Insights",
-    avatarUrl: "/api/placeholder/60/60?text=DM",
-  },
-];
-
-// Main Testimonials Section Component
-const TestimonialsSection: React.FC = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? testimonialsData.length - 1 : prevIndex - 1
-    );
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === testimonialsData.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const currentTestimonial = testimonialsData[currentIndex];
-
-  // Animation variants for Framer Motion
-  const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
+const TestimonialsSection = () => {
+  const testimonials = [
+    {
+      metric: "40%",
+      metricText: "reduction in routine inquiries",
+      quote: "Since implementing this tool, our customer service team has seen a 40% reduction in routine inquiries, allowing them to focus on complex issues.",
+      name: "Sarah Johnson",
+      title: "Customer Success Manager",
+      company: "TechFlow",
+      image: "/avatars/avatar-1.png",
     },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0,
-    }),
-  };
-
-  // Store direction for animations
-  const [[page, direction], setPage] = useState([0, 0]);
-
-  const paginate = (newDirection: number) => {
-    setPage([page + newDirection, newDirection]);
-    if (newDirection > 0) handleNext();
-    else handlePrev();
-  };
-
+    {
+      metric: "28%",
+      metricText: "increase in satisfaction ratings",
+      quote: "The customization options are incredible. We made it match our brand perfectly, and our customers love the seamless experience.",
+      name: "Michael Chen",
+      title: "Director of E-Commerce",
+      company: "StyleHub",
+      image: "/avatars/avatar-2.png",
+    },
+    {
+      metric: "10,000+",
+      metricText: "hours saved annually",
+      quote: "The ability to offer 24/7 support without increasing our staff has been a game-changer for our international customer base.",
+      name: "Emma Rodriguez",
+      title: "Head of Digital Strategy",
+      company: "GlobalSell",
+      image: "/avatars/avatar-3.png",
+    },
+  ];
 
   return (
-    <section className="py-16 md:py-24 bg-white" id="testimonials">
-      <div className="container mx-auto px-4">
-        <SectionTitle
-          title="What Our Clients Say"
-          subtitle="Real feedback from businesses thriving with Dvojkavit's AI solutions."
-        />
+    <section className="w-full py-24 md:py-32" id="testimonials">
+      <div className="container px-4 md:px-6 mx-auto max-w-6xl">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center space-y-4 mb-16"
+        >
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
+            Real customers, <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-violet-500">real results</span>
+          </h2>
+          <p className="mx-auto max-w-[700px] text-gray-400 md:text-xl">
+            See how businesses are transforming with our platform
+          </p>
+        </motion.div>
 
-        <div className="relative max-w-3xl mx-auto overflow-hidden">
-          <AnimatePresence initial={false} custom={direction}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {testimonials.map((testimonial, index) => (
             <motion.div
-              key={page} // Use page state for unique key
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 }
-              }}
-              className="bg-neutral-50 rounded-lg p-8 shadow-lg relative" // Added relative positioning
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 + index * 0.1 }}
+              className="bg-black border border-purple-900/20 rounded-xl overflow-hidden relative group hover:border-purple-500/30 transition-all duration-300"
             >
-              <FaQuoteLeft className="absolute top-6 left-6 text-5xl text-primary-100 opacity-80 z-0" />
-              <div className="relative z-10">
-                <div className="mb-4">
-                  <StarRating rating={currentTestimonial.rating} />
-                </div>
-                <p className="text-lg italic text-neutral-700 mb-6 leading-relaxed">
-                  "{currentTestimonial.quote}"
-                </p>
+              {/* Metric highlight */}
+              <div className="bg-purple-900/20 p-6 border-b border-purple-900/20">
+                <div className="text-3xl font-bold text-purple-400">{testimonial.metric}</div>
+                <div className="text-sm text-gray-400">{testimonial.metricText}</div>
+              </div>
+
+              {/* Quote content */}
+              <div className="p-6">
+                <QuoteIcon className="h-6 w-6 text-purple-500 mb-4 opacity-60" />
+                <p className="text-gray-300 mb-6 line-clamp-4">{testimonial.quote}</p>
                 <div className="flex items-center">
-                  <Image
-                    src={currentTestimonial.avatarUrl}
-                    alt={currentTestimonial.name}
-                    width={60}
-                    height={60}
-                    className="rounded-full mr-4 border-2 border-primary-200"
-                    unoptimized
-                  />
+                  <div className="relative h-10 w-10 rounded-full overflow-hidden mr-4 border border-purple-900/40">
+                    <Image
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      fill
+                      className="object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${testimonial.name}&background=6d28d9&color=fff`;
+                      }}
+                    />
+                  </div>
                   <div>
-                    <h4 className="font-bold text-lg text-neutral-900">{currentTestimonial.name}</h4>
-                    <p className="text-sm text-neutral-600">
-                      {currentTestimonial.position} at <span className="font-medium text-primary-600">{currentTestimonial.company}</span>
+                    <h4 className="font-medium text-white text-sm">{testimonial.name}</h4>
+                    <p className="text-gray-400 text-xs">
+                      {testimonial.title}, {testimonial.company}
                     </p>
                   </div>
                 </div>
               </div>
+
+              {/* Card glow effect on hover */}
+              <div className="absolute -z-10 inset-0 bg-gradient-to-r from-purple-600/0 via-purple-600/0 to-purple-600/0 opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-500 group-hover:via-purple-600/20"></div>
             </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation Buttons */}
-          <button
-            onClick={() => paginate(-1)}
-            className="absolute top-1/2 left-[-15px] md:left-[-30px] transform -translate-y-1/2 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-neutral-100 transition text-primary-500 hover:text-primary-700 z-20"
-            aria-label="Previous testimonial"
-          >
-            <FaChevronLeft />
-          </button>
-          <button
-            onClick={() => paginate(1)}
-            className="absolute top-1/2 right-[-15px] md:right-[-30px] transform -translate-y-1/2 bg-white rounded-full w-10 h-10 flex items-center justify-center shadow-md hover:bg-neutral-100 transition text-primary-500 hover:text-primary-700 z-20"
-            aria-label="Next testimonial"
-          >
-            <FaChevronRight />
-          </button>
-        </div>
-
-        {/* Navigation Dots */}
-        <div className="flex justify-center space-x-2 mt-8">
-          {testimonialsData.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentIndex(index)} // Direct navigation (optional)
-              className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                currentIndex === index ? 'bg-primary-500 scale-110' : 'bg-neutral-300 hover:bg-neutral-400'
-              }`}
-              aria-label={`Go to testimonial ${index + 1}`}
-            />
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          className="mt-16 text-center"
+        >
+          <a href="#contact" className="inline-flex items-center text-purple-400 hover:text-purple-300 font-medium text-lg transition-colors">
+            Read all customer stories
+            <svg className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </a>
+        </motion.div>
       </div>
     </section>
   );

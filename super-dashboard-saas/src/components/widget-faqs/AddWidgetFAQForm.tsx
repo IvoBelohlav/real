@@ -52,7 +52,9 @@ const AddWidgetFAQForm: React.FC<AddWidgetFAQFormProps> = ({ onSubmit, onCancel,
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="question" className="block text-sm font-medium text-gray-700">Question *</label>
+        {/* Apply dark theme label style */}
+        <label htmlFor="question" className="block text-sm font-medium text-muted-foreground">Question *</label>
+        {/* Apply dark theme input style */}
         <input
           type="text"
           name="question"
@@ -60,12 +62,14 @@ const AddWidgetFAQForm: React.FC<AddWidgetFAQFormProps> = ({ onSubmit, onCancel,
           value={formData.question}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm bg-input text-foreground placeholder-muted-foreground"
         />
       </div>
 
       <div>
-        <label htmlFor="answer" className="block text-sm font-medium text-gray-700">Answer *</label>
+        {/* Apply dark theme label style */}
+        <label htmlFor="answer" className="block text-sm font-medium text-muted-foreground">Answer *</label>
+        {/* Apply dark theme textarea style */}
         <textarea
           name="answer"
           id="answer"
@@ -73,7 +77,7 @@ const AddWidgetFAQForm: React.FC<AddWidgetFAQFormProps> = ({ onSubmit, onCancel,
           value={formData.answer}
           onChange={handleChange}
           required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm bg-input text-foreground placeholder-muted-foreground"
         />
       </div>
 
@@ -82,7 +86,9 @@ const AddWidgetFAQForm: React.FC<AddWidgetFAQFormProps> = ({ onSubmit, onCancel,
         {/* Widget Order - now takes full width */}
         <div className="grid grid-cols-1 gap-4 items-center">
             <div>
-                <label htmlFor="widget_order" className="block text-sm font-medium text-gray-700">Widget Order</label>
+                {/* Apply dark theme label style */}
+                <label htmlFor="widget_order" className="block text-sm font-medium text-muted-foreground">Widget Order</label>
+                {/* Apply dark theme input style */}
                 <input
                 type="number"
                 name="widget_order"
@@ -90,26 +96,27 @@ const AddWidgetFAQForm: React.FC<AddWidgetFAQFormProps> = ({ onSubmit, onCancel,
                 value={formData.widget_order || ''} // Show empty instead of 0 if null/0
                 onChange={handleChange}
                 placeholder="Lower number = higher priority"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block w-full px-3 py-2 border border-border rounded-md shadow-sm focus:outline-none focus:ring-ring focus:border-primary sm:text-sm bg-input text-foreground placeholder-muted-foreground"
                 />
             </div>
             {/* Removed Show in Widget and Active checkboxes container */}
         </div>
 
 
-      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-6">
+      {/* Apply dark theme styles to buttons and border */}
+      <div className="flex justify-end space-x-3 pt-4 border-t border-border mt-6">
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 text-sm font-medium disabled:opacity-50"
+          className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-muted text-sm font-medium disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isLoading}
-          className="px-4 py-2 bg-indigo-600 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 flex items-center justify-center min-w-[100px]"
+          className="px-4 py-2 bg-primary border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 flex items-center justify-center min-w-[100px]"
         >
           {isLoading ? <LoadingSpinner /> : (
               <>

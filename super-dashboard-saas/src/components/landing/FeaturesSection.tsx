@@ -1,136 +1,183 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { FaRobot, FaComments, FaChartLine, FaCogs, FaShieldAlt, FaHeadset, FaCheck, FaArrowRight } from 'react-icons/fa';
+import {
+  Clock,
+  TrendingDown,
+  Lightbulb,
+  Image as ImageIcon,
+  Globe,
+  Bitcoin,
+  ArrowRight
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-// Reusable Section Title Component (Optional - can be created separately)
-interface SectionTitleProps {
+// Define the type for a feature item
+interface FeatureItem {
+  icon: React.ReactNode;
   title: string;
   subtitle: string;
 }
-const SectionTitle: React.FC<SectionTitleProps> = ({ title, subtitle }) => (
-  <div className="text-center mb-12">
-    <h2 className="text-3xl md:text-4xl font-bold mb-3 relative inline-block text-neutral-900">
-      {title}
-      <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-primary-500 to-primary-700 rounded-full"></span>
-    </h2>
-    <p className="max-w-2xl mx-auto mt-6 text-neutral-600">{subtitle}</p>
-  </div>
-);
 
-// Reusable Feature Card Component
-interface FeatureCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  delay?: number;
-}
-const FeatureCard: React.FC<FeatureCardProps> = ({ icon, title, description, delay = 0 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, amount: 0.2 }}
-    transition={{ duration: 0.5, delay }}
-    className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col h-full group"
-  >
-    <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-lg bg-primary-100 text-primary-600 mb-5 text-2xl transition-colors duration-300 group-hover:bg-primary-500 group-hover:text-white">
-      {icon}
-    </div>
-    <h3 className="text-xl font-bold mb-3 text-neutral-900">{title}</h3>
-    <p className="text-neutral-600 mb-5 flex-grow">{description}</p>
-    <Link href="#contact" className="text-primary-500 font-medium mt-auto flex items-center group-hover:text-primary-700 transition-colors duration-300">
-      Learn More <FaArrowRight className="ml-2 text-sm transition-transform duration-300 group-hover:translate-x-1" />
-    </Link>
-  </motion.div>
-);
-
-// Main Features Section Component
-const FeaturesSection: React.FC = () => {
-  const features = [
-    { icon: <FaRobot />, title: 'AI-Powered Conversations', description: 'Engage users with natural, intelligent conversations powered by advanced AI.' },
-    { icon: <FaComments />, title: 'Lead Generation', description: 'Capture and qualify leads automatically through interactive chat flows.' },
-    { icon: <FaCogs />, title: 'Customizable Flows', description: 'Easily build and modify conversation paths with our intuitive visual editor.' },
-    { icon: <FaChartLine />, title: 'Insightful Analytics', description: 'Track performance, understand user behavior, and optimize your chatbot.' },
-    { icon: <FaShieldAlt />, title: 'Secure & Reliable', description: 'Enterprise-grade security and infrastructure ensure data privacy and uptime.' },
-    { icon: <FaHeadset />, title: 'Seamless Handoff', description: 'Smoothly transition complex queries from bot to human agents when needed.' },
-  ];
-
-  const highlightFeatures = [
-    { title: 'Knowledge Base Integration', description: 'Connect your existing documentation for instant, accurate answers.' },
-    { title: 'Multi-Channel Support', description: 'Deploy your chatbot across websites, messaging apps, and more.' },
-    { title: 'Proactive Engagement', description: 'Initiate conversations based on user behavior to increase conversions.' },
+const FeaturesSection = () => {
+  // Features array with Czech text and icons
+  const features: FeatureItem[] = [
+    {
+      icon: <Clock className="h-6 w-6 text-purple-400" />,
+      title: "ÚSPORA ČASU",
+      subtitle: "Meta, Google, TikTok, Linked-in"
+    },
+    {
+      icon: <TrendingDown className="h-6 w-6 text-purple-400" />,
+      title: "MENŠÍ ZTRÁTA OBJEDNÁVEK",
+      subtitle: "Webflow, WP, Custom"
+    },
+    {
+      icon: <Lightbulb className="h-6 w-6 text-purple-400" />,
+      title: "VÍCE OBJEDNÁVEK",
+      subtitle: "Logo, Webdesign, Billboardy"
+    },
+    {
+      icon: <ImageIcon className="h-6 w-6 text-purple-400" />,
+      title: "MÉNĚ STÍŽNOSTÍ",
+      subtitle: "Foto, Video, Edit"
+    },
+    {
+      icon: <Globe className="h-6 w-6 text-purple-400" />,
+      title: "ONLINE 24/7",
+      subtitle: "Produkt Prototyp"
+    },
+    {
+      icon: <Bitcoin className="h-6 w-6 text-purple-400" />,
+      title: "Blockchain a NFT",
+      subtitle: "Tokeny, Dapps, NFT, SC"
+    }
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-neutral-50" id="features">
-      <div className="container mx-auto px-4">
-        <SectionTitle
-          title="Why Choose Dvojkavit?"
-          subtitle="Discover the powerful features that make our AI chatbot the perfect solution for your business needs."
-        />
+    // Added overflow-hidden to contain glow
+    <section className="w-full py-24 md:py-32 relative bg-black text-white overflow-hidden" id="features">
+       {/* Background Glow Elements */}
+       <div className="absolute inset-0 -z-10 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[110px] animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-violet-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+      </div>
+      {/* Container with z-10 */}
+      <div className="container px-4 md:px-6 mx-auto max-w-7xl relative z-10">
+        {/* Main content container */}
+        <div className="flex flex-col-reverse md:flex-row gap-12 lg:gap-16 items-center">
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-          {features.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-              delay={index * 0.1}
-            />
-          ))}
-        </div>
-
-        {/* Highlighted Feature Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          {/* Left Column: Feature Cards */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative"
+            className="w-full md:w-2/3"
           >
-            <Image
-              src="/api/placeholder/600/500?text=Chatbot+Interface" // Placeholder
-              alt="Dvojkavit Chatbot Interface"
-              width={600}
-              height={500}
-              className="rounded-lg shadow-xl object-cover"
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.6 }}
-          >
-            <span className="inline-block text-sm font-semibold py-1 px-3 rounded-full bg-primary-100 text-primary-600 mb-4">
-              Advanced Capabilities
-            </span>
-            <h2 className="text-3xl font-bold mb-5 text-neutral-900">Go Beyond Basic Chatbots</h2>
-            <p className="text-neutral-600 mb-6 text-lg leading-relaxed">
-              Dvojkavit offers more than just simple Q&A. Leverage our platform for sophisticated automation, personalization, and integration possibilities.
-            </p>
-            <ul className="space-y-4">
-              {highlightFeatures.map((item, index) => (
-                <li key={index} className="flex items-start">
-                  <div className="flex-shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary-100 text-primary-600 mr-3 mt-1">
-                    <FaCheck className="text-xs" />
+            <div className="flex flex-col space-y-6">
+              {/* First row - single card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="w-full"
+              >
+                {/* Apply new styles */}
+                <div className="bg-black/40 backdrop-blur-sm rounded-3xl border border-purple-600/20 p-5 shadow-xl flex items-center space-x-5 transition-all">
+                  <div className="bg-black rounded-full p-3 flex items-center justify-center">
+                    <Clock className="h-6 w-6 text-purple-400" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-neutral-800">{item.title}</h4>
-                    <p className="text-neutral-600">{item.description}</p>
+                    <h3 className="text-lg font-bold tracking-wide">{features[0].title}</h3>
+                    <p className="text-gray-400 text-sm">{features[0].subtitle}</p>
                   </div>
-                </li>
-              ))}
-            </ul>
-            <Link href="/register" className="btn btn-primary mt-8">
-              Start Building Your Bot
-            </Link>
+                </div>
+              </motion.div>
+
+              {/* Second row - single card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="w-full"
+              >
+                 {/* Apply new styles */}
+                <div className="bg-black/40 backdrop-blur-sm rounded-3xl border border-purple-600/20 p-5 shadow-xl flex items-center space-x-5 transition-all">
+                  <div className="bg-black rounded-full p-3 flex items-center justify-center">
+                    <TrendingDown className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold tracking-wide">{features[1].title}</h3>
+                    <p className="text-gray-400 text-sm">{features[1].subtitle}</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Third row - single card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="w-full"
+              >
+                 {/* Apply new styles */}
+                <div className="bg-black/40 backdrop-blur-sm rounded-3xl border border-purple-600/20 p-5 shadow-xl flex items-center space-x-5 transition-all">
+                  <div className="bg-black rounded-full p-3 flex items-center justify-center">
+                    <Lightbulb className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold tracking-wide">{features[2].title}</h3>
+                    <p className="text-gray-400 text-sm">{features[2].subtitle}</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Fourth row - 3 cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {features.slice(3).map((feature, index) => (
+                  <motion.div
+                    key={index + 3}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                  >
+                     {/* Apply new styles */}
+                    <div className="bg-black/40 backdrop-blur-sm rounded-3xl border border-purple-600/20 p-5 shadow-xl flex flex-col items-center text-center transition-all h-full">
+                      <div className="bg-black rounded-full p-3 flex items-center justify-center mb-4">
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-base font-bold tracking-wide mb-1">{feature.title}</h3>
+                      <p className="text-gray-400 text-xs">{feature.subtitle}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Column: Text Block */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="w-full md:w-1/3 space-y-5 text-left md:pl-8"
+          >
+            {/* Apply gradient to h2 */}
+            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl leading-tight">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-fuchsia-300 to-violet-400">
+                JAKÉ JSOU REÁLNÉ VÝHODY NAŠEHO WIDGETU?
+              </span>
+            </h2>
+            {/* Adjusted Purple Subtitle styling */}
+            <div className="inline-block bg-purple-600 rounded-lg px-4 py-2 text-white"> {/* Changed bg and text color */}
+              <p className="text-2xl sm:text-3xl font-bold">
+                Váš Úspěch
+              </p>
+            </div>
+            <p className="text-gray-400 text-lg">
+              Protože marketing není jen o nastavení reklamy. Jinak řečeno – neděláme jen správu kampaní. Vytvoříme vám samostatný a efektivní marketingový kanál.
+            </p>
           </motion.div>
         </div>
       </div>
