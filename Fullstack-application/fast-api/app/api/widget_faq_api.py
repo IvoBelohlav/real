@@ -7,7 +7,8 @@ from bson import ObjectId
 from app.models.widget_faq_models import WidgetFAQItem, WidgetFAQCreate
 from app.utils.mongo import get_widget_faq_collection, serialize_mongo_doc
 from app.utils.logging_config import get_module_logger
-from app.utils.dependencies import get_current_active_customer
+# Use verify_widget_origin for public endpoint, get_current_user for others
+from app.utils.dependencies import verify_widget_origin, get_current_user 
 
 router = APIRouter()
 logger = get_module_logger(__name__)
@@ -15,11 +16,17 @@ logger = get_module_logger(__name__)
 async def get_widget_faq_items_collection(): # Dependency function to get widget_faq collection
     return await get_widget_faq_collection()
 
-@router.get("/widget-faqs", response_model=List[WidgetFAQItem])
-async def get_widget_faqs_endpoint(
-    current_user: dict = Depends(get_current_active_customer),
+# Endpoint for the public widget to fetch FAQs
+@router.get("/public/widget-faqs", response_model=List[WidgetFAQItem], name="public:get-widget-faqs", tags=["Public Widget"])
+async def get_public_widget_faqs_endpoint(
+    # Use the strict origin verification dependency
+    current_user: dict = Depends(verify_widget_origin), 
     widget_faq_collection = Depends(get_widget_faq_items_collection)
 ):
+    """
+    Retrieve active widget FAQs for the user associated with the API key,
+    validating the request origin.
+    """
     """
     Retrieve all widget FAQs.
     """
@@ -56,10 +63,12 @@ async def get_widget_faqs_endpoint(
         logger.error(f"Error retrieving widget FAQs: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not retrieve widget FAQs")
 
-@router.get("/widget-faqs/{faq_id}", response_model=WidgetFAQItem)
-async def get_widget_faq_by_id(
+# Endpoint for dashboard management (requires JWT auth)
+@router.get("/manage/widget-faqs/{faq_id}", response_model=WidgetFAQItem, name="dashboard:get-widget-faq", tags=["Dashboard Management"])
+async def get_widget_faq_by_id_for_management(
     faq_id: str, 
-    current_user: dict = Depends(get_current_active_customer),
+    # Use standard JWT authentication for dashboard
+    current_user: dict = Depends(get_current_user), 
     widget_faq_collection = Depends(get_widget_faq_items_collection)
 ):
     """
@@ -98,10 +107,12 @@ async def get_widget_faq_by_id(
         logger.error(f"Error retrieving widget FAQ: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Could not retrieve widget FAQ")
 
-@router.post("/widget-faqs", response_model=WidgetFAQItem, status_code=status.HTTP_201_CREATED)
-async def create_widget_faq(
+# Endpoint for dashboard management (requires JWT auth)
+@router.post("/manage/widget-faqs", response_model=WidgetFAQItem, status_code=status.HTTP_201_CREATED, name="dashboard:create-widget-faq", tags=["Dashboard Management"])
+async def create_widget_faq_for_management(
     widget_faq_create: WidgetFAQCreate, 
-    current_user: dict = Depends(get_current_active_customer),
+    # Use standard JWT authentication for dashboard
+    current_user: dict = Depends(get_current_user), 
     widget_faq_collection = Depends(get_widget_faq_items_collection)
 ):
     """
@@ -127,11 +138,13 @@ async def create_widget_faq(
         logger.error(f"Error creating widget FAQ: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to create widget FAQ")
 
-@router.put("/widget-faqs/{faq_id}", response_model=WidgetFAQItem)
-async def update_widget_faq(
+# Endpoint for dashboard management (requires JWT auth)
+@router.put("/manage/widget-faqs/{faq_id}", response_model=WidgetFAQItem, name="dashboard:update-widget-faq", tags=["Dashboard Management"])
+async def update_widget_faq_for_management(
     faq_id: str, 
     widget_faq_update: WidgetFAQCreate, 
-    current_user: dict = Depends(get_current_active_customer),
+    # Use standard JWT authentication for dashboard
+    current_user: dict = Depends(get_current_user), 
     widget_faq_collection = Depends(get_widget_faq_items_collection)
 ):
     """
@@ -177,10 +190,12 @@ async def update_widget_faq(
         logger.error(f"Error updating widget FAQ: {e}", exc_info=True)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update widget FAQ")
 
-@router.delete("/widget-faqs/{faq_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_widget_faq(
+# Endpoint for dashboard management (requires JWT auth)
+@router.delete("/manage/widget-faqs/{faq_id}", status_code=status.HTTP_204_NO_CONTENT, name="dashboard:delete-widget-faq", tags=["Dashboard Management"])
+async def delete_widget_faq_for_management(
     faq_id: str, 
-    current_user: dict = Depends(get_current_active_customer),
+    # Use standard JWT authentication for dashboard
+    current_user: dict = Depends(get_current_user), 
     widget_faq_collection = Depends(get_widget_faq_items_collection)
 ):
     """

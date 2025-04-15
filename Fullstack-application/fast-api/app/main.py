@@ -79,21 +79,7 @@ patch_json_response(app)
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001", 
-        "http://127.0.0.1:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5174",
-        "http://127.0.0.1:5500", # Added for local testing via simple HTTP server
-        "https://d129jv2av2liy7.cloudfront.net",
-        "http://lermoplus.s3-website.eu-north-1.amazonaws.com",
-        # Remove the wildcard "*" and add specific origins instead
-    ],
+    allow_origins=["*"], # Allow all origins for CORS preflight, security handled by verify_widget_origin
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["Content-Type", "Authorization", "Accept", "Origin", "X-Requested-With", "X-API-Key"],

@@ -5,7 +5,7 @@ import re
 from typing import Dict, List, Optional, Any, Tuple, Set
 from motor.motor_asyncio import AsyncIOMotorClient
 from app.utils.logging_config import get_module_logger
-from app.utils.mongo import get_product_collection, get_qa_collection
+from app.utils.mongo import get_product_collection, get_qa_collection, get_widget_faq_collection, serialize_mongo_doc
 from bson import ObjectId
 
 logger = get_module_logger(__name__)
@@ -20,8 +20,10 @@ class KnowledgeBase:
         self.db = db
         self.product_collection = None
         self.qa_collection = None
+        self.widget_faq_collection = None # Added for widget FAQs
         # Tenant-specific caches
         self.products_cache = {}  # user_id -> {product_id -> product}
+        self.widget_faqs_cache = {} # Added for widget FAQs: user_id -> {faq_id -> faq}
         self.categories_cache = {}
         self.templates_cache = {}
         self.common_phrases_cache = {}
@@ -56,6 +58,7 @@ class KnowledgeBase:
         """Initialize database collections and load cached data."""
         self.product_collection = await get_product_collection()
         self.qa_collection = await get_qa_collection()
+        self.widget_faq_collection = await get_widget_faq_collection() # Added
         await self.load_caches()
         await self.build_indexes()
     
@@ -65,6 +68,7 @@ class KnowledgeBase:
         try:
             await self.load_products_cache()
             await self.load_qa_cache()
+            await self.load_widget_faqs_cache() # Added
             self.logger.info("Knowledge base caches loaded successfully.")
         except Exception as e:
             self.logger.error(f"Error loading caches: {str(e)}")
@@ -134,11 +138,50 @@ class KnowledgeBase:
             phrases = await phrases_cursor.to_list(length=None)
             self.common_phrases_cache = {item["key"]: item["content"] for item in phrases}
             
-            self.logger.info(f"Loaded QA cache: {len(self.categories_cache)} categories, " 
+            self.logger.info(f"Loaded QA cache: {len(self.categories_cache)} categories, "
                             f"{len(self.templates_cache)} templates, "
                             f"{len(self.common_phrases_cache)} common phrases")
         except Exception as e:
             self.logger.error(f"Error loading QA cache: {str(e)}")
+
+    async def load_widget_faqs_cache(self):
+        """Load widget FAQs from database into memory cache."""
+        if self.widget_faq_collection is None:
+            self.logger.error("Widget FAQ collection not initialized")
+            return
+
+        try:
+            # Filter for active FAQs meant for the widget
+            filter_criteria = {"active": True, "show_in_widget": True}
+            cursor = self.widget_faq_collection.find(filter_criteria)
+            widget_faqs_raw = await cursor.to_list(length=None)
+
+            # Reset cache
+            self.widget_faqs_cache = {}
+
+            # Store in cache with user_id as primary key and faq_id as secondary key
+            for faq in widget_faqs_raw:
+                user_id = str(faq.get("user_id")) # Ensure user_id is present
+                if not user_id:
+                    self.logger.warning(f"Widget FAQ found without user_id: {faq.get('_id')}")
+                    continue # Skip FAQs without a user_id
+
+                faq_id = str(faq["_id"])
+                serialized_faq = serialize_mongo_doc(faq) # Use existing serializer
+
+                # Initialize user cache if not exists
+                if user_id not in self.widget_faqs_cache:
+                    self.widget_faqs_cache[user_id] = {}
+
+                # Store FAQ in tenant-specific cache
+                self.widget_faqs_cache[user_id][faq_id] = serialized_faq
+
+            # Log cache stats
+            total_faqs = sum(len(user_faqs) for user_faqs in self.widget_faqs_cache.values())
+            self.logger.info(f"Loaded {total_faqs} widget FAQs into tenant-specific cache for {len(self.widget_faqs_cache)} tenants")
+
+        except Exception as e:
+            self.logger.error(f"Error loading widget FAQs cache: {str(e)}")
     
     async def build_indexes(self):
         """Build in-memory indexes for faster searching."""
@@ -835,7 +878,43 @@ class KnowledgeBase:
         except Exception as e:
             self.logger.error(f"Error finding QA items for keyword '{keyword}' for user '{user_id}': {str(e)}")
             return []
-            
+
+    async def find_widget_faqs_by_keyword(self, keyword: str, user_id: Optional[str] = None, limit: int = 5) -> List[Dict]:
+        """Find widget FAQs by keyword from the cache, filtered by user_id."""
+        if not user_id:
+            self.logger.debug("Cannot search widget FAQs without user_id.")
+            return []
+
+        if user_id not in self.widget_faqs_cache:
+            self.logger.debug(f"No widget FAQs cached for user_id: {user_id}")
+            return []
+
+        try:
+            user_faqs = self.widget_faqs_cache.get(user_id, {})
+            matching_faqs = []
+            keyword_lower = keyword.lower()
+
+            for faq_id, faq_data in user_faqs.items():
+                # Check question, answer, and keywords
+                question_match = keyword_lower in faq_data.get("question", "").lower()
+                answer_match = keyword_lower in faq_data.get("answer", "").lower()
+                keywords_match = any(keyword_lower in k.lower() for k in faq_data.get("keywords", []))
+
+                if question_match or answer_match or keywords_match:
+                    matching_faqs.append(faq_data)
+                    if len(matching_faqs) >= limit:
+                        break # Stop if limit reached
+
+            # Optional: Sort results by relevance (e.g., keyword match > question > answer)
+            # For simplicity, returning in found order for now.
+
+            self.logger.debug(f"Found {len(matching_faqs)} widget FAQs for keyword '{keyword}' for user '{user_id}'")
+            return matching_faqs
+
+        except Exception as e:
+            self.logger.error(f"Error searching widget FAQs cache for keyword '{keyword}' for user '{user_id}': {str(e)}")
+            return []
+
     async def find_services_by_category(self, service_category: str, user_id: Optional[str] = None, limit: int = 5) -> List[Dict]:
         """Find services by category, filtered by user_id."""
         # This method would be implemented if you have services collection

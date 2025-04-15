@@ -218,7 +218,7 @@ async def handle_checkout_session_completed(event: stripe.Event, user_collection
                 "stripe_customer_id": customer_id,
                 "stripe_subscription_id": subscription_id,
                 "subscription_status": internal_status.value,
-                "subscription_tier": plan_id, # Ensure this uses the plan_id variable
+                "subscription_tier": subscription_tier_enum.value, # Store the mapped tier name
                 "subscription_current_period_end": current_period_end_dt,
                 "updated_at": datetime.now(timezone.utc)
             }
@@ -286,7 +286,7 @@ async def handle_customer_subscription_updated(event: stripe.Event, user_collect
 
     update_data = {
         "subscription_status": internal_status.value,
-        "subscription_tier": plan_id, # Save the actual Stripe Price ID
+        "subscription_tier": subscription_tier_enum.value, # Store the mapped tier name
         "subscription_current_period_end": current_period_end_dt,
         "updated_at": datetime.now(timezone.utc)
     }

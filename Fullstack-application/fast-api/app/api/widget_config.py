@@ -10,8 +10,8 @@ from app.utils.mongo import get_db, get_widget_config_collection
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Dict
 from app.utils.logging_config import get_module_logger
-# Import JWT, API Key, and the new Origin verification dependencies
-from app.utils.dependencies import require_active_subscription, get_user_from_api_key, verify_widget_origin
+# Import JWT, API Key, and the Origin verification dependencies
+from app.utils.dependencies import require_active_subscription, verify_widget_origin, verify_widget_origin_for_config
 
 logger = get_module_logger(__name__)
 
@@ -132,12 +132,16 @@ async def update_widget_config(
 
 
 # --- New Endpoint for Public Widget Script ---
-@router.get("/public/widget-config", response_model=WidgetConfig)
+@router.get("/public/widget-config", response_model=WidgetConfig, name="public:get-widget-config", tags=["Public Widget"])
 async def get_public_widget_config(
-    # Use the new dependency that includes API key auth AND origin verification
-    current_user: Dict = Depends(verify_widget_origin)
+    # Use the dependency that checks Origin ONLY to find the user for config
+    current_user: Dict = Depends(verify_widget_origin_for_config)
 ) -> WidgetConfig:
     """
+    Retrieves the widget configuration based *only* on the request's Origin header
+    matching a domain in a user's whitelist.
+    This endpoint is intended ONLY for the initial config fetch by the public widget script.
+    Subsequent API calls from the widget MUST use X-Api-Key and verify_widget_origin.
     Retrieves the widget configuration using an API key.
     This endpoint is intended to be called by the public widget script.
     """

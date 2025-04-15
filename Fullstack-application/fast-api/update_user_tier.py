@@ -9,8 +9,8 @@ load_dotenv()
 
 MONGO_URL = os.getenv("MONGO_URL")
 MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
-USER_ID_TO_UPDATE = "67f2adff1e6d8d35418530be" # User ID from the screenshot
-NEW_TIER = "basic"
+USER_ID_TO_UPDATE = "67fabaf3907c8f7b66d56285" # User ID from the screenshot provided by user
+NEW_TIER = "premium" # Set the correct tier
 
 if not MONGO_URL or not MONGO_DB_NAME:
     print("Error: MONGO_URL or MONGO_DB_NAME not found in .env file.", file=sys.stderr)

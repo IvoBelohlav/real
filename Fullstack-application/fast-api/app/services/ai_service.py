@@ -1,9 +1,21 @@
+"""
+Enhanced AI Service with a hybrid approach that provides:
+1. Core E-commerce functionality (tenant isolation, product filtering, database integration)
+2. Business-specific logic (product scoring, recommendations, pricing)
+3. Streamlined AI interactions for intent/entity recognition and natural language responses
+
+This refactored service follows a hybrid architecture that:
+- Keeps the critical infrastructure (database, tenant management, caching)
+- Simplifies the AI interaction layer
+- Delegates NLP tasks to Gemini while keeping business-specific processing in code
+- Focuses on multi-tenancy and proper data delivery to the frontend
+"""
+
 import os
 import json
 import re
-import time
 import math
-from typing import Dict, List, Optional, Any, Tuple, Set
+from typing import Dict, List, Optional, Any, Tuple
 from bson import ObjectId
 import google.generativeai as genai
 import asyncio
@@ -12,34 +24,24 @@ from app.utils.logging_config import get_module_logger
 from app.services.knowledge_base import KnowledgeBase
 from app.utils.context import EnhancedConversationContext
 from app.utils.mongo import get_shop_info
-from openai import AsyncOpenAI
 
 # Load environment variables
 from dotenv import load_dotenv
 load_dotenv()
 
-# Configure Gemini API with the key from environment variables
+# Configure Gemini API 
 gemini_api_key = os.getenv("GEMINI_API_KEY")
-openai_api_key = os.getenv("OPENAI_API_KEY")  # Fallback API key
 genai.configure(api_key=gemini_api_key)
-
-# Create OpenAI client
-openai_client = AsyncOpenAI(api_key=openai_api_key)
 
 # Constants for model selection and retries
 MAX_RETRIES = 3
 RETRY_DELAY_BASE = 2  # seconds
 MAX_RETRY_DELAY = 10  # seconds
 MODEL_CASCADE = [
-    {'name': 'gemini-2.0-flash-lite', 'desc': 'Gemini 2.0 Flash-Lite model (alias for gemini-2.0-flash-lite-001)'},
-    {'name': 'gemini-2.0-flash-thinking-exp-01-21', 'desc': 'Gemini 2.0 Flash Thinking model'},
+    {'name': 'gemini-2.0-flash-lite', 'desc': 'Gemini 2.0 Flash-Lite model'},
     {'name': 'gemini-1.5-pro', 'desc': 'Gemini 1.5 Pro model (paid tier)'},
-    {'name': 'gemini-1.5-flash', 'desc': 'lighter model Gemini 1.5 Flash (paid tier)'},
-    {'name': 'gemini-1.0-pro', 'desc': 'Gemini 1.0 Pro with reduced parameters (paid tier)'}
+    {'name': 'gemini-1.0-pro', 'desc': 'Gemini 1.0 Pro model (paid tier)'}
 ]
-
-# If we have quota issues, increase retries for the free model
-FREE_MODEL_MAX_RETRIES = 5  # Additional retries for the free model
 
 logger = get_module_logger(__name__)
 
@@ -65,37 +67,21 @@ def json_safe_dumps(obj):
 
 class AIService:
     """
-    Advanced AI-powered understanding and response generation
-    with product recommendations, comparisons, and knowledge integration using Gemini API.
+    Enhanced AI service with a hybrid architecture that balances:
+    - Business-specific E-commerce logic (product scoring, tenant isolation, caching)
+    - Simplified AI integration with Gemini for intent/entity recognition and response generation
+    - Multi-tenant data management with proper product formatting for frontend display
     """
     
     def __init__(self, knowledge_base: KnowledgeBase):
         self.knowledge_base = knowledge_base
         self.logger = logger
-        self.system_prompts = {}  # We'll load these dynamically now
-        
-        # Intent categories with expanded capabilities in both English and Czech
-        self.intent_categories = {
-            "product_recommendation": ["recommend", "suggest", "best", "looking for", "need", "want", "which", 
-                                      "doporuč", "doporucit", "navrhni", "nejlepší", "hledám", "potřebuji", "chci", "který", "jaký"],
-            "product_comparison": ["compare", "difference", "better", "vs", "versus", "or", "choose between",
-                                  "porovnej", "porovnat", "srovnej", "rozdíl", "lepší", "versus", "nebo", "mezi"],
-            "technical_info": ["how does", "specs", "features", "technical", "performance", "specification",
-                              "jak funguje", "specifikace", "vlastnosti", "technické", "výkon", "parametry"],
-            "accessory_recommendation": ["accessory", "accessories", "compatible", "work with", "add-on",
-                                        "příslušenství", "kompatibilní", "funguje s", "doplněk", "doplňky", "další doplňky", "k tomuto", "doporučili", "ještě pořídit", "hodí se k"],
-            "store_navigation": ["find", "where", "category", "section", "page", "website",
-                                "najdi", "najít", "kde", "kategorie", "sekce", "stránka", "web", "obchod"],
-            "shipping_payment": ["shipping", "delivery", "payment", "pay", "cost", "price", "fee",
-                                "doprava", "doručení", "platba", "zaplatit", "cena", "poplatek", "náklady"],
-            "customer_service": ["refund", "return", "warranty", "repair", "contact", "help", "service", "support",
-                                "vrácení", "reklamace", "záruka", "oprava", "kontakt", "pomoc", "služba", "podpora"]
-        }
+        self.system_prompts = {}  # Dynamically loaded shop-specific prompts
     
     async def _get_system_prompt(self, language: str = "cs") -> str:
         """
-        Get the system prompt for the specified language.
-        The prompt will be dynamically constructed using shop information from the database.
+        Get the system prompt for the specified language, dynamically constructed using 
+        shop information from the database to personalize the AI behavior.
         
         Args:
             language: Language code (default: "cs" for Czech)
@@ -203,9 +189,336 @@ Respond concisely and directly. For information you don't know, honestly admit y
                 
             self.system_prompts[language] = fallback
             return fallback
-    
+
+    async def extract_entities_with_gemini(self, query: str, context: Optional[EnhancedConversationContext], language: str = "cs") -> Dict[str, Any]:
+        """
+        Analyze query using Gemini to extract intent and entities.
+        This is a streamlined approach where Gemini handles the NLP tasks directly.
+        
+        Args:
+            query: The user's query text
+            context: Optional conversation context
+            language: Language code (default: "cs" for Czech)
+            
+        Returns:
+            Dictionary with extracted intent and entities, or a fallback structure on error.
+            Example: {"intent": "product_recommendation", "entities": {"products": ["kolo"], "price_range": {"min": 5000}}}
+        """
+        self.logger.info(f"Extracting entities from query: '{query}' in language: {language}")
+        
+        # Prepare context data for the analysis
+        context_data = {}
+        if context:
+            context_data = {
+                "previous_queries": context.previous_queries[-3:] if context.previous_queries else [],
+                "previous_intents": context.previous_intents[-3:] if context.previous_intents else [],
+                "category": context.category,
+                "budget_range": context.budget_range,
+                "required_features": context.required_features,
+                "attributes": context.attributes
+            }
+
+        system_prompt = await self._get_system_prompt(language)
+        
+        # Define possible intents and entities for the prompt
+        possible_intents = ["product_recommendation", "product_comparison", "technical_explanation", "accessory_recommendation", "store_navigation", "shipping_payment", "customer_service", "order_status", "general_question"]
+        entity_structure = """
+        {
+            "products": ["<product name>", ...],
+            "categories": ["<category name>", ...],
+            "features": ["<feature name>", ...],
+            "brands": ["<brand name>", ...],
+            "price_range": {"min": <number or null>, "max": <number or null>},
+            "comparison": <boolean>,
+            "accessories": ["<accessory name>", ...],
+            "service_requests": ["<service type>", ...],
+            "order_number": "<order number or null>",
+            "email": "<email address or null>"
+        }
+        """
+
+        analysis_instructions = f"""
+Analyze the user query considering the conversation context. Identify the primary user intent and extract relevant entities. 
+**CRITICAL:** Queries asking generally about products, inventory, or what the shop sells (e.g., "jaké máte produkty?", "what products do you have?", "show me bikes", "do you sell accessories?", "ukaž mi zboží") MUST be classified with the intent 'product_recommendation', even if no specific product name or category is mentioned. Do NOT classify these as 'general_question'.
+
+Possible Intents: {', '.join(possible_intents)}
+Entity Structure to Extract: {entity_structure}
+
+User query: "{query}"
+Conversation context: {json_safe_dumps(context_data)}
+
+Return ONLY the JSON object containing the 'intent' and 'entities'.
+""" if language == "cs" else f"""
+Analyze the user query considering the conversation context. Identify the primary user intent and extract relevant entities.
+
+Possible Intents: {', '.join(possible_intents)}
+Entity Structure to Extract: {entity_structure}
+
+User query: "{query}"
+Conversation context: {json_safe_dumps(context_data)}
+
+Return ONLY the JSON object containing the 'intent' and 'entities'.
+"""
+
+        full_prompt = f"{system_prompt}\n\n{analysis_instructions}"
+        generation_config = {
+            "temperature": 0.1, # Low temperature for factual extraction
+            "max_output_tokens": 512,
+            "top_p": 0.95,
+            "top_k": 40,
+            "response_mime_type": "application/json", # Request JSON output directly if supported
+        }
+
+    async def extract_entities_with_gemini(self, query: str, context: Optional[EnhancedConversationContext], language: str = "cs") -> Dict[str, Any]:
+        """
+        Analyze query using Gemini to extract intent and entities.
+        
+        Args:
+            query: The user's query text
+            context: Optional conversation context
+            language: Language code (default: "cs" for Czech)
+            
+        Returns:
+            Dictionary with extracted intent and entities, or a fallback structure on error.
+            Example: {"intent": "product_recommendation", "entities": {"products": ["kolo"], "price_range": {"min": 5000}}}
+        """
+        self.logger.info(f"Extracting entities from query: '{query}' in language: {language}")
+        
+        # Prepare context data for the analysis
+        context_data = {}
+        if context:
+            context_data = {
+                "previous_queries": context.previous_queries[-3:] if context.previous_queries else [],
+                "previous_intents": context.previous_intents[-3:] if context.previous_intents else [],
+                "category": context.category,
+                "budget_range": context.budget_range,
+                "required_features": context.required_features,
+                "attributes": context.attributes
+            }
+
+        system_prompt = await self._get_system_prompt(language)
+        
+        # Define possible intents and entities for the prompt
+        possible_intents = ["product_recommendation", "product_comparison", "technical_explanation", "accessory_recommendation", "store_navigation", "shipping_payment", "customer_service", "order_status", "general_question"]
+        entity_structure = """
+        {
+            "products": ["<product name>", ...],
+            "categories": ["<category name>", ...],
+            "features": ["<feature name>", ...],
+            "brands": ["<brand name>", ...],
+            "price_range": {"min": <number or null>, "max": <number or null>},
+            "comparison": <boolean>,
+            "accessories": ["<accessory name>", ...],
+            "service_requests": ["<service type>", ...],
+            "order_number": "<order number or null>",
+            "email": "<email address or null>"
+        }
+        """
+
+        analysis_instructions = f"""
+Analyze the user query considering the conversation context. Identify the primary user intent and extract relevant entities. 
+**CRITICAL:** Queries asking generally about products, inventory, or what the shop sells (e.g., "jaké máte produkty?", "what products do you have?", "show me bikes", "do you sell accessories?", "ukaž mi zboží") MUST be classified with the intent 'product_recommendation', even if no specific product name or category is mentioned. Do NOT classify these as 'general_question'.
+
+Possible Intents: {', '.join(possible_intents)}
+Entity Structure to Extract: {entity_structure}
+
+User query: "{query}"
+Conversation context: {json_safe_dumps(context_data)}
+
+Return ONLY the JSON object containing the 'intent' and 'entities'.
+""" if language == "cs" else f"""
+Analyze the user query considering the conversation context. Identify the primary user intent and extract relevant entities.
+
+Possible Intents: {', '.join(possible_intents)}
+Entity Structure to Extract: {entity_structure}
+
+User query: "{query}"
+Conversation context: {json_safe_dumps(context_data)}
+
+Return ONLY the JSON object containing the 'intent' and 'entities'.
+"""
+
+        full_prompt = f"{system_prompt}\n\n{analysis_instructions}"
+        generation_config = {
+            "temperature": 0.1, # Low temperature for factual extraction
+            "max_output_tokens": 512,
+            "top_p": 0.95,
+            "top_k": 40,
+            "response_mime_type": "application/json", # Request JSON output directly if supported
+        }
+
+        # Default fallback structure
+        fallback_analysis = {
+            "intent": "general_question",
+            "entities": {
+                "products": [], "categories": [], "features": [], "brands": [],
+                "price_range": {"min": None, "max": None}, "comparison": False,
+                "accessories": [], "service_requests": [], "order_number": None, "email": None
+            },
+            "confidence": 0.0 # Indicate low confidence for fallback
+        }
+
+        response = None
+        retry_count = 0
+        last_error = None
+
+        while response is None and retry_count <= MAX_RETRIES:
+            try:
+                model_info = MODEL_CASCADE[min(retry_count, len(MODEL_CASCADE) - 1)]
+                self.logger.info(f"Entity Extraction Try #{retry_count+1} with {model_info['desc']}")
+                model = genai.GenerativeModel(model_info['name'])
+                
+                response = await asyncio.to_thread(
+                    model.generate_content,
+                    full_prompt,
+                    generation_config=generation_config
+                )
+                
+                # Check if response has text part
+                if response and hasattr(response, 'text') and response.text:
+                    result_text = response.text.strip()
+                    try:
+                        # Try to parse the JSON response
+                        parsed_json = json.loads(result_text)
+                        # Basic validation
+                        if "intent" in parsed_json and "entities" in parsed_json:
+                             # Add confidence score based on successful parsing
+                            parsed_json["confidence"] = 0.85 # High confidence for successful AI extraction
+                            self.logger.debug(f"Successfully extracted entities: {parsed_json}")
+                            return parsed_json
+                        else:
+                             self.logger.warning(f"Extracted JSON missing required keys: {result_text}")
+                             # Fall through to retry or fallback
+                    except json.JSONDecodeError:
+                        self.logger.warning(f"Failed to parse JSON response for entity extraction: {result_text}")
+                        # Fall through to retry or fallback
+                else:
+                    self.logger.warning(f"Received empty or invalid response from Gemini API (Attempt {retry_count+1})")
+
+            except Exception as e:
+                last_error = e
+                self.logger.warning(f"Gemini API call failed (attempt {retry_count+1}): {str(e)}")
+            
+            # Increment retry count and delay
+            retry_count += 1
+            if retry_count <= MAX_RETRIES:
+                delay = min(RETRY_DELAY_BASE * (2 ** (retry_count - 1)), MAX_RETRY_DELAY)
+                await asyncio.sleep(delay)
+
+        # If all retries fail
+        self.logger.error(f"All Gemini API attempts failed for entity extraction. Last error: {last_error}. Using fallback.")
+        return fallback_analysis
+
+
+    async def generate_response_with_gemini(self, query: str, analysis: Dict[str, Any], relevant_data: List[Dict], context: Optional[EnhancedConversationContext], language: str = "cs") -> str:
+        """
+        Generate a natural language response using Gemini based on the query, analysis, and retrieved data.
+        
+        Args:
+            query: The original user query.
+            analysis: The result from extract_entities_with_gemini.
+            relevant_data: List of processed data items (e.g., formatted products) retrieved from KnowledgeBase.
+            context: Optional conversation context.
+            language: Language code.
+            
+        Returns:
+            The generated natural language response string.
+        """
+        self.logger.info(f"Generating response for query: '{query}' with intent: {analysis.get('intent')}")
+
+        system_prompt = await self._get_system_prompt(language)
+        
+        # Prepare context data
+        context_data = {}
+        if context:
+            context_data = {
+                "previous_queries": context.previous_queries[-3:] if context.previous_queries else [],
+                "previous_intents": context.previous_intents[-3:] if context.previous_intents else [],
+                "category": context.category,
+                "budget_range": context.budget_range,
+                "required_features": context.required_features,
+                "attributes": context.attributes
+            }
+
+        # Prepare relevant data string
+        relevant_data_str = "No specific data found."
+        if relevant_data:
+            relevant_data_str = f"Found the following relevant information:\n{json_safe_dumps(relevant_data)}"
+
+        response_instructions = f"""
+Based on the user's query, the conversation context, and the relevant data found, generate a helpful and natural response in {language}.
+
+User Query: "{query}"
+Identified Intent: {analysis.get('intent', 'N/A')}
+Extracted Entities: {json_safe_dumps(analysis.get('entities', {}))}
+Conversation Context: {json_safe_dumps(context_data)}
+Relevant Data Found:
+{relevant_data_str}
+
+Instructions:
+- Address the user's query directly.
+- Incorporate the relevant data naturally into the response.
+- Maintain a {language} language and a friendly, professional tone ({system_prompt}).
+- Keep the response concise and to the point.
+- If relevant data was found, base your response primarily on that data.
+- If no relevant data was found, provide a helpful general response or ask clarifying questions.
+- Optionally, suggest one relevant follow-up question the user might have.
+"""
+
+        full_prompt = f"{system_prompt}\n\n{response_instructions}"
+        generation_config = {
+            "temperature": 0.6, # Slightly higher temperature for more natural language
+            "max_output_tokens": 1024,
+            "top_p": 0.95,
+            "top_k": 40
+        }
+
+        # Fallback response
+        fallback_responses = {
+            "cs": "Omlouvám se, ale momentálně nemohu odpovědět na váš dotaz. Zkuste to prosím později nebo položte otázku jiným způsobem.",
+            "en": "I apologize, but I cannot answer your query at the moment. Please try again later or rephrase your question."
+        }
+        fallback_reply = fallback_responses.get(language, fallback_responses["cs"])
+
+        response = None
+        retry_count = 0
+        last_error = None
+
+        while response is None and retry_count <= MAX_RETRIES:
+            try:
+                model_info = MODEL_CASCADE[min(retry_count, len(MODEL_CASCADE) - 1)]
+                self.logger.info(f"Response Generation Try #{retry_count+1} with {model_info['desc']}")
+                model = genai.GenerativeModel(model_info['name'])
+                
+                response = await asyncio.to_thread(
+                    model.generate_content,
+                    full_prompt,
+                    generation_config=generation_config
+                )
+
+                if response and hasattr(response, 'text') and response.text:
+                    self.logger.debug(f"Successfully generated response: {response.text.strip()}")
+                    return response.text.strip()
+                else:
+                    self.logger.warning(f"Received empty or invalid response from Gemini API for response generation (Attempt {retry_count+1})")
+
+            except Exception as e:
+                last_error = e
+                self.logger.warning(f"Gemini API call failed during response generation (attempt {retry_count+1}): {str(e)}")
+
+            # Increment retry count and delay
+            retry_count += 1
+            if retry_count <= MAX_RETRIES:
+                delay = min(RETRY_DELAY_BASE * (2 ** (retry_count - 1)), MAX_RETRY_DELAY)
+                await asyncio.sleep(delay)
+
+        # If all retries fail
+        self.logger.error(f"All Gemini API attempts failed for response generation. Last error: {last_error}. Using fallback response.")
+        return fallback_reply
+        
     def _create_fallback_analysis(self, query: str, context: Optional[EnhancedConversationContext] = None) -> Dict[str, Any]:
         """
+        DEPRECATED - Use extract_entities_with_gemini fallback instead.
         Create a simple rule-based analysis when AI-based analysis fails.
         
         Args:
@@ -564,6 +877,268 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                 "requires_followup": False
             }
     
+    # --- Keep Helper Methods ---
+    # Keep _score_products_for_recommendation, _compute_query_similarity, 
+    # _extract_price_value, _format_price, _format_product_data
+    # Keep _get_system_prompt
+
+    async def _score_products_for_recommendation(self,
+                                            products: List[Dict],
+                                            entities: Dict[str, Any],
+                                            context: Optional[EnhancedConversationContext] = None
+                                           ) -> List[Dict]:
+        """
+        Score products for recommendation based on user preferences and requirements.
+        (Keeping this logic as it's business-specific)
+        
+        Args:
+            products: List of product dictionaries
+            entities: Entities extracted from query
+            context: Optional conversation context
+            
+        Returns:
+            List of scored products with score components
+        """
+        scored_products = []
+        
+        for product in products:
+            # Initialize score components
+            score_components = {
+                "feature_score": 0.0,
+                "price_score": 0.0,
+                "category_score": 0.0,
+                "brand_score": 0.0,
+                "semantic_score": 0.0, # This might be hard to calculate without deeper NLP
+                "admin_priority_score": 0.0
+            }
+            
+            # Feature matching
+            required_features = entities.get("features", [])
+            if context and context.required_features:
+                required_features.extend(context.required_features)
+            
+            product_features = set(product.get("features", []))
+            if required_features and product_features:
+                # Use case-insensitive matching for features
+                matching_features = [f for f in required_features if any(
+                    feature.lower() in f.lower() or f.lower() in feature.lower() 
+                    for feature in product_features
+                )]
+                if required_features: # Avoid division by zero
+                    score_components["feature_score"] = len(matching_features) / len(required_features)
+            
+            # Price matching
+            price_range = entities.get("price_range", {})
+            if (not price_range or (price_range.get("min") is None and price_range.get("max") is None)) and context and context.budget_range:
+                 price_range = context.budget_range # Use context budget if available and not in entities
+
+            if price_range and (price_range.get("min") is not None or price_range.get("max") is not None):
+                product_price = self._extract_price_value(product)
+                if product_price is not None: # Check if price extraction was successful
+                    min_price = price_range.get("min")
+                    max_price = price_range.get("max")
+                    
+                    # Handle potential infinity values safely
+                    if max_price is not None and math.isinf(max_price):
+                        max_price = float('inf') # Keep infinity for comparison logic below
+
+                    if min_price is not None and max_price is not None:
+                        if min_price <= product_price <= max_price:
+                            score_components["price_score"] = 1.0 # Perfect match
+                        elif product_price < min_price:
+                            # Score based on how far below minimum
+                            price_diff_ratio = (min_price - product_price) / min_price if min_price > 0 else 0
+                            score_components["price_score"] = max(0, 1 - min(price_diff_ratio, 1)) * 0.8 # Penalize slightly for being too cheap
+                        else: # product_price > max_price
+                            # Score based on how far above maximum
+                            price_diff_ratio = (product_price - max_price) / max_price if max_price > 0 else float('inf')
+                            score_components["price_score"] = max(0, 1 - min(price_diff_ratio, 1)) # Penalize more heavily for being too expensive
+                    elif min_price is not None and product_price >= min_price:
+                        # Only min price specified
+                        score_components["price_score"] = 0.8 # Good score if above min
+                    elif max_price is not None and product_price <= max_price:
+                        # Only max price specified
+                        score_components["price_score"] = 0.8 # Good score if below max
+            
+            # Category matching
+            categories = entities.get("categories", [])
+            if not categories and context and context.category:
+                categories = [context.category]
+            
+            if categories and product.get("category"):
+                product_category_lower = product.get("category").lower()
+                # Case-insensitive matching for categories
+                if any(category.lower() == product_category_lower for category in categories):
+                    score_components["category_score"] = 1.0
+                elif any(category.lower() in product_category_lower or product_category_lower in category.lower() for category in categories):
+                     score_components["category_score"] = 0.7 # Partial match score
+
+            # Brand matching
+            brands = entities.get("brands", [])
+            if brands and product.get("brand"):
+                product_brand_lower = product.get("brand").lower()
+                # Case-insensitive matching for brands
+                if any(brand.lower() == product_brand_lower for brand in brands):
+                    score_components["brand_score"] = 1.0
+                elif any(brand.lower() in product_brand_lower for brand in brands):
+                     score_components["brand_score"] = 0.8 # Partial match score
+
+            # Admin priority (if available)
+            admin_priority = product.get("admin_priority", 0)
+            if admin_priority > 0:
+                score_components["admin_priority_score"] = min(admin_priority / 10.0, 1.0) # Normalize priority score (e.g., 1-10 scale)
+
+            # Calculate aggregate score using defined weights
+            weights = {
+                "feature_score": 0.3,
+                "price_score": 0.25,
+                "category_score": 0.2,
+                "brand_score": 0.1,
+                "semantic_score": 0.0, # Set semantic score weight to 0 as it's not calculated
+                "admin_priority_score": 0.15 # Slightly increased weight for admin priority
+            }
+            
+            total_score = sum(score_components.get(key, 0) * weight for key, weight in weights.items())
+            
+            # Add to scored products
+            scored_products.append({
+                "product": product,
+                "score": total_score,
+                "score_components": score_components
+            })
+        
+        return scored_products
+    
+    def _compute_query_similarity(self, query: str, reference: str) -> float:
+        """
+        Compute simple similarity between query and reference text.
+        (Keeping this helper)
+        """
+        # Normalize texts
+        query_norm = query.lower()
+        reference_norm = reference.lower()
+        
+        # Extract words (simple tokenization)
+        query_words = set(re.findall(r'\w+', query_norm))
+        reference_words = set(re.findall(r'\w+', reference_norm))
+        
+        # Calculate word overlap (Jaccard similarity)
+        if not query_words or not reference_words:
+            return 0.0
+        
+        intersection = query_words.intersection(reference_words)
+        union = query_words.union(reference_words)
+        
+        # Avoid division by zero if union is empty
+        return len(intersection) / len(union) if union else 0.0
+
+    def _extract_price_value(self, product: Dict) -> Optional[float]:
+        """Extract price value from product data with multiple fallbacks. (Keeping this helper)"""
+        pricing = product.get("pricing", {})
+        
+        # Try different price types
+        for price_type in ["one_time", "value", "monthly", "annual"]:
+            price = pricing.get(price_type)
+            if price is not None: # Check for None explicitly
+                # Convert to float if it's a string or int
+                if isinstance(price, (str, int)):
+                    try:
+                        # Handle potential currency symbols or formatting in strings
+                        if isinstance(price, str):
+                             price_str = re.sub(r'[^\d.,]', '', price).replace(',', '.')
+                             return float(price_str)
+                        else: # It's an int
+                             return float(price)
+                    except ValueError:
+                        self.logger.warning(f"Could not convert price '{price}' to float for product {product.get('_id')}")
+                        pass # Continue to next price type if conversion fails
+                elif isinstance(price, float): # Already a float
+                     return price
+        
+        # Fallback: Check top-level price field if pricing dict fails
+        top_level_price = product.get("price")
+        if top_level_price is not None:
+             if isinstance(top_level_price, (str, int)):
+                 try:
+                     if isinstance(top_level_price, str):
+                         price_str = re.sub(r'[^\d.,]', '', top_level_price).replace(',', '.')
+                         return float(price_str)
+                     else:
+                         return float(top_level_price)
+                 except ValueError:
+                     self.logger.warning(f"Could not convert top-level price '{top_level_price}' to float for product {product.get('_id')}")
+             elif isinstance(top_level_price, float):
+                 return top_level_price
+
+        self.logger.debug(f"Could not extract price for product {product.get('_id')}")
+        return None
+
+    def _format_price(self, product: Dict) -> str:
+        """Format price information from a product dictionary. (Keeping this helper)"""
+        pricing = product.get("pricing", {})
+        price_value = self._extract_price_value(product) # Use the robust extraction method
+        
+        if price_value is not None:
+            currency = pricing.get("currency", "Kč") # Default to CZK
+            
+            # Determine price type for suffix
+            price_type_suffix = ""
+            if pricing.get("monthly") is not None:
+                price_type_suffix = "/měsíc" if currency == "Kč" else "/month"
+            elif pricing.get("annual") is not None:
+                price_type_suffix = "/rok" if currency == "Kč" else "/year"
+
+            try:
+                # Format the number with non-breaking space as thousands separator for CZK
+                separator = " " if currency == "Kč" else ","
+                price_formatted = f"{price_value:,.0f}".replace(",", separator)
+                return f"{price_formatted} {currency}{price_type_suffix}"
+            except Exception as e:
+                 self.logger.warning(f"Error formatting price {price_value}: {e}")
+                 # Fallback to simple string representation
+                 return f"{price_value} {currency}{price_type_suffix}"
+        
+        return "Cena není uvedena" if currency == "Kč" else "Price not available"
+
+
+    def _format_product_data(self, product: Dict) -> Dict:
+        """
+        Format product data for use in prompts and responses. (Keeping this helper)
+        
+        Args:
+            product: Product dictionary
+            
+        Returns:
+            Formatted product data dictionary (simplified for prompts)
+        """
+        # Extract basic product info, keep it concise for prompts
+        formatted = {
+            "name": product.get("product_name", "Unknown Product"),
+            "category": product.get("category", "N/A"),
+            "price": self._format_price(product), # Use the updated formatting
+            "features": product.get("features", [])[:5], # Limit features for brevity
+            "id": str(product.get("_id", "")) # Ensure ID is string
+        }
+        
+        # Optionally add a snippet of description if needed, but keep it short
+        description = product.get("description", "")
+        if description:
+             formatted["description_snippet"] = (description[:100] + '...') if len(description) > 100 else description
+
+        # Add brand if available
+        if product.get("brand"):
+            formatted["brand"] = product.get("brand")
+            
+        return formatted
+
+    # --- DEPRECATED METHODS TO BE REMOVED ---
+    # analyze_query, _enhanced_analysis, _create_fallback_analysis
+    # generate_response, _handle_..., _retrieve_specialized_knowledge
+    # _generate_relevant_followup_questions and its helpers
+
+    # Note: The actual removal will happen via replace_in_file diffs.
+    # This section is just for logical separation during thought process.
+
     async def generate_response(self, 
                             query: str, 
                             context: Optional[EnhancedConversationContext] = None,
@@ -586,10 +1161,10 @@ Possible query_type values: direct_product, category_browse, comparison, feature
         try:
             # Step 1: Analyze the query with enhanced analysis
             analysis = await self.analyze_query(query, language, context)
-            
-            # Step 2: Retrieve relevant knowledge based on intent - PASS USER_ID HERE
-            knowledge = await self._retrieve_specialized_knowledge(analysis, context, user_id)
-            
+
+            # Step 2: Retrieve relevant knowledge based on intent - PASS USER_ID and QUERY HERE
+            knowledge = await self._retrieve_specialized_knowledge(query, analysis, context, user_id) # Pass query
+
             # Step 3: Handle specialized query types
             response_data = {}
             intent = analysis.get("intent", "general_question")
@@ -665,21 +1240,23 @@ Possible query_type values: direct_product, category_browse, comparison, feature
                 "metadata": {"error": str(e)}
             }
     
-    async def _retrieve_specialized_knowledge(self, 
+    async def _retrieve_specialized_knowledge(self,
+                                        query: str, # Added query parameter
                                         analysis: Dict[str, Any],
                                         context: Optional[EnhancedConversationContext] = None,
-                                        user_id: Optional[str] = None  # Add user_id parameter
+                                        user_id: Optional[str] = None
                                         ) -> Dict[str, Any]:
         """
-        Retrieve relevant knowledge specialized by intent type.
-        
+        Retrieve relevant knowledge specialized by intent type, including widget FAQs.
+
         Args:
-            analysis: The query analysis result
-            context: Optional conversation context
-            user_id: Optional user ID to filter products by tenant
-            
+            query: The original user query text.
+            analysis: The query analysis result.
+            context: Optional conversation context.
+            user_id: Optional user ID to filter products and FAQs by tenant.
+
         Returns:
-            Dictionary with specialized knowledge
+            Dictionary with specialized knowledge.
         """
         knowledge = {
             "products": [],
@@ -814,7 +1391,27 @@ Possible query_type values: direct_product, category_browse, comparison, feature
         template = self.knowledge_base.get_template(intent)
         if template:
             knowledge["templates"][intent] = template
-        
+
+        # Add Widget FAQ retrieval using the original query text
+        try:
+            if query and user_id: # Ensure query and user_id are available
+                widget_faqs = await self.knowledge_base.find_widget_faqs_by_keyword(
+                    keyword=query,
+                    user_id=user_id,
+                    limit=3 # Limit to a few relevant FAQs
+                )
+                if widget_faqs:
+                    # Ensure qa_items exists before extending
+                    if "qa_items" not in knowledge:
+                        knowledge["qa_items"] = []
+                    # Add a source field to distinguish them if needed later
+                    for faq in widget_faqs:
+                        faq["source_type"] = "widget_faq" # Mark the source
+                    knowledge["qa_items"].extend(widget_faqs)
+                    self.logger.debug(f"Added {len(widget_faqs)} widget FAQs to knowledge for user {user_id}")
+        except Exception as e:
+            self.logger.error(f"Error retrieving widget FAQs for knowledge base: {e}")
+
         return knowledge
     
     async def _handle_product_comparison(self, # Added user_id parameter
@@ -3130,3 +3727,5 @@ Be specific but also flexible so the customer can easily follow the navigation t
         
         # Return unique inferred products
         return list(set(inferred_products))
+
+# --- End of AIService Class ---
