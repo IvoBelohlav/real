@@ -22,7 +22,7 @@ from app.api.orders import router as orders_router
 
 from app.api.chat import router as chat_router, get_knowledge_base, get_ai_service
 from app.api.admin import router as admin_router
-from app.api.auth import router as auth_router, initialize_admin_user
+from app.api.auth import router as auth_router
 from app.api.subscriptions import router as subscription_router
 from app.api.users import router as users_router
 from app.api.domains import router as domains_router # Import domains router
