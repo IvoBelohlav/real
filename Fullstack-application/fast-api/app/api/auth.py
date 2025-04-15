@@ -25,44 +25,7 @@ logger = get_module_logger(__name__)
 
 router = APIRouter()
 
-async def initialize_admin_user(db: AsyncIOMotorClient = Depends(get_db)):
-    """
-    Creates an admin user if it doesn't exist based on environment variables.
-    Raises an exception if admin user creation fails.
-    """
-    admin_email = os.getenv("ADMIN_EMAIL")
-    admin_password = os.getenv("ADMIN_PASSWORD")
-    admin_api_key = os.getenv("ADMIN_API_KEY", "admin_dev_api_key_123456")
-
-    if not admin_email or not admin_password:
-        error_msg = "WARNING: ADMIN_EMAIL or ADMIN_PASSWORD environment variables not set."
-        logger.error(error_msg)
-        raise Exception(error_msg)
-
-    # Get user collection from the passed db instance
-    user_collection = db[USER_COLLECTION_NAME] if isinstance(db, AsyncIOMotorClient) else db.get_collection(USER_COLLECTION_NAME)
-
-    try:
-        user = await user_collection.find_one({"email": admin_email.lower()})
-        if user:
-            if not user.get("api_key"):
-                logger.info("Admin user exists but doesn't have an API key. Setting API key.")
-                await user_collection.update_one({"email": admin_email.lower()}, {"$set": {"api_key": admin_api_key}})
-            logger.info("Admin user already exists.")
-            return
-
-        hashed_password = get_password_hash(admin_password)
-        admin_user = User(
-            id=str(uuid.uuid4()), email=admin_email.lower(), username="admin", password_hash=hashed_password,
-            created_at=datetime.now(timezone.utc), subscription_tier=SubscriptionTier.ENTERPRISE, # Use ENTERPRISE tier for admin
-            is_email_verified=True, api_key=admin_api_key
-        )
-        await user_collection.insert_one(admin_user.model_dump())
-        logger.info("Admin user created successfully with API key.")
-
-    except Exception as e:
-        logger.error(f"Error creating admin user: {e}")
-        raise Exception(f"Failed to create admin user: {e}")
+# Removed initialize_admin_user function as per user request
 
 @router.post("/auth/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
 async def register_user(user_data: UserCreate, background_tasks: BackgroundTasks, db: AsyncIOMotorClient = Depends(get_db)):

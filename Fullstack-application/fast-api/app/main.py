@@ -168,8 +168,7 @@ async def startup_event():
             logger.error("Database connection verification failed. Aborting startup.")
             sys.exit(1)  # Stop startup if DB verification fails
 
-        await initialize_admin_user(db=app.db)
-        logger.info("Admin user initialized")
+        # Removed call to initialize_admin_user(db=app.db) as per user request
 
         # Initialize KnowledgeBase
         knowledge_base = await get_knowledge_base()
@@ -208,10 +207,9 @@ async def startup_event():
             logger.info(f"Admin user already has API key: {admin_user.get('api_key', '')[0:5]}...")
         else:
             logger.info(f"Admin user not found: {admin_email}")
-            # Admin user will be created by auth.initialize_admin_user with the API key
+            # Admin user creation logic removed from startup
             
-        # Call initialize_admin_user to create admin if it doesn't exist
-        await initialize_admin_user(app.db)
+        # Removed call to initialize_admin_user(app.db)
         
     except Exception as e:
         logger.error(f"Startup error: {e}", exc_info=True)
