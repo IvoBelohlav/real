@@ -33,6 +33,11 @@ const ChatMessage = ({
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const carouselRef = useRef(null);
 
+  // --- Debugging Logs ---
+  console.log("ChatMessage received message:", JSON.stringify(message, null, 2));
+  console.log("ChatMessage received widgetConfig:", JSON.stringify(widgetConfig, null, 2));
+  // --- End Debugging Logs ---
+
   // --- Color Setup ---
   // Determine colors based on theme, widgetConfig, and potential overrides from `style` prop.
   // It's crucial that widgetConfig is passed correctly as a prop.
@@ -129,6 +134,11 @@ const ChatMessage = ({
     .filter(product => product !== null) // Remove any items that failed normalization
     // Sort by priority: higher admin_priority or priority comes first
     .sort((a, b) => (b.admin_priority || b.priority || 0) - (a.admin_priority || a.priority || 0));
+
+  // --- Debugging Logs ---
+  console.log("Raw Recommendations:", JSON.stringify(rawRecommendations, null, 2));
+  console.log("Normalized Recommendations:", JSON.stringify(normalizedRecommendations, null, 2));
+  // --- End Debugging Logs ---
 
   // Determine if there are any recommendations to display
   const hasRecommendations = normalizedRecommendations.length > 0;
@@ -494,6 +504,13 @@ const ChatMessage = ({
   // Flags to check if products or accessories exist
   const hasProducts = products.length > 0;
   const hasAccessories = accessories.length > 0;
+
+  // --- Debugging Logs ---
+  console.log("Products to render:", JSON.stringify(products, null, 2));
+  console.log("Accessories to render:", JSON.stringify(accessories, null, 2));
+  console.log("Has Products:", hasProducts);
+  // --- End Debugging Logs ---
+
 
   // Helper function to render message text with basic markdown-like formatting
   // Uses dangerouslySetInnerHTML for simplicity; consider react-markdown for complex needs.

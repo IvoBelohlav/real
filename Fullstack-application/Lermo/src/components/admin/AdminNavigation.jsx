@@ -18,19 +18,46 @@ import { removeAuthToken } from "../../utils/auth";
 import ServerReset from "./ServerReset";
 import styles from "./AdminNavigation.module.css";
 
-const navItems = [
-  { path: "/admin", icon: Home, label: "Dashboard" },
-  { path: "/admin/statistics", icon: BarChart2, label: "Statistics" },
-  { path: "/admin/products", icon: Package, label: "Products" },
-  { path: "/admin/business-types", icon: Building, label: "Business Types" },
-  { path: "/admin/guided-chat", icon: BookPlus, label: "Guided Chat" },
-  { path: "/admin/widget-config", icon: Settings, label: "Widget Config" },
-  { path: "/admin/shop-info", icon: Store, label: "Shop Info" },
-  { path: "/admin/conversations", icon: List, label: "Conversation Logs" },
-  { path: "/admin/contact-submissions", icon: Mailbox, label: "Contact Submissions" },
-  { path: "/admin/widget-faqs", icon: MessageSquare, label: "Widget FAQs" },
-  { path: "/admin/agent-chat", icon: MessageCircle, label: "Human Support" },
+// New structured navigation items based on widget modes
+const navigationStructure = [
+  {
+    mode: "Přehled", // Overview
+    items: [
+      { path: "/admin", icon: Home, label: "Dashboard" },
+      { path: "/admin/statistics", icon: BarChart2, label: "Statistiky" },
+    ],
+  },
+  {
+    mode: "Průvodce", // Guided Chat Mode
+    items: [
+      { path: "/admin/guided-chat", icon: BookPlus, label: "Editor Průvodce" },
+      { path: "/admin/products", icon: Package, label: "Produkty" },
+      { path: "/admin/business-types", icon: Building, label: "Typy Podnikání" },
+    ],
+  },
+  {
+    mode: "Chat", // Chat Mode
+    items: [
+       { path: "/admin/conversations", icon: List, label: "Logy Konverzací" },
+       { path: "/admin/agent-chat", icon: MessageCircle, label: "Lidská Podpora" },
+       { path: "/admin/contact-submissions", icon: Mailbox, label: "Kontaktní Formuláře" },
+    ],
+  },
+  {
+    mode: "FAQ", // FAQ Mode
+    items: [
+      { path: "/admin/widget-faqs", icon: MessageSquare, label: "Editor FAQ" },
+    ],
+  },
+   {
+    mode: "Nastavení", // Settings
+    items: [
+      { path: "/admin/widget-config", icon: Settings, label: "Konfigurace Widgetu" },
+      { path: "/admin/shop-info", icon: Store, label: "Informace o Obchodě" },
+    ],
+  },
 ];
+
 
 const AdminNavigation = React.memo(() => {
   const location = useLocation();
@@ -60,36 +87,41 @@ const AdminNavigation = React.memo(() => {
       </div>
 
       <div className={styles.mainContainer}>
-        {/* Navigation Items */}
+        {/* Navigation Items - Updated Structure */}
         <div className={styles.navItems}>
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`${styles.navItem} ${
-                isNavItemActive(item.path)
-                  ? styles.navItemActive
-                  : styles.navItemInactive
-              }`}
-              title={item.label}
-            >
-              <item.icon size={18} className={styles.icon} />
-              <span className={styles.navItemText}>{item.label}</span>
-            </Link>
+          {navigationStructure.map((group) => (
+            <div key={group.mode} className={styles.navGroup}>
+              <h3 className={styles.navGroupHeader}>{group.mode}</h3>
+              {group.items.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`${styles.navItem} ${
+                    isNavItemActive(item.path)
+                      ? styles.navItemActive
+                      : styles.navItemInactive
+                  }`}
+                  // title={item.label} // Tooltip removed
+                >
+                  <item.icon size={18} className={styles.icon} />
+                  <span className={styles.navItemText}>{item.label}</span>
+                </Link>
+              ))}
+            </div>
           ))}
         </div>
 
         {/* Bottom Actions */}
         <div className={styles.bottomActions}>
           <div className={styles.actionsContainer}>
-            <ServerReset />
+            <ServerReset /> {/* Consider if ServerReset needs a tooltip removed too? Assuming not for now. */}
             <button
               onClick={handleLogout}
               className={styles.logoutButton}
-              title="Logout"
+              // title="Logout" // Tooltip removed
             >
               <LogOut size={16} className={styles.logoutIcon} />
-              <span>Logout</span>
+              <span className={styles.logoutText}>Logout</span> {/* Added span for consistency */}
             </button>
           </div>
         </div>

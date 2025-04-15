@@ -673,25 +673,33 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
             return (
                 <motion.div
                     className={`${styles.widget} ${styles.collapsedCircular}`} // Use a new class for circular styling
-                    style={{ fontFamily: brandTheme.fonts }}
+                    // Force z-index for collapsed circular view
+                    style={{ fontFamily: brandTheme.fonts, zIndex: '2147483647 !important' }} 
                     initial={{ opacity: 0, scale: 0.5, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0, transition: { type: "spring", damping: 15, stiffness: 300 } }}
                     whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
                 >
                     <motion.button
-                        className={styles.chatButtonCircular} // New class for circular button
+                        // className={styles.chatButtonCircular} // Class removed, styles moved inline
                         onClick={() => setIsExpanded(true)}
                         aria-label="Open chat widget"
                         style={{
-                            backgroundColor: currentTheme === 'light' ? brandTheme.primaryColor : brandTheme.primaryColor,
+                            // Core styles from previous inline + Widget.module.css
+                            backgroundColor: brandTheme.primaryColor, // Simplified logic as it was same for light/dark
                             color: brandTheme.buttonText,
-                            borderRadius: '50%', // Make it circular
-                            width: '50px', // Adjust size as needed
+                            borderRadius: '50%',
+                            width: '50px',
                             height: '50px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             boxShadow: brandTheme.widgetShadow,
+                            border: 'none', // from CSS
+                            cursor: 'pointer', // from CSS
+                            outline: 'none', // from CSS
+                            fontFamily: brandTheme.fonts, // Ensure font consistency
+                            zIndex: '2147483647', // Ensure button is on top
+                            // Add !important selectively if needed, start without
                         }}
                         whileTap={{ scale: 0.9 }}
                         animate={{
@@ -723,8 +731,10 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
         return (
             <motion.div
                 className={`${styles.widget} ${styles.collapsed}`} // Existing class for wide style
+                // Force z-index for collapsed wide view
                 style={{
                     fontFamily: brandTheme.fonts,
+                    zIndex: '2147483647 !important', 
                 }}
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
                 animate={{ 
@@ -742,19 +752,28 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                     transition: { duration: 0.2 }
                 }}
             >
-                <motion.button 
-                    className={styles.chatButton}
+                <motion.button
+                    // className={styles.chatButton} // Class removed, styles moved inline
                     onClick={() => setIsExpanded(true)}
                     aria-label="Open chat widget"
                     style={{
-                        backgroundColor: currentTheme === 'light' 
-                            ? brandTheme.primaryColor
-                            : brandTheme.primaryColor,
+                        // Core styles from previous inline + Widget.module.css
+                        backgroundColor: brandTheme.primaryColor, // Simplified logic
                         color: brandTheme.buttonText,
                         borderRadius: brandTheme.widgetBorderRadius || '1.6rem',
                         boxShadow: brandTheme.widgetShadow,
                         padding: '0.625rem 1rem',
                         fontWeight: brandTheme.buttonFontWeight || 'bold',
+                        border: 'none', // from CSS
+                        cursor: 'pointer', // from CSS
+                        display: 'flex', // from CSS
+                        alignItems: 'center', // from CSS
+                        justifyContent: 'center', // from CSS
+                        fontSize: '0.9rem', // from CSS
+                        outline: 'none', // from CSS
+                        fontFamily: brandTheme.fonts, // Ensure font consistency
+                        zIndex: '2147483647', // Ensure button is on top
+                        // Add !important selectively if needed, start without
                     }}
                     whileTap={{ scale: 0.95 }}
                     animate={{
@@ -804,8 +823,56 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
         );
     }
 
+    // Define styles for CSS variables needed by MessageInput.module.css
+    // Define styles for CSS variables needed by MessageInput.module.css
+    const defaultThemeForContainer = themes[currentTheme] || themes.light; // Get default light/dark theme
+    const widgetContainerStyle = {
+        '--input-bg-color': brandTheme.backgroundColor, // Use THEMED background for input field itself
+        '--input-text-color': brandTheme.textColor, // Use THEMED text color for input field itself
+        '--input-placeholder-color': brandTheme.placeholderText || (currentTheme === 'light' ? '#757575' : '#bdbdbd'), // Fallback placeholder
+        '--input-focus-shadow-color': brandTheme.primaryColor, // Use THEMED primary color for focus ring
+        '--input-container-bg': defaultThemeForContainer.secondaryColor, // Use DEFAULT secondary color (neutral grey) for the container
+        '--input-border-top-color': defaultThemeForContainer.secondaryColor, // Match container background
+        '--input-shadow-color': 'rgba(0, 0, 0, 0.05)', // Lighter shadow for input container
+        '--scrollbar-track-color': defaultThemeForContainer.secondaryColor, // Use DEFAULT secondary for scrollbar track
+        '--scrollbar-thumb-color': brandTheme.primaryColor, // Use THEMED primary for scrollbar thumb
+        '--scrollbar-thumb-hover-color': brandTheme.accentColor || brandTheme.primaryColor, // Use accent or primary for thumb hover
+        '--button-bg-color': brandTheme.primaryColor, // Use primary for send button background
+        '--button-text-color': brandTheme.buttonText, // Use button text color for send button icon
+        '--button-cursor': 'pointer', // Default cursor for send button
+        '--button-opacity': 1, // Default opacity for send button
+    };
+
+    // Define a unique ID for the root container
+    const widgetRootId = "lermo-unique-widget-root"; 
+
     return (
-        <div className={styles['dvojkavit-widget-container']}>
+        // Add the unique ID and aggressive reset styles here
+        <div 
+            id={widgetRootId} 
+            className={styles['dvojkavit-widget-container']} 
+            // Revert root styles back, just keep CSS vars and basic positioning/z-index
+            style={{ 
+                ...widgetContainerStyle,      // Keep existing CSS variables
+                position: 'fixed',            // Keep basic positioning
+                bottom: '20px',               // Keep basic positioning
+                right: '20px',                // Keep basic positioning
+                right: '20px !important',     // Force position
+                width: 'auto !important',     // Prevent container forcing a width
+                height: 'auto !important',    // Prevent container forcing a height
+                maxWidth: 'none !important',  // Prevent container limiting width
+                maxHeight: 'none !important', // Prevent container limiting height
+                margin: '0 !important',       // Reset margin
+                padding: '0 !important',      // Reset padding (widget content adds its own)
+                border: 'none !important',    // Reset border (widget content adds its own)
+                zIndex: '2147483647 !important', // Max z-index
+                // --- Re-apply essential base styles ---
+                fontFamily: brandTheme.fonts, // Re-apply font family 
+                boxSizing: 'border-box',      // Keep box-sizing
+            }}
+        >
+            {/* Keep box-sizing reset for children */}
+            <style>{`#${widgetRootId} *, #${widgetRootId} *::before, #${widgetRootId} *::after { box-sizing: border-box; }`}</style> 
             <AnimatePresence>
                 {showError && (
                     <motion.div
@@ -1175,7 +1242,7 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
+                                        borderColor: brandTheme.primaryColor, // Use borderColor directly
                                     }}
                                 />
                             </div>
@@ -1193,7 +1260,7 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
+                                        borderColor: brandTheme.primaryColor, // Use borderColor directly
                                     }}
                                 />
                             </div>
@@ -1212,7 +1279,7 @@ const Widget = ({ fonts, widgetConfig: widgetConfigProp, currentTheme: currentTh
                                     style={{
                                         backgroundColor: currentTheme === 'light' ? '#F9FAFB' : '#2D3748',
                                         color: brandTheme.textColor,
-                                        borderColor: `${brandTheme.primaryColor}80`, // Use borderColor
+                                        borderColor: brandTheme.primaryColor, // Use borderColor directly
                                     }}
                                 ></textarea>
                             </div>

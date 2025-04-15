@@ -14,7 +14,8 @@ export const useChat = () => {
         query: text,
         guest_id: guestId,
       });
-      const { reply, followup_questions = [], source = '', metadata = {} } = response.data;
+      // Extract personalized_recommendations as well
+      const { reply, followup_questions = [], source = '', metadata = {}, personalized_recommendations = [] } = response.data; 
   
       setMessages(prevMessages => [
         ...prevMessages,
@@ -23,7 +24,8 @@ export const useChat = () => {
           sender: 'bot',
           followUp: followup_questions,
           source,
-          metadata
+          metadata,
+          personalized_recommendations // Add the recommendations here
         },
       ]);
     } catch (error) {

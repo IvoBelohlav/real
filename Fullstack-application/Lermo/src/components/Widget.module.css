@@ -2,50 +2,49 @@
 /* Add this to the end of your src/index.css file */
 /* Create a file called heading-fix.css in your public folder */
 
-/* ===== TYPOGRAPHY PROTECTION LAYER ===== */
-.dvojkavit-widget-container * {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-  line-height: 1.5 !important;
-  text-transform: none !important;
-  letter-spacing: normal !important;
-  word-spacing: normal !important;
-  -webkit-font-smoothing: antialiased !important;
-  -moz-osx-font-smoothing: grayscale !important;
+/* ===== BASE TYPOGRAPHY (Rely on Shadow DOM isolation) ===== */
+/* Set base font on the container, allowing inheritance */
+.dvojkavit-widget-container {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px; /* Define a base size */
+  color: #333; /* Default text color for light mode */
 }
 
-/* Define base font sizes */
+/* Base styles for headings (without !important) */
 .dvojkavit-widget-container h1,
 .dvojkavit-widget-container h2,
-.dvojkavit-widget-container h3,
+.dvojkavit-widget-container h3 {
+  font-size: 1.25rem; /* ~20px */
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 0;
+  margin-bottom: 0.5rem; /* 8px */
+}
 .dvojkavit-widget-container h4,
 .dvojkavit-widget-container h5,
 .dvojkavit-widget-container h6 {
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  line-height: 1.3 !important;
-  margin-top: 0 !important;
-  margin-bottom: 8px !important;
-}
-.dvojkavit-widget-container h4{
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  margin-top: 0 !important;
-  margin-bottom: 8px !important;
-  line-height: 1.3 !important;
+  font-size: 1rem; /* ~16px */
+  font-weight: 700;
+  line-height: 1.3;
+  margin-top: 0;
+  margin-bottom: 0.5rem; /* 8px */
 }
 
-.dvojkavit-widget-container p{
-  font-size: 16px !important;
-  line-height: 1.5 !important;
+/* Base styles for paragraphs (without !important) */
+.dvojkavit-widget-container p {
+  font-size: 1rem; /* ~16px */
+  line-height: 1.5;
+  margin-top: 0;
+  margin-bottom: 1rem; /* Add some default spacing */
 }
-.dvojkavit-widget-container span,
-.dvojkavit-widget-container div {
-  font-size: 12px !important;
-  line-height: 1.5 !important;
-}
+/* Remove generic span/div font-size rule - too broad */
 
 /* Common Classes */
 .dvojkavit-widget-container {
+  /* Keep positioning styles */
   position: fixed;
   bottom: 2px;
   right: 2px;

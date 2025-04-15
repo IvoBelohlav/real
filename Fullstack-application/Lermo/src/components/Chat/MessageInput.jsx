@@ -84,10 +84,10 @@ const MessageInput = ({
 
   // Define CSS variables
   const cssVariables = {
-    '--input-container-bg': containerBgColor || (theme === 'light' ? '#ffffff' : '#1a202c'), // Fallback container bg
+    '--input-container-bg': containerBgColor || (theme === 'light' ? '#ffffff' : '#000000'), // Fallback container bg
     '--input-border-top-color': `${primaryColor}20` || 'rgba(0,0,0,0.1)', // Fallback border top
     '--input-shadow-color': `${primaryColor}05` || 'rgba(0,0,0,0.02)', // Fallback shadow
-    '--input-bg-color': inputBgColor || (theme === 'light' ? '#f7fafc' : '#2d3748'), // Fallback input bg
+    '--input-bg-color': inputBgColor || (theme === 'light' ? '#ffffff' : '#000000'), // Fallback input bg
     '--input-text-color': inputTextColor || (theme === 'light' ? '#000000' : '#ffffff'), // Fallback text color
     '--input-placeholder-color': placeholderColor,
     '--input-focus-shadow-color': focusShadowColor || 'rgba(0,0,0,0.1)', // Fallback focus shadow
