@@ -3,11 +3,11 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install dependencies
-COPY Fullstack-application/fast-api/requirements.txt .  
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY Fullstack-application/fast-api/ .  
+COPY . .
 
 
 ENV PORT=8000
