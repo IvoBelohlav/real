@@ -54,7 +54,7 @@ async def initialize_admin_user(db: AsyncIOMotorClient = Depends(get_db)):
         hashed_password = get_password_hash(admin_password)
         admin_user = User(
             id=str(uuid.uuid4()), email=admin_email.lower(), username="admin", password_hash=hashed_password,
-            created_at=datetime.now(timezone.utc), subscription_tier=SubscriptionTier.ADMIN,
+            created_at=datetime.now(timezone.utc), subscription_tier=SubscriptionTier.ENTERPRISE, # Use ENTERPRISE tier for admin
             is_email_verified=True, api_key=admin_api_key
         )
         await user_collection.insert_one(admin_user.model_dump())
